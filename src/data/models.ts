@@ -17,6 +17,7 @@ import melMaiaPreview1 from "@/assets/mel-maia-preview-1.png";
 import melMaiaPreview2 from "@/assets/mel-maia-preview-2.png";
 import melMaiaPreview3 from "@/assets/mel-maia-preview-3.png";
 import melMaiaPreview4 from "@/assets/mel-maia-preview-4.png";
+import melMaiaBanner from "@/assets/mel-maia-banner.jpg";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
@@ -133,7 +134,7 @@ export const models: ModelData[] = [
     name: "Mel Maia",
     username: "@melmaia",
     avatar: melMaiaAvatar,
-    banner: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=80",
+    banner: melMaiaBanner,
     bio: "Oii amores! 🥰 Sou a Ju, 24 anos, fitness e muito safada! Aqui tem conteúdo exclusivo, vídeos de treino sensual, ensaios e muito +18 🔥 Adoro conversar no chat e fazer conteúdo personalizado pra vocês 💕",
     verified: true,
     stats: { photos: 634, videos: 521, posts: 48, likes: "276.3K" },
