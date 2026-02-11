@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Heart, Image, MessageSquare, Lock, FileText, Search, Plus, MessageCircle } from "lucide-react";
+import { Camera, Heart, Image, MessageSquare, Lock, FileText, Search, Plus, MessageCircle, Eye, Users, Zap, Clock } from "lucide-react";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import logoIcon from "@/assets/logo-icon.png";
 import bannerImage from "@/assets/banner.jpg";
@@ -117,7 +117,7 @@ const Index = () => {
         {/* Banner + Avatar */}
         <div className="relative">
           <div
-            className="h-36 bg-muted cursor-pointer overflow-hidden"
+            className="h-40 bg-muted cursor-pointer overflow-hidden"
             onClick={() => bannerRef.current?.click()}
           >
             {bannerUrl ? (
@@ -128,25 +128,38 @@ const Index = () => {
               </div>
             )}
             <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e, setBannerUrl)} />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </div>
 
-          {/* Avatar */}
+          {/* Avatar with accent ring */}
           <div
-            className="absolute -bottom-10 left-4 h-20 w-20 rounded-full border-3 border-background bg-muted overflow-hidden cursor-pointer"
+            className="absolute -bottom-10 left-4 h-20 w-20 rounded-full p-[3px] cursor-pointer"
+            style={{ background: "linear-gradient(135deg, hsl(24,95%,53%) 0%, hsl(340,80%,55%) 100%)" }}
             onClick={() => avatarRef.current?.click()}
           >
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <Camera className="h-5 w-5 text-muted-foreground" />
-              </div>
-            )}
+            <div className="h-full w-full rounded-full overflow-hidden border-2 border-background">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-muted">
+                  <Camera className="h-5 w-5 text-muted-foreground" />
+                </div>
+              )}
+            </div>
             <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e, setAvatarUrl)} />
           </div>
 
+          {/* Badge on banner */}
+          <div
+            className="absolute top-3 left-3 text-[10px] font-bold text-white px-2.5 py-1 rounded-full shadow-lg"
+            style={{ background: "linear-gradient(135deg, hsl(24,95%,53%) 0%, hsl(340,80%,55%) 100%)" }}
+          >
+            🔥 MAIS POPULAR
+          </div>
+
           {/* Stats on banner */}
-          <div className="flex items-center gap-4 absolute bottom-2 right-3 text-[11px] text-background/90 font-medium">
+          <div className="flex items-center gap-3 absolute bottom-2 right-3 text-[11px] text-white/90 font-medium">
             <span className="flex items-center gap-1"><Image className="h-3 w-3" /> 711</span>
             <span className="flex items-center gap-1"><Image className="h-3 w-3" /> 619</span>
             <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> 54</span>
@@ -161,6 +174,18 @@ const Index = () => {
             <VerifiedBadge className="h-5 w-5" />
           </div>
           <p className="text-sm text-muted-foreground mb-2">@estermuniz</p>
+
+          {/* Online indicator */}
+          <div className="flex items-center gap-3 mb-3">
+            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-green-600">
+              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              Online agora
+            </span>
+            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Eye className="h-3 w-3" /> 847 vendo agora
+            </span>
+          </div>
+
           <p className="text-sm text-foreground leading-relaxed">
             {showFullBio ? bio : bio.slice(0, 140) + "..."}
           </p>
@@ -170,6 +195,13 @@ const Index = () => {
           >
             {showFullBio ? "Mostrar menos" : "Ler mais"}
           </button>
+        </div>
+
+        {/* Tagline banner */}
+        <div className="mx-4 mb-4 rounded-xl p-3 text-center" style={{ background: "linear-gradient(135deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)" }}>
+          <p className="text-sm font-bold" style={{ color: "hsl(24,95%,53%)" }}>
+            Conteúdo novo TODOS os dias!
+          </p>
         </div>
 
         {/* Divider */}
@@ -182,14 +214,27 @@ const Index = () => {
           {/* Main plan - orange gradient pill */}
           <button
             onClick={() => navigate(`/checkout?plan=${encodeURIComponent(mainPlan.name)}&price=${mainPlan.price.replace(",", ".")}&model=Ester Muniz`)}
-            className="w-full rounded-full py-3 px-5 text-left transition-all mb-5 active:scale-[0.97]"
+            className="w-full rounded-2xl py-4 px-5 text-left transition-all mb-4 active:scale-[0.97] shadow-md relative overflow-hidden"
             style={{
               background: "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)",
             }}
           >
+            <div className="absolute top-0 right-0 px-2 py-0.5 text-[9px] font-bold text-white/90 rounded-bl-lg bg-white/20">
+              ⭐ RECOMENDADO
+            </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-white">{mainPlan.name}</span>
-              <span className="text-base font-bold text-white">R$ {mainPlan.price}</span>
+              <div>
+                <span className="text-sm font-bold text-white block">{mainPlan.name}</span>
+                <span className="text-[10px] text-white/70">Acesso completo</span>
+              </div>
+              <div className="text-right">
+                <span className="text-lg font-bold text-white block">R$ {mainPlan.price}</span>
+              </div>
+            </div>
+            <div className="mt-2 text-center">
+              <span className="text-[11px] font-bold text-white bg-white/20 px-3 py-1 rounded-full">
+                🔥 ASSINAR AGORA
+              </span>
             </div>
           </button>
 
@@ -212,6 +257,24 @@ const Index = () => {
                   <span className="text-base font-bold text-foreground">R$ {promo.price}</span>
                 </div>
               </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Social proof */}
+        <div className="mx-4 mb-4 rounded-xl bg-background border border-border p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Users className="h-4 w-4" style={{ color: "hsl(24,95%,53%)" }} />
+            <span className="text-xs font-bold text-foreground">Assinantes recentes</span>
+          </div>
+          <div className="space-y-1.5">
+            {["João M.", "Carlos S.", "Pedro R."].map((name, i) => (
+              <div key={i} className="flex items-center justify-between text-[11px]">
+                <span className="text-muted-foreground">{name} assinou agora</span>
+                <span className="text-muted-foreground flex items-center gap-1">
+                  <Clock className="h-2.5 w-2.5" /> {i + 1}min atrás
+                </span>
+              </div>
             ))}
           </div>
         </div>
@@ -239,13 +302,13 @@ const Index = () => {
             {[preview1, preview2, preview3, preview4].map((src, i) => (
               <div
                 key={i}
-                className="relative aspect-square rounded-lg bg-muted overflow-hidden cursor-pointer"
+                className="relative aspect-square rounded-lg bg-muted overflow-hidden cursor-pointer group"
               >
-                {src && <img src={src} alt={`Preview ${i + 1}`} className="h-full w-full object-cover" />}
-                {!src && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30 backdrop-blur-sm">
-                    <Lock className="h-5 w-5 text-background mb-1" />
-                    <span className="text-[10px] font-semibold text-background">VIP</span>
+                <img src={src} alt={`Preview ${i + 1}`} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                {i >= 2 && (
+                  <div className="absolute inset-0 backdrop-blur-md bg-black/30 flex flex-col items-center justify-center">
+                    <Lock className="h-5 w-5 text-white mb-1" />
+                    <span className="text-[10px] font-bold text-white">EXCLUSIVO</span>
                   </div>
                 )}
               </div>
@@ -253,6 +316,20 @@ const Index = () => {
           </div>
           <p className="text-xs text-muted-foreground text-center mt-3">
             Assine para desbloquear todo o conteúdo 🔥
+          </p>
+        </div>
+
+        {/* Urgency CTA at bottom */}
+        <div className="mx-4 mb-4">
+          <button
+            onClick={() => navigate(`/checkout?plan=${encodeURIComponent(mainPlan.name)}&price=${mainPlan.price.replace(",", ".")}&model=Ester Muniz`)}
+            className="w-full rounded-xl py-4 text-center text-base font-bold text-white shadow-lg active:scale-[0.97] transition-transform"
+            style={{ background: "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)" }}
+          >
+            🔥 ASSINAR AGORA POR R$ {mainPlan.price}
+          </button>
+          <p className="text-[10px] text-muted-foreground text-center mt-2 flex items-center justify-center gap-1">
+            <Zap className="h-3 w-3" /> 847 pessoas visualizando agora
           </p>
         </div>
       </div>
