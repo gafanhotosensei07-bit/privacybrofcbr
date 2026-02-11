@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Camera, Heart, Image, MessageSquare, Star, Check } from "lucide-react";
+import { Camera, Heart, Image, MessageSquare, Star, Check, Lock } from "lucide-react";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -114,6 +114,32 @@ const Index = () => {
             >
               {showFullBio ? "Mostrar menos" : "Mostrar mais"}
             </button>
+          </CardContent>
+        </Card>
+
+        {/* Prévias */}
+        <Card className="mx-3 mt-4 shadow-sm">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Image className="h-5 w-5 text-[hsl(24,95%,53%)]" />
+              <h3 className="text-lg font-bold text-foreground">Prévias</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="relative aspect-square rounded-xl bg-gradient-to-br from-muted to-muted-foreground/10 overflow-hidden group cursor-pointer"
+                >
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30 backdrop-blur-sm">
+                    <Lock className="h-5 w-5 text-background mb-1" />
+                    <span className="text-[10px] font-semibold text-background">VIP</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground text-center mt-3">
+              Assine para desbloquear todo o conteúdo 🔥
+            </p>
           </CardContent>
         </Card>
 
