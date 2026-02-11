@@ -178,10 +178,12 @@ const Index = () => {
                   className="relative aspect-square rounded-xl bg-gradient-to-br from-muted to-muted-foreground/10 overflow-hidden group cursor-pointer"
                 >
                   {src && <img src={src} alt={`Preview ${i + 1}`} className="h-full w-full object-cover" />}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30 backdrop-blur-sm">
-                    <Lock className="h-5 w-5 text-background mb-1" />
-                    <span className="text-[10px] font-semibold text-background">VIP</span>
-                  </div>
+                  {!src && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30 backdrop-blur-sm">
+                      <Lock className="h-5 w-5 text-background mb-1" />
+                      <span className="text-[10px] font-semibold text-background">VIP</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
