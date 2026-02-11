@@ -5,6 +5,7 @@ import logoImage from "@/assets/logo.webp";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import logoIcon from "@/assets/logo-icon.png";
 import bannerImage from "@/assets/banner.jpg";
+import verifiedBadge from "@/assets/verified-badge.jpeg";
 import preview1 from "@/assets/preview-1.jpeg";
 import preview2 from "@/assets/preview-2.jpeg";
 import preview3 from "@/assets/preview-3.jpeg";
@@ -123,9 +124,7 @@ const Index = () => {
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-1">
               <h2 className="text-lg font-bold text-foreground">ester muniz</h2>
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(24,95%,53%)]">
-                <Check className="h-3 w-3 text-background" />
-              </span>
+              <img src={verifiedBadge} alt="Verificado" className="h-5 w-5 object-contain" />
             </div>
             <p className="text-sm text-muted-foreground mb-3">@estermunizreal</p>
             <p className="text-sm text-foreground leading-relaxed">
