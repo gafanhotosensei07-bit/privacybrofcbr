@@ -17,6 +17,7 @@ import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
 import mcPipokinhaPreview4 from "@/assets/mc-pipokinha-preview-4.png";
 import mcPipokinhaPreview5 from "@/assets/mc-pipokinha-preview-5.png";
+import mcPipokinhaBanner from "@/assets/mc-pipokinha-banner.png";
 
 export interface ModelData {
   slug: string;
@@ -108,7 +109,7 @@ export const models: ModelData[] = [
     name: "MC Pipokinha",
     username: "@mcpipokinha",
     avatar: mcPipokinhaAvatar,
-    banner: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80",
+    banner: mcPipokinhaBanner,
     bio: "Hey baby! 💋 Tenho 20 aninhos e sou uma mistura de doce com picante 🌶️ Conteúdo +18 todos os dias! Fotos, vídeos solo e muito mais esperando por você. Vem se inscrever e aproveitar! 🔥",
     verified: false,
     stats: { photos: 289, videos: 198, posts: 25, likes: "98.7K" },
