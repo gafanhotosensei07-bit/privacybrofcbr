@@ -24,6 +24,7 @@ import mcMelodyPreview3 from "@/assets/mc-melody-preview-3.jpeg";
 import mcMelodyPreview4 from "@/assets/mc-melody-preview-4.jpeg";
 import mcMelodyAvatar from "@/assets/mc-melody-avatar.jpg";
 import mcMelodyBanner from "@/assets/mc-melody-banner.webp";
+import julianaBondeAvatar from "@/assets/juliana-bonde-avatar.webp";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
@@ -177,7 +178,7 @@ export const models: ModelData[] = [
     slug: "julianabonde",
     name: "Juliana Bonde",
     username: "@julianabonde",
-    avatar: "https://i.pravatar.cc/200?img=23",
+    avatar: julianaBondeAvatar,
     banner: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=800&q=80",
     bio: "Eai gatinhos! 😻 Sou a Fer, 25 anos e cheia de conteúdo quente pra vocês! Ensaios profissionais, vídeos explícitos e muito conteúdo exclusivo que você não encontra em nenhum outro lugar 🔥 Me chama no chat! 💋",
     verified: true,
