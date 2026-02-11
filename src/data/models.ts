@@ -90,7 +90,7 @@ export const models: ModelData[] = [
     username: "@andressaurach",
     avatar: andressaAvatar,
     banner: andressaBanner,
-    bio: "Olá meus amores 💕 Tenho 21 anos e sou apaixonada por criar conteúdo exclusivo pra vocês! Aqui você vai encontrar muito conteúdo +18, fotos sensuais e vídeos que vão te deixar louco 🔥 Venha se divertir comigo! Respondo todas as mensagens 💋",
+    bio: "Olá meus amores 💕 Tenho 38 anos e sou apaixonada por criar conteúdo exclusivo pra vocês! Aqui você vai encontrar muito conteúdo +18, fotos sensuais e vídeos que vão te deixar louco 🔥 Venha se divertir comigo! Respondo todas as mensagens 💋",
     verified: true,
     stats: { photos: 423, videos: 312, posts: 38, likes: "189.2K" },
     mainPlan: { name: "1 mês", price: "12,90" },
