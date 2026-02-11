@@ -14,6 +14,7 @@ import kamylinhaPreview4 from "@/assets/kamylinha-preview-4.png";
 import brunaPreview1 from "@/assets/bruna-preview-1.webp";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
+import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
 
 export interface ModelData {
   slug: string;
@@ -117,7 +118,7 @@ export const models: ModelData[] = [
     ],
     postCount: 210,
     mediaCount: 180,
-    previews: [brunaPreview1, mcPipokinhaPreview2],
+    previews: [brunaPreview1, mcPipokinhaPreview2, mcPipokinhaPreview3],
   },
   {
     slug: "julianalima",
