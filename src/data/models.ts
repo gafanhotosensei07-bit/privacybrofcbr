@@ -44,9 +44,9 @@ export const models: ModelData[] = [
     mediaCount: 354,
   },
   {
-    slug: "luanasilva",
-    name: "Luana Silva",
-    username: "@luanasilva",
+    slug: "andressaurach",
+    name: "Andressa Urach",
+    username: "@andressaurach",
     avatar: "https://i.pravatar.cc/200?img=1",
     banner: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
     bio: "Olá meus amores 💕 Tenho 21 anos e sou apaixonada por criar conteúdo exclusivo pra vocês! Aqui você vai encontrar muito conteúdo +18, fotos sensuais e vídeos que vão te deixar louco 🔥 Venha se divertir comigo! Respondo todas as mensagens 💋",
