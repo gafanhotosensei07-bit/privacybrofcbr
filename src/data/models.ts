@@ -5,6 +5,7 @@ import andressaPreview2 from "@/assets/andressa-preview-2.jpeg";
 import andressaPreview3 from "@/assets/andressa-preview-3.png";
 import andressaPreview4 from "@/assets/andressa-preview-4.png";
 import camilaAvatar from "@/assets/camila-santos-avatar.png";
+import camilaBanner from "@/assets/camila-santos-banner.jpeg";
 
 export interface ModelData {
   slug: string;
@@ -76,7 +77,7 @@ export const models: ModelData[] = [
     name: "Kamylinha Santos",
     username: "@kamylinhasantos",
     avatar: camilaAvatar,
-    banner: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
+    banner: camilaBanner,
     bio: "Oi gatinhos! 😘 Sou a Camila, tenho 23 anos e adoro provocar! Conteúdo exclusivo todos os dias, vídeos explícitos e muita interação no chat. Vem conhecer meu lado mais ousado 🔥💦 Não vai se arrepender!",
     verified: true,
     stats: { photos: 567, videos: 445, posts: 62, likes: "321.5K" },
