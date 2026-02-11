@@ -79,7 +79,7 @@ export const models: ModelData[] = [
     username: "@kamylinhasantos",
     avatar: camilaAvatar,
     banner: camilaBanner,
-    bio: "Oi gatinhos! 😘 Sou a Camila, tenho 23 anos e adoro provocar! Conteúdo exclusivo todos os dias, vídeos explícitos e muita interação no chat. Vem conhecer meu lado mais ousado 🔥💦 Não vai se arrepender!",
+    bio: "Oi gatinhos! 😘 Sou a Kamylinha, tenho 23 anos e adoro provocar! Conteúdo exclusivo todos os dias, vídeos explícitos e muita interação no chat. Vem conhecer meu lado mais ousado 🔥💦 Não vai se arrepender!",
     verified: true,
     stats: { photos: 567, videos: 445, posts: 62, likes: "321.5K" },
     mainPlan: { name: "1 mês", price: "12,90" },
