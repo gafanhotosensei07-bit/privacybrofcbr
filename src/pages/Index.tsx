@@ -47,7 +47,7 @@ const Index = () => {
   };
 
   const bio =
-    "Oi, meu amor... sou Ester Muniz 💋 Tenho um lado intenso, atrevido e perigosamente viciante — e hoje eu decidi não esconder mais nada. Aqui você vai encontrar meus vídeos exclusivos, momentos íntimos onde me entrego de corpo e alma. 😏 Cada centímetro do meu corpo é pura tentação e minhas fotos são um convite exclusivo para você explorar seus desejos mais secretos, tudo sem censura! Se você tem coragem de se perder nessa paixão sem limites, vem comigo... Estou te esperando para uma experiência única e irresistível.😈💋";
+    "Sou muito safadinha e tenho 22 aninhos. PRINCESINHA +18 🥇 Sexo EXPLÍCITO 😈 Aqui você vai conhecer o meu jeito de menina e o meu lado safada. Aqui você encontrará vídeos de sexo, vídeos com amiguinhas, muito anal, vídeos solos e packs personalizados, totalmente sem CENSURA. Estou aqui para te fazer feliz todos os dias 🔥 Respondo rapidamente no Chat 💋";
 
   return (
     <div className="min-h-screen bg-[hsl(30,20%,97%)] flex flex-col">
