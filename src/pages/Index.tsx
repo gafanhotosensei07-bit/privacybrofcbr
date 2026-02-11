@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Camera, Heart, Image, MessageSquare, Star, Check, Lock, Search, Plus, MessageCircle } from "lucide-react";
 import logoImage from "@/assets/logo.webp";
 import profilePhoto from "@/assets/profile-photo.jpeg";
+import logoIcon from "@/assets/logo-icon.png";
 import bannerImage from "@/assets/banner.jpg";
 import preview1 from "@/assets/preview-1.jpeg";
 import preview2 from "@/assets/preview-2.jpeg";
@@ -61,7 +62,7 @@ const Index = () => {
 
       {/* Search bar */}
       <div className="flex items-center gap-3 px-4 py-3 bg-background border-b border-border">
-        <img src={logoImage} alt="Privacy" className="h-8" />
+        <img src={logoIcon} alt="Privacy" className="h-8" />
         <div className="flex-1 flex items-center gap-2 rounded-full border border-border px-4 py-2">
           <input
             type="text"
