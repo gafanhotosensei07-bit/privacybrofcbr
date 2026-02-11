@@ -149,9 +149,9 @@ export const models: ModelData[] = [
     previews: [melMaiaPreview1, melMaiaPreview2, melMaiaPreview3, melMaiaPreview4],
   },
   {
-    slug: "amandarocha",
-    name: "Amanda Rocha",
-    username: "@amandarocha",
+    slug: "mcmelody",
+    name: "Mc Melody",
+    username: "@mcmelody",
     avatar: "https://i.pravatar.cc/200?img=20",
     banner: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80",
     bio: "Oi meu bem! 💜 Amanda aqui, 22 anos. Morena, gostosa e muito atrevida 😈 Conteúdo novo todo dia! Vídeos solo, com amigas, ensaios sensuais e packs personalizados. Venha fazer parte da minha turma VIP 🔥",
