@@ -53,7 +53,7 @@ const Index = () => {
     <div className="min-h-screen bg-[hsl(30,20%,97%)] flex flex-col">
       {/* Header - Privacy style centered logo */}
       <header className="flex items-center justify-center py-3 bg-background border-b border-border">
-        <img src={logoIcon} alt="Privacy" className="h-10" />
+        <img src={logoIcon} alt="Privacy" className="h-16" />
       </header>
 
       <div className="mx-auto w-full max-w-lg flex-1 pb-24">
