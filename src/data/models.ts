@@ -118,7 +118,7 @@ export const models: ModelData[] = [
     ],
     postCount: 210,
     mediaCount: 180,
-    previews: [brunaPreview1, mcPipokinhaPreview2, mcPipokinhaPreview3],
+    previews: [mcPipokinhaPreview2, mcPipokinhaPreview3],
   },
   {
     slug: "julianalima",
