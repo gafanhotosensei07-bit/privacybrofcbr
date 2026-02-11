@@ -1,5 +1,9 @@
 import andressaAvatar from "@/assets/andressa-urach-avatar.png";
 import andressaBanner from "@/assets/andressa-urach-banner.png";
+import andressaPreview1 from "@/assets/andressa-preview-1.jpeg";
+import andressaPreview2 from "@/assets/andressa-preview-2.jpeg";
+import andressaPreview3 from "@/assets/andressa-preview-3.png";
+import andressaPreview4 from "@/assets/andressa-preview-4.png";
 
 export interface ModelData {
   slug: string;
@@ -26,6 +30,7 @@ export interface ModelData {
   }[];
   postCount: number;
   mediaCount: number;
+  previews?: string[];
 }
 
 export const models: ModelData[] = [
@@ -63,6 +68,7 @@ export const models: ModelData[] = [
     ],
     postCount: 380,
     mediaCount: 290,
+    previews: [andressaPreview1, andressaPreview2, andressaPreview3, andressaPreview4],
   },
   {
     slug: "camilasantos",
