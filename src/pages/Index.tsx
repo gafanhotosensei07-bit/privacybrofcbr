@@ -147,7 +147,7 @@ const Index = () => {
 
             {/* Header badge */}
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm font-semibold text-foreground">VEJA TUDO AGORA 🔥🔥</span>
+              <span className="text-sm font-semibold text-foreground bg-[hsl(24,95%,53%)]/15 px-3 py-1 rounded-full">VEJA TUDO AGORA 🔥🔥</span>
               <span className="bg-[hsl(24,95%,53%)]/10 text-[hsl(24,95%,53%)] text-xs font-bold px-2.5 py-0.5 rounded-full">Promocional</span>
             </div>
 
