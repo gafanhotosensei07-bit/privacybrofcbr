@@ -7,6 +7,7 @@ import andressaPreview4 from "@/assets/andressa-preview-4.png";
 import andressaPreview5 from "@/assets/andressa-preview-5.png";
 import camilaAvatar from "@/assets/camila-santos-avatar.png";
 import camilaBanner from "@/assets/camila-santos-banner.jpeg";
+import kamylinhaPreview1 from "@/assets/kamylinha-preview-1.png";
 
 export interface ModelData {
   slug: string;
@@ -91,6 +92,7 @@ export const models: ModelData[] = [
     ],
     postCount: 445,
     mediaCount: 380,
+    previews: [kamylinhaPreview1],
   },
   {
     slug: "brunacosta",
