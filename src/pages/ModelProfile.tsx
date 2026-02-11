@@ -62,7 +62,7 @@ const ModelProfile = () => {
             <Search className="h-4 w-4 text-muted-foreground" />
           </div>
           <Plus className="h-5 w-5 text-muted-foreground" />
-          <MessageCircle className="h-5 w-5 text-muted-foreground" />
+          <MessageCircle className="h-5 w-5 text-muted-foreground cursor-pointer hover:text-[hsl(24,95%,53%)] transition-colors" onClick={() => navigate(`/chat/${slug}`)} />
         </div>
 
         {searchFocused && (
