@@ -19,7 +19,7 @@ const Checkout = () => {
   const planPrice = parseFloat(searchParams.get("price") || "9.90");
 
   const [step, setStep] = useState<Step>("form");
-  const [form, setForm] = useState({ name: "", email: "", cpf: "", phone: "" });
+  const [form, setForm] = useState({ name: "", email: "" });
   const [pixCode, setPixCode] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [paymentId, setPaymentId] = useState("");
@@ -82,7 +82,7 @@ const Checkout = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.cpf) {
+    if (!form.name || !form.email) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
@@ -99,8 +99,8 @@ const Checkout = () => {
           productTitle: planName,
           customerName: form.name,
           customerEmail: form.email,
-          customerDocument: form.cpf,
-          customerPhone: form.phone,
+          customerDocument: "",
+          customerPhone: "",
         }),
       });
 
@@ -182,24 +182,6 @@ const Checkout = () => {
                     placeholder="seu@email.com"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cpf">CPF *</Label>
-                  <Input
-                    id="cpf"
-                    placeholder="000.000.000-00"
-                    value={form.cpf}
-                    onChange={(e) => setForm({ ...form, cpf: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Telefone</Label>
-                  <Input
-                    id="phone"
-                    placeholder="(00) 00000-0000"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   />
                 </div>
               </div>
