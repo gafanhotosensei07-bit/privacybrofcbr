@@ -109,11 +109,29 @@ const ChatConversation = () => {
     const content = newMessage.trim();
     setNewMessage("");
 
-    await supabase.from("messages").insert({
-      conversation_id: conversationId,
+    // Optimistic update
+    const tempMsg: Message = {
+      id: crypto.randomUUID(),
       sender_type: "user",
       content,
-    });
+      created_at: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, tempMsg]);
+
+    const { data } = await supabase
+      .from("messages")
+      .insert({
+        conversation_id: conversationId,
+        sender_type: "user",
+        content,
+      })
+      .select("id, sender_type, content, created_at")
+      .single();
+
+    // Replace temp message with real one
+    if (data) {
+      setMessages((prev) => prev.map((m) => (m.id === tempMsg.id ? data : m)));
+    }
 
     setSending(false);
   };
