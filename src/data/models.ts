@@ -15,6 +15,7 @@ import brunaPreview1 from "@/assets/bruna-preview-1.webp";
 import melMaiaAvatar from "@/assets/mel-maia-avatar.avif";
 import melMaiaPreview1 from "@/assets/mel-maia-preview-1.png";
 import melMaiaPreview2 from "@/assets/mel-maia-preview-2.png";
+import melMaiaPreview3 from "@/assets/mel-maia-preview-3.png";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
@@ -143,7 +144,7 @@ export const models: ModelData[] = [
     ],
     postCount: 520,
     mediaCount: 410,
-    previews: [melMaiaPreview1, melMaiaPreview2],
+    previews: [melMaiaPreview1, melMaiaPreview2, melMaiaPreview3],
   },
   {
     slug: "amandarocha",
