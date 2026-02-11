@@ -65,7 +65,7 @@ const Index = () => {
             type="text"
             placeholder="Pesquise aqui..."
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
-            readOnly
+            
           />
           <Search className="h-4 w-4 text-muted-foreground" />
         </div>
