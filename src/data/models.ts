@@ -4,6 +4,7 @@ import andressaPreview1 from "@/assets/andressa-preview-1.jpeg";
 import andressaPreview2 from "@/assets/andressa-preview-2.jpeg";
 import andressaPreview3 from "@/assets/andressa-preview-3.png";
 import andressaPreview4 from "@/assets/andressa-preview-4.png";
+import andressaPreview5 from "@/assets/andressa-preview-5.png";
 import camilaAvatar from "@/assets/camila-santos-avatar.png";
 import camilaBanner from "@/assets/camila-santos-banner.jpeg";
 
@@ -71,7 +72,7 @@ export const models: ModelData[] = [
     ],
     postCount: 380,
     mediaCount: 290,
-    previews: [andressaPreview1, andressaPreview2, andressaPreview3, andressaPreview4],
+    previews: [andressaPreview1, andressaPreview2, andressaPreview3, andressaPreview4, andressaPreview5],
   },
   {
     slug: "camilasantos",
