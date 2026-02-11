@@ -16,6 +16,7 @@ import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
 import mcPipokinhaPreview4 from "@/assets/mc-pipokinha-preview-4.png";
+import mcPipokinhaPreview5 from "@/assets/mc-pipokinha-preview-5.png";
 
 export interface ModelData {
   slug: string;
@@ -119,7 +120,7 @@ export const models: ModelData[] = [
     ],
     postCount: 210,
     mediaCount: 180,
-    previews: [mcPipokinhaPreview2, mcPipokinhaPreview3, mcPipokinhaPreview4],
+    previews: [mcPipokinhaPreview2, mcPipokinhaPreview3, mcPipokinhaPreview4, mcPipokinhaPreview5],
   },
   {
     slug: "julianalima",
