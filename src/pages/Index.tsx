@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Camera, Heart, Image, MessageSquare, Star, Check, Lock } from "lucide-react";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import bannerImage from "@/assets/banner.jpg";
@@ -31,6 +32,7 @@ const plans = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState(0);
   const [bannerUrl, setBannerUrl] = useState<string | null>(bannerImage);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profilePhoto);
@@ -200,6 +202,10 @@ const Index = () => {
       {/* Fixed CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
         <Button
+          onClick={() => {
+            const plan = plans[selectedPlan];
+            navigate(`/checkout?plan=${encodeURIComponent(plan.name)}&price=${plan.price.replace(",", ".")}`);
+          }}
           className="w-full max-w-lg mx-auto block h-12 text-base font-bold rounded-xl"
           style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
         >
