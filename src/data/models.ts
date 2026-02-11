@@ -73,8 +73,8 @@ export const models: ModelData[] = [
   },
   {
     slug: "camilasantos",
-    name: "Camila Santos",
-    username: "@camilasantos",
+    name: "Kamylinha Santos",
+    username: "@kamylinhasantos",
     avatar: camilaAvatar,
     banner: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
     bio: "Oi gatinhos! 😘 Sou a Camila, tenho 23 anos e adoro provocar! Conteúdo exclusivo todos os dias, vídeos explícitos e muita interação no chat. Vem conhecer meu lado mais ousado 🔥💦 Não vai se arrepender!",
