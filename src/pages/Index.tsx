@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Camera, Heart, Image, MessageSquare, Star, Check, Lock } from "lucide-react";
+import logoImage from "@/assets/logo.png";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import bannerImage from "@/assets/banner.jpg";
 import preview1 from "@/assets/preview-1.jpeg";
@@ -54,12 +55,7 @@ const Index = () => {
     <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col">
       {/* Top bar */}
       <header className="flex items-center justify-center py-4 bg-[hsl(24,95%,53%)]">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-background font-bold text-[hsl(24,95%,53%)] text-2xl">
-            P
-          </div>
-          <span className="text-3xl font-bold text-background tracking-tight">privacy</span>
-        </div>
+        <img src={logoImage} alt="Privacy" className="h-10" />
       </header>
 
       <div className="mx-auto w-full max-w-lg flex-1 pb-24">
