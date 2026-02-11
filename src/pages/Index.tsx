@@ -14,10 +14,10 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const plans = [
   {
-    name: "Plano Basico",
+    name: "Plano Especial",
     emoji: "🔥",
-    description: "Fotos e vídeos exclusivos",
-    price: "9,90",
+    description: "Fotos e vídeos exclusivos + Extras",
+    price: "19,90",
     badge: null,
   },
   {
