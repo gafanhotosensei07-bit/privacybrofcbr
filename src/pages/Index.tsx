@@ -169,8 +169,8 @@ const Index = () => {
               <Image className="h-5 w-5 text-[hsl(24,95%,53%)]" />
               <h3 className="text-lg font-bold text-foreground">Prévias</h3>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {Array.from({ length: 9 }).map((_, i) => (
+            <div className="grid grid-cols-2 gap-2">
+              {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
                   className="relative aspect-square rounded-xl bg-gradient-to-br from-muted to-muted-foreground/10 overflow-hidden group cursor-pointer"
