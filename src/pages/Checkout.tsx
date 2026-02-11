@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Copy, CheckCircle, Loader2, AlertCircle, Shield, Clock, Sparkles, User, Mail } from "lucide-react";
+import { ArrowLeft, Copy, CheckCircle, Loader2, AlertCircle, Shield, Clock, Sparkles, User, Mail, Flame, Gift, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,32 @@ const Checkout = () => {
   const [searchParams] = useSearchParams();
   const planName = searchParams.get("plan") || "Plano Basico";
   const planPrice = parseFloat(searchParams.get("price") || "9.90");
+
+  const [orderBumps, setOrderBumps] = useState<Record<string, boolean>>({});
+
+  const orderBumpOptions: Record<string, { id: string; icon: React.ReactNode; title: string; description: string; price: number; oldPrice?: number }[]> = {
+    "Plano Basico": [
+      { id: "pack-fotos", icon: <Flame className="h-5 w-5 text-[hsl(24,95%,53%)]" />, title: "📸 Pack de 10 fotos extras", description: "Fotos exclusivas que não estão no plano básico", price: 4.90, oldPrice: 9.90 },
+      { id: "acesso-antecipado", icon: <Zap className="h-5 w-5 text-[hsl(24,95%,53%)]" />, title: "⚡ Acesso antecipado", description: "Veja o conteúdo novo 24h antes de todos", price: 3.90 },
+    ],
+    "Plano Premium": [
+      { id: "video-chamada", icon: <Gift className="h-5 w-5 text-[hsl(24,95%,53%)]" />, title: "🎁 Videochamada exclusiva (5 min)", description: "Uma chamada especial e personalizada comigo", price: 19.90, oldPrice: 39.90 },
+      { id: "pack-videos", icon: <Flame className="h-5 w-5 text-[hsl(24,95%,53%)]" />, title: "🔥 Pack de 5 vídeos especiais", description: "Conteúdo premium que vai te deixar sem fôlego", price: 9.90, oldPrice: 14.90 },
+    ],
+    "Plano VIP": [
+      { id: "conteudo-sob-demanda", icon: <Sparkles className="h-5 w-5 text-[hsl(24,95%,53%)]" />, title: "✨ Conteúdo sob demanda", description: "Peça exatamente o que quiser — eu faço pra você", price: 29.90, oldPrice: 49.90 },
+      { id: "grupo-vip", icon: <Gift className="h-5 w-5 text-[hsl(24,95%,53%)]" />, title: "👑 Acesso ao grupo VIP secreto", description: "Conteúdo diário exclusivo + bastidores + interação", price: 7.90 },
+    ],
+  };
+
+  const currentBumps = orderBumpOptions[planName] || orderBumpOptions["Plano Basico"];
+  const bumpTotal = Object.entries(orderBumps)
+    .filter(([, v]) => v)
+    .reduce((sum, [id]) => {
+      const bump = currentBumps.find(b => b.id === id);
+      return sum + (bump?.price || 0);
+    }, 0);
+  const totalPrice = planPrice + bumpTotal;
 
   const [step, setStep] = useState<Step>("form");
   const [form, setForm] = useState({ name: "", email: "" });
@@ -161,6 +187,51 @@ const Checkout = () => {
             </div>
           </div>
         </div>
+
+        {/* Order Bumps */}
+        {step === "form" && (
+          <div className="mb-5 space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <Flame className="h-4 w-4 text-[hsl(24,95%,53%)]" />
+              <p className="text-sm font-bold text-foreground">Aproveite e adicione:</p>
+            </div>
+            {currentBumps.map((bump) => (
+              <button
+                key={bump.id}
+                onClick={() => setOrderBumps(prev => ({ ...prev, [bump.id]: !prev[bump.id] }))}
+                className={`w-full flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all ${
+                  orderBumps[bump.id]
+                    ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5 shadow-md"
+                    : "border-border bg-background hover:border-muted-foreground/30"
+                }`}
+              >
+                <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+                  orderBumps[bump.id]
+                    ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]"
+                    : "border-muted-foreground/40"
+                }`}>
+                  {orderBumps[bump.id] && <CheckCircle className="h-3 w-3 text-white" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground">{bump.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{bump.description}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  {bump.oldPrice && (
+                    <span className="text-xs text-muted-foreground line-through block">R$ {bump.oldPrice.toFixed(2).replace(".", ",")}</span>
+                  )}
+                  <span className="text-sm font-bold text-[hsl(24,95%,53%)]">+ R$ {bump.price.toFixed(2).replace(".", ",")}</span>
+                </div>
+              </button>
+            ))}
+            {bumpTotal > 0 && (
+              <div className="flex justify-between items-center px-2 py-2 rounded-lg bg-[hsl(24,95%,53%)]/5">
+                <span className="text-sm font-semibold text-foreground">Total com extras:</span>
+                <span className="text-lg font-extrabold text-[hsl(24,95%,53%)]">R$ {totalPrice.toFixed(2).replace(".", ",")}/mês</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Form step */}
         {step === "form" && (
