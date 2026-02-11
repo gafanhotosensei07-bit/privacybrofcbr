@@ -26,6 +26,7 @@ import mcMelodyAvatar from "@/assets/mc-melody-avatar.jpg";
 import mcMelodyBanner from "@/assets/mc-melody-banner.webp";
 import julianaBondeAvatar from "@/assets/juliana-bonde-avatar.webp";
 import julianaBondePreview1 from "@/assets/juliana-bonde-preview-1.webp";
+import julianaBondePreview2 from "@/assets/juliana-bonde-preview-2.jpg";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
@@ -192,6 +193,6 @@ export const models: ModelData[] = [
     ],
     postCount: 410,
     mediaCount: 330,
-    previews: [julianaBondePreview1],
+    previews: [julianaBondePreview1, julianaBondePreview2],
   },
 ];
