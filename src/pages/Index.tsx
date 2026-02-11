@@ -125,7 +125,7 @@ const Index = () => {
                 <Check className="h-3 w-3 text-background" />
               </span>
             </div>
-            <p className="text-sm text-muted-foreground mb-3">@linduraff</p>
+            <p className="text-sm text-muted-foreground mb-3">@estermunizreal</p>
             <p className="text-sm text-foreground leading-relaxed">
               {showFullBio ? bio : bio.slice(0, 100) + "..."}
             </p>
