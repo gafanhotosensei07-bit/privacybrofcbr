@@ -12,6 +12,7 @@ import kamylinhaPreview2 from "@/assets/kamylinha-preview-2.png";
 import kamylinhaPreview3 from "@/assets/kamylinha-preview-3.png";
 import kamylinhaPreview4 from "@/assets/kamylinha-preview-4.png";
 import brunaPreview1 from "@/assets/bruna-preview-1.webp";
+import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 
 export interface ModelData {
   slug: string;
@@ -102,7 +103,7 @@ export const models: ModelData[] = [
     slug: "mcpipokinha",
     name: "MC Pipokinha",
     username: "@mcpipokinha",
-    avatar: "https://i.pravatar.cc/200?img=9",
+    avatar: mcPipokinhaAvatar,
     banner: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80",
     bio: "Hey baby! 💋 Tenho 20 aninhos e sou uma mistura de doce com picante 🌶️ Conteúdo +18 todos os dias! Fotos, vídeos solo e muito mais esperando por você. Vem se inscrever e aproveitar! 🔥",
     verified: false,
