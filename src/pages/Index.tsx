@@ -55,7 +55,7 @@ const Index = () => {
     <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col">
       {/* Top bar */}
       <header className="flex items-center justify-center py-2">
-        <img src={logoImage} alt="Privacy" className="h-10" />
+        <img src={logoImage} alt="Privacy" className="h-14" />
       </header>
 
       <div className="mx-auto w-full max-w-lg flex-1 pb-24">
