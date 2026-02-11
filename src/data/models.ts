@@ -4,6 +4,7 @@ import andressaPreview1 from "@/assets/andressa-preview-1.jpeg";
 import andressaPreview2 from "@/assets/andressa-preview-2.jpeg";
 import andressaPreview3 from "@/assets/andressa-preview-3.png";
 import andressaPreview4 from "@/assets/andressa-preview-4.png";
+import camilaAvatar from "@/assets/camila-santos-avatar.png";
 
 export interface ModelData {
   slug: string;
@@ -74,7 +75,7 @@ export const models: ModelData[] = [
     slug: "camilasantos",
     name: "Camila Santos",
     username: "@camilasantos",
-    avatar: "https://i.pravatar.cc/200?img=5",
+    avatar: camilaAvatar,
     banner: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
     bio: "Oi gatinhos! 😘 Sou a Camila, tenho 23 anos e adoro provocar! Conteúdo exclusivo todos os dias, vídeos explícitos e muita interação no chat. Vem conhecer meu lado mais ousado 🔥💦 Não vai se arrepender!",
     verified: true,
