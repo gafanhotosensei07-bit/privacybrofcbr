@@ -124,9 +124,9 @@ export const models: ModelData[] = [
     previews: [mcPipokinhaPreview2, mcPipokinhaPreview3, mcPipokinhaPreview4, mcPipokinhaPreview5],
   },
   {
-    slug: "julianalima",
-    name: "Juliana Lima",
-    username: "@julianalima",
+    slug: "melmaia",
+    name: "Mel Maia",
+    username: "@melmaia",
     avatar: "https://i.pravatar.cc/200?img=16",
     banner: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=80",
     bio: "Oii amores! 🥰 Sou a Ju, 24 anos, fitness e muito safada! Aqui tem conteúdo exclusivo, vídeos de treino sensual, ensaios e muito +18 🔥 Adoro conversar no chat e fazer conteúdo personalizado pra vocês 💕",
