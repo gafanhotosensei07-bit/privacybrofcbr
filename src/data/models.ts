@@ -12,6 +12,7 @@ import kamylinhaPreview2 from "@/assets/kamylinha-preview-2.png";
 import kamylinhaPreview3 from "@/assets/kamylinha-preview-3.png";
 import kamylinhaPreview4 from "@/assets/kamylinha-preview-4.png";
 import brunaPreview1 from "@/assets/bruna-preview-1.webp";
+import melMaiaAvatar from "@/assets/mel-maia-avatar.avif";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
@@ -127,7 +128,7 @@ export const models: ModelData[] = [
     slug: "melmaia",
     name: "Mel Maia",
     username: "@melmaia",
-    avatar: "https://i.pravatar.cc/200?img=16",
+    avatar: melMaiaAvatar,
     banner: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=80",
     bio: "Oii amores! 🥰 Sou a Ju, 24 anos, fitness e muito safada! Aqui tem conteúdo exclusivo, vídeos de treino sensual, ensaios e muito +18 🔥 Adoro conversar no chat e fazer conteúdo personalizado pra vocês 💕",
     verified: true,
