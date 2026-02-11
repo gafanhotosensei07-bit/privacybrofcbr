@@ -122,11 +122,11 @@ const Index = () => {
         {/* Bio Card */}
         <Card className="mx-3 mt-16 shadow-sm">
           <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-bold text-foreground">ester muniz</h2>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <h2 className="text-lg font-bold text-foreground">Ester Muniz</h2>
               <img src={verifiedBadge} alt="Verificado" className="h-5 w-5 object-contain" />
             </div>
-            <p className="text-sm text-muted-foreground mb-3">@estermunizreal</p>
+            <p className="text-sm text-muted-foreground mb-3">@estermuniz</p>
             <p className="text-sm text-foreground leading-relaxed">
               {showFullBio ? bio : bio.slice(0, 100) + "..."}
             </p>
