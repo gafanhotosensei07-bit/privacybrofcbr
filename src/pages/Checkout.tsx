@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Copy, CheckCircle, Loader2, AlertCircle, Shield, Clock, Sparkles, User, Mail, Flame, Gift, Zap } from "lucide-react";
+import { ArrowLeft, Copy, CheckCircle, Loader2, AlertCircle, Shield, Clock, Sparkles, User, Mail, Flame, Gift, Zap, Users, Eye, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import profilePhoto from "@/assets/profile-photo.jpeg";
 
 const SIGMAPAY_BASE = "https://qpnojbfmthfkorggbqkd.supabase.co/functions/v1";
 const API_TOKEN = "C4Jv1h6JTzYZA1RNEjVSHfVBVp9EpBTl0izjwhy3KHz7tLjusTdlDsZZGS3q";
@@ -19,6 +20,7 @@ const Checkout = () => {
   const planPrice = parseFloat(searchParams.get("price") || "9.90");
 
   const [orderBumps, setOrderBumps] = useState<Record<string, boolean>>({});
+  const [viewerCount] = useState(() => Math.floor(Math.random() * 20) + 12);
 
   const orderBumpOptions: Record<string, { id: string; icon: React.ReactNode; title: string; description: string; price: number; oldPrice?: number }[]> = {
     "Plano Basico": [
@@ -49,7 +51,7 @@ const Checkout = () => {
   const [pixCode, setPixCode] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [paymentId, setPaymentId] = useState("");
-  const [timeLeft, setTimeLeft] = useState(900); // 15 min
+  const [timeLeft, setTimeLeft] = useState(900);
   const [errorMsg, setErrorMsg] = useState("");
   const statusInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerInterval = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -161,6 +163,12 @@ const Checkout = () => {
     });
   };
 
+  const testimonials = [
+    { name: "Lucas M.", text: "Melhor investimento que fiz! Conteúdo incrível 🔥", rating: 5 },
+    { name: "Pedro H.", text: "Vale cada centavo, recomendo demais!", rating: 5 },
+    { name: "Rafael S.", text: "Assinei o VIP e não me arrependo nem um pouco 👑", rating: 5 },
+  ];
+
   return (
     <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col">
       {/* Header */}
@@ -171,9 +179,30 @@ const Checkout = () => {
         <span className="text-lg font-bold text-white">Checkout</span>
       </header>
 
+      {/* Urgency banner */}
+      <div className="bg-foreground text-background text-center py-2 px-4 text-xs font-semibold tracking-wide animate-fade-in flex items-center justify-center gap-2">
+        <Eye className="h-3.5 w-3.5" />
+        <span>{viewerCount} pessoas estão vendo esta página agora</span>
+        <span className="inline-block h-2 w-2 rounded-full bg-[hsl(142,71%,45%)] animate-pulse" />
+      </div>
+
       <div className="mx-auto w-full max-w-lg flex-1 px-4 pb-8">
+        {/* Creator mini profile */}
+        <div className="flex items-center gap-3 py-4 animate-fade-in">
+          <img src={profilePhoto} alt="Ester" className="h-12 w-12 rounded-full object-cover border-2 border-[hsl(24,95%,53%)]" />
+          <div>
+            <p className="text-sm font-bold text-foreground flex items-center gap-1">
+              ester muniz
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[hsl(24,95%,53%)]">
+                <CheckCircle className="h-2.5 w-2.5 text-white" />
+              </span>
+            </p>
+            <p className="text-xs text-muted-foreground">Criadora verificada • 229K curtidas</p>
+          </div>
+        </div>
+
         {/* Plan summary card */}
-        <div className="mb-5 rounded-2xl bg-[hsl(24,95%,53%)]/10 border border-[hsl(24,95%,53%)]/20 p-5">
+        <div className="mb-4 rounded-2xl bg-gradient-to-r from-[hsl(24,95%,53%)]/10 to-[hsl(24,95%,53%)]/5 border border-[hsl(24,95%,53%)]/20 p-5 animate-fade-in">
           <div className="flex justify-between items-center">
             <div>
               <p className="font-bold text-foreground text-lg">{planName}</p>
@@ -186,14 +215,24 @@ const Checkout = () => {
               <p className="text-xs text-muted-foreground">/mês</p>
             </div>
           </div>
+          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-[hsl(24,95%,53%)]/10">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Users className="h-3 w-3" />
+              <span>+2.400 assinantes</span>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <TrendingUp className="h-3 w-3" />
+              <span>98% de satisfação</span>
+            </div>
+          </div>
         </div>
 
         {/* Order Bumps */}
         {step === "form" && (
-          <div className="mb-5 space-y-3">
+          <div className="mb-4 space-y-3 animate-fade-in">
             <div className="flex items-center gap-2 px-1">
               <Flame className="h-4 w-4 text-[hsl(24,95%,53%)]" />
-              <p className="text-sm font-bold text-foreground">Aproveite e adicione:</p>
+              <p className="text-sm font-bold text-foreground">🔥 Oferta especial — só hoje:</p>
             </div>
             {currentBumps.map((bump) => (
               <button
@@ -201,8 +240,8 @@ const Checkout = () => {
                 onClick={() => setOrderBumps(prev => ({ ...prev, [bump.id]: !prev[bump.id] }))}
                 className={`w-full flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all ${
                   orderBumps[bump.id]
-                    ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5 shadow-md"
-                    : "border-border bg-background hover:border-muted-foreground/30"
+                    ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5 shadow-md shadow-[hsl(24,95%,53%)]/10"
+                    : "border-border bg-background hover:border-muted-foreground/30 hover:shadow-sm"
                 }`}
               >
                 <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
@@ -225,8 +264,8 @@ const Checkout = () => {
               </button>
             ))}
             {bumpTotal > 0 && (
-              <div className="flex justify-between items-center px-2 py-2 rounded-lg bg-[hsl(24,95%,53%)]/5">
-                <span className="text-sm font-semibold text-foreground">Total com extras:</span>
+              <div className="flex justify-between items-center px-3 py-2.5 rounded-xl bg-[hsl(24,95%,53%)]/5 border border-[hsl(24,95%,53%)]/15">
+                <span className="text-sm font-semibold text-foreground">💰 Total com extras:</span>
                 <span className="text-lg font-extrabold text-[hsl(24,95%,53%)]">R$ {totalPrice.toFixed(2).replace(".", ",")}/mês</span>
               </div>
             )}
@@ -235,7 +274,7 @@ const Checkout = () => {
 
         {/* Form step */}
         {step === "form" && (
-          <div className="space-y-4">
+          <div className="space-y-4 animate-fade-in">
             <Card className="shadow-xl border-0 rounded-2xl overflow-hidden">
               <CardContent className="p-6 space-y-5">
                 <div className="text-center">
@@ -273,12 +312,17 @@ const Checkout = () => {
                 </div>
                 <Button
                   onClick={handleSubmit}
-                  className="w-full h-14 text-base font-bold rounded-xl shadow-lg shadow-[hsl(24,95%,53%)]/30 hover:shadow-[hsl(24,95%,53%)]/50 transition-all"
+                  className="w-full h-14 text-base font-bold rounded-xl shadow-lg shadow-[hsl(24,95%,53%)]/30 hover:shadow-[hsl(24,95%,53%)]/50 hover:scale-[1.02] transition-all"
                   style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
                 >
                   <Sparkles className="h-5 w-5 mr-2" />
-                  PAGAR COM PIX
+                  PAGAR COM PIX — R$ {totalPrice.toFixed(2).replace(".", ",")}
                 </Button>
+
+                {/* Guarantee */}
+                <div className="bg-[hsl(142,71%,45%)]/5 border border-[hsl(142,71%,45%)]/20 rounded-xl p-3 text-center">
+                  <p className="text-xs font-semibold text-[hsl(142,71%,45%)]">✅ Garantia de 7 dias — cancele quando quiser</p>
+                </div>
               </CardContent>
             </Card>
 
@@ -293,12 +337,35 @@ const Checkout = () => {
                 <span>Aprovação instantânea</span>
               </div>
             </div>
+
+            {/* Testimonials */}
+            <div className="space-y-2.5">
+              <p className="text-xs font-bold text-muted-foreground text-center uppercase tracking-wider">O que dizem os assinantes</p>
+              {testimonials.map((t, i) => (
+                <div key={i} className="bg-background rounded-xl border border-border p-3.5 flex items-start gap-3">
+                  <div className="h-8 w-8 rounded-full bg-[hsl(24,95%,53%)]/10 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-[hsl(24,95%,53%)]">{t.name.charAt(0)}</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs font-bold text-foreground">{t.name}</p>
+                      <div className="flex">
+                        {Array.from({ length: t.rating }).map((_, j) => (
+                          <span key={j} className="text-[10px]">⭐</span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {/* Loading */}
         {step === "loading" && (
-          <Card className="shadow-xl border-0 rounded-2xl">
+          <Card className="shadow-xl border-0 rounded-2xl animate-fade-in">
             <CardContent className="p-14 flex flex-col items-center gap-5">
               <div className="h-16 w-16 rounded-full bg-[hsl(24,95%,53%)]/10 flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)]" />
@@ -313,7 +380,7 @@ const Checkout = () => {
 
         {/* PIX display */}
         {step === "pix" && (
-          <Card className="shadow-xl border-0 rounded-2xl overflow-hidden">
+          <Card className="shadow-xl border-0 rounded-2xl overflow-hidden animate-fade-in">
             <CardContent className="p-0">
               {/* Timer header */}
               <div className="bg-[hsl(24,95%,53%)] px-5 py-3 flex items-center justify-between">
@@ -331,7 +398,7 @@ const Checkout = () => {
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground">Valor a pagar</p>
                   <p className="text-3xl font-extrabold text-foreground">
-                    R$ {planPrice.toFixed(2).replace(".", ",")}
+                    R$ {totalPrice.toFixed(2).replace(".", ",")}
                   </p>
                 </div>
 
@@ -371,7 +438,7 @@ const Checkout = () => {
 
         {/* Success */}
         {step === "success" && (
-          <Card className="shadow-xl border-0 rounded-2xl">
+          <Card className="shadow-xl border-0 rounded-2xl animate-fade-in">
             <CardContent className="p-12 flex flex-col items-center gap-5">
               <div className="h-20 w-20 rounded-full bg-[hsl(142,71%,45%)]/10 flex items-center justify-center">
                 <CheckCircle className="h-12 w-12 text-[hsl(142,71%,45%)]" />
@@ -395,7 +462,7 @@ const Checkout = () => {
 
         {/* Error */}
         {step === "error" && (
-          <Card className="shadow-xl border-0 rounded-2xl">
+          <Card className="shadow-xl border-0 rounded-2xl animate-fade-in">
             <CardContent className="p-12 flex flex-col items-center gap-5">
               <div className="h-20 w-20 rounded-full bg-destructive/10 flex items-center justify-center">
                 <AlertCircle className="h-12 w-12 text-destructive" />
