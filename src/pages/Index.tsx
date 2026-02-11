@@ -5,6 +5,7 @@ import bannerImage from "@/assets/banner.jpg";
 import preview1 from "@/assets/preview-1.jpeg";
 import preview2 from "@/assets/preview-2.jpeg";
 import preview3 from "@/assets/preview-3.jpeg";
+import preview4 from "@/assets/preview-4.jpg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -174,7 +175,7 @@ const Index = () => {
               <h3 className="text-lg font-bold text-foreground">Prévias</h3>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {[preview1, preview2, preview3, null].map((src, i) => (
+              {[preview1, preview2, preview3, preview4].map((src, i) => (
                 <div
                   key={i}
                   className="relative aspect-square rounded-xl bg-gradient-to-br from-muted to-muted-foreground/10 overflow-hidden group cursor-pointer"
