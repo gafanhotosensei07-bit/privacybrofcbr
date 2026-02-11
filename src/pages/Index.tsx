@@ -59,7 +59,7 @@ const Index = () => {
     <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col">
       {/* Top bar */}
       <header className="flex items-center justify-between px-4 py-2 bg-[hsl(24,95%,53%)]">
-        <img src={logoImage} alt="Privacy" className="h-8 brightness-0 invert" />
+        <img src={logoIcon} alt="Privacy" className="h-8 brightness-0 invert" />
         <span className="text-xs font-bold text-white tracking-wide">ESSA PROMOÇÃO É VÁLIDA ATÉ 11/02/2026</span>
       </header>
 
