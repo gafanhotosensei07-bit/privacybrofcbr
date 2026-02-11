@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import profilePhoto from "@/assets/profile-photo.jpeg";
+import { models } from "@/data/models";
 
 const SIGMAPAY_BASE = "https://qpnojbfmthfkorggbqkd.supabase.co/functions/v1";
 const API_TOKEN = "C4Jv1h6JTzYZA1RNEjVSHfVBVp9EpBTl0izjwhy3KHz7tLjusTdlDsZZGS3q";
@@ -18,7 +19,8 @@ const Checkout = () => {
   const [searchParams] = useSearchParams();
   const planName = searchParams.get("plan") || "Plano Basico";
   const planPrice = parseFloat(searchParams.get("price") || "9.90");
-
+  const modelName = searchParams.get("model") || "";
+  const model = models.find((m) => m.name === modelName);
   const [orderBumps, setOrderBumps] = useState<Record<string, boolean>>({});
   const [viewerCount] = useState(() => Math.floor(Math.random() * 20) + 12);
 
@@ -189,15 +191,15 @@ const Checkout = () => {
       <div className="mx-auto w-full max-w-lg flex-1 px-4 pb-8">
         {/* Creator mini profile */}
         <div className="flex items-center gap-3 py-4 animate-fade-in">
-          <img src={profilePhoto} alt="Ester" className="h-12 w-12 rounded-full object-cover border-2 border-[hsl(24,95%,53%)]" />
+          <img src={model?.avatar || profilePhoto} alt={model?.name || "Criadora"} className="h-12 w-12 rounded-full object-cover border-2 border-[hsl(24,95%,53%)]" />
           <div>
             <p className="text-sm font-bold text-foreground flex items-center gap-1">
-              ester muniz
+              {model?.name || "ester muniz"}
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[hsl(24,95%,53%)]">
                 <CheckCircle className="h-2.5 w-2.5 text-white" />
               </span>
             </p>
-            <p className="text-xs text-muted-foreground">Criadora verificada • 229K curtidas</p>
+            <p className="text-xs text-muted-foreground">Criadora verificada • {model?.stats.likes || "254.6K"} curtidas</p>
           </div>
         </div>
 
