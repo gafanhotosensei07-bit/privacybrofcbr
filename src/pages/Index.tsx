@@ -15,21 +15,24 @@ import { Card, CardContent } from "@/components/ui/card";
 const plans = [
   {
     name: "Plano Basico",
+    emoji: "🔥",
     description: "Fotos e vídeos exclusivos",
     price: "9,90",
-    selected: true,
+    badge: null,
   },
   {
     name: "Plano Premium",
+    emoji: "💎",
     description: "Conteúdo completo + Mensagens diretas",
     price: "14,90",
-    selected: false,
+    badge: "MAIS POPULAR",
   },
   {
     name: "Plano VIP",
+    emoji: "👑",
     description: "Tudo liberado + Conteúdo personalizado",
     price: "22,90",
-    selected: false,
+    badge: "MELHOR VALOR",
   },
 ];
 
@@ -152,12 +155,17 @@ const Index = () => {
                 <button
                   key={plan.name}
                   onClick={() => setSelectedPlan(i)}
-                  className={`w-full flex items-center justify-between rounded-xl border-2 p-4 text-left transition-colors ${
+                  className={`relative w-full flex items-center justify-between rounded-xl border-2 p-4 text-left transition-all ${
                     selectedPlan === i
-                      ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5"
+                      ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5 shadow-md shadow-[hsl(24,95%,53%)]/10"
                       : "border-border bg-background hover:border-muted-foreground/30"
                   }`}
                 >
+                  {plan.badge && (
+                    <span className="absolute -top-2.5 right-3 bg-[hsl(24,95%,53%)] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-wide">
+                      {plan.badge}
+                    </span>
+                  )}
                   <div className="flex items-center gap-3">
                     <div
                       className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
@@ -169,7 +177,10 @@ const Index = () => {
                       {selectedPlan === i && <div className="h-2 w-2 rounded-full bg-background" />}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-foreground">{plan.name}</p>
+                      <p className="text-sm font-semibold text-foreground">
+                        <span className="mr-1">{plan.emoji}</span>
+                        {plan.name}
+                      </p>
                       <p className="text-xs text-muted-foreground">{plan.description}</p>
                     </div>
                   </div>
