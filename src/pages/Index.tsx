@@ -62,7 +62,7 @@ const Index = () => {
 
       {/* Search bar */}
       <div className="flex items-center gap-3 px-4 py-3 bg-background border-b border-border">
-        <img src={logoIcon} alt="Privacy" className="h-8" />
+        <img src={logoIcon} alt="Privacy" className="h-12" />
         <div className="flex-1 flex items-center gap-2 rounded-full border border-border px-4 py-2">
           <input
             type="text"
