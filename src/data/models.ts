@@ -101,7 +101,7 @@ export const models: ModelData[] = [
     ],
     postCount: 380,
     mediaCount: 290,
-    previews: [andressaPreview1, andressaPreview2, andressaPreview3, andressaPreview4, andressaPreview5],
+    previews: [andressaPreview1, andressaPreview2, andressaPreview3, andressaPreview4],
   },
   {
     slug: "camilasantos",
