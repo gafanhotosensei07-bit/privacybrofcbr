@@ -1,0 +1,148 @@
+export interface ModelData {
+  slug: string;
+  name: string;
+  username: string;
+  avatar: string;
+  banner: string;
+  bio: string;
+  verified: boolean;
+  stats: {
+    photos: number;
+    videos: number;
+    posts: number;
+    likes: string;
+  };
+  mainPlan: {
+    name: string;
+    price: string;
+  };
+  promos: {
+    name: string;
+    discount: string;
+    price: string;
+  }[];
+  postCount: number;
+  mediaCount: number;
+}
+
+export const models: ModelData[] = [
+  {
+    slug: "estermuniz",
+    name: "Ester Muniz",
+    username: "@estermuniz",
+    avatar: "",
+    banner: "",
+    bio: "Sou muito safadinha e tenho 22 aninhos. PRINCESINHA +18 🥇 Sexo EXPLÍCITO 😈 Aqui você vai conhecer o meu jeito de menina e o meu lado safada. Aqui você encontrará vídeos de sexo, vídeos com amiguinhas, muito anal, vídeos solos e packs personalizados, totalmente sem CENSURA. Estou aqui para te fazer feliz todos os dias 🔥 Respondo rapidamente no Chat 💋",
+    verified: true,
+    stats: { photos: 711, videos: 619, posts: 54, likes: "254.6K" },
+    mainPlan: { name: "1 mês", price: "14,90" },
+    promos: [
+      { name: "3 meses", discount: "9% off", price: "21,90" },
+      { name: "1 Ano", discount: "21% off", price: "9,90" },
+    ],
+    postCount: 502,
+    mediaCount: 354,
+  },
+  {
+    slug: "luanasilva",
+    name: "Luana Silva",
+    username: "@luanasilva",
+    avatar: "https://i.pravatar.cc/200?img=1",
+    banner: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
+    bio: "Olá meus amores 💕 Tenho 21 anos e sou apaixonada por criar conteúdo exclusivo pra vocês! Aqui você vai encontrar muito conteúdo +18, fotos sensuais e vídeos que vão te deixar louco 🔥 Venha se divertir comigo! Respondo todas as mensagens 💋",
+    verified: true,
+    stats: { photos: 423, videos: 312, posts: 38, likes: "189.2K" },
+    mainPlan: { name: "1 mês", price: "12,90" },
+    promos: [
+      { name: "3 meses", discount: "10% off", price: "19,90" },
+      { name: "1 Ano", discount: "25% off", price: "8,90" },
+    ],
+    postCount: 380,
+    mediaCount: 290,
+  },
+  {
+    slug: "camilasantos",
+    name: "Camila Santos",
+    username: "@camilasantos",
+    avatar: "https://i.pravatar.cc/200?img=5",
+    banner: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
+    bio: "Oi gatinhos! 😘 Sou a Camila, tenho 23 anos e adoro provocar! Conteúdo exclusivo todos os dias, vídeos explícitos e muita interação no chat. Vem conhecer meu lado mais ousado 🔥💦 Não vai se arrepender!",
+    verified: true,
+    stats: { photos: 567, videos: 445, posts: 62, likes: "321.5K" },
+    mainPlan: { name: "1 mês", price: "16,90" },
+    promos: [
+      { name: "3 meses", discount: "12% off", price: "24,90" },
+      { name: "1 Ano", discount: "20% off", price: "11,90" },
+    ],
+    postCount: 445,
+    mediaCount: 380,
+  },
+  {
+    slug: "brunacosta",
+    name: "Bruna Costa",
+    username: "@brunacosta",
+    avatar: "https://i.pravatar.cc/200?img=9",
+    banner: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80",
+    bio: "Hey baby! 💋 Tenho 20 aninhos e sou uma mistura de doce com picante 🌶️ Conteúdo +18 todos os dias! Fotos, vídeos solo e muito mais esperando por você. Vem se inscrever e aproveitar! 🔥",
+    verified: false,
+    stats: { photos: 289, videos: 198, posts: 25, likes: "98.7K" },
+    mainPlan: { name: "1 mês", price: "9,90" },
+    promos: [
+      { name: "3 meses", discount: "8% off", price: "14,90" },
+      { name: "1 Ano", discount: "18% off", price: "6,90" },
+    ],
+    postCount: 210,
+    mediaCount: 180,
+  },
+  {
+    slug: "julianalima",
+    name: "Juliana Lima",
+    username: "@julianalima",
+    avatar: "https://i.pravatar.cc/200?img=16",
+    banner: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=80",
+    bio: "Oii amores! 🥰 Sou a Ju, 24 anos, fitness e muito safada! Aqui tem conteúdo exclusivo, vídeos de treino sensual, ensaios e muito +18 🔥 Adoro conversar no chat e fazer conteúdo personalizado pra vocês 💕",
+    verified: true,
+    stats: { photos: 634, videos: 521, posts: 48, likes: "276.3K" },
+    mainPlan: { name: "1 mês", price: "19,90" },
+    promos: [
+      { name: "3 meses", discount: "15% off", price: "29,90" },
+      { name: "1 Ano", discount: "30% off", price: "12,90" },
+    ],
+    postCount: 520,
+    mediaCount: 410,
+  },
+  {
+    slug: "amandarocha",
+    name: "Amanda Rocha",
+    username: "@amandarocha",
+    avatar: "https://i.pravatar.cc/200?img=20",
+    banner: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80",
+    bio: "Oi meu bem! 💜 Amanda aqui, 22 anos. Morena, gostosa e muito atrevida 😈 Conteúdo novo todo dia! Vídeos solo, com amigas, ensaios sensuais e packs personalizados. Venha fazer parte da minha turma VIP 🔥",
+    verified: true,
+    stats: { photos: 512, videos: 387, posts: 41, likes: "203.8K" },
+    mainPlan: { name: "1 mês", price: "13,90" },
+    promos: [
+      { name: "3 meses", discount: "10% off", price: "20,90" },
+      { name: "1 Ano", discount: "22% off", price: "9,90" },
+    ],
+    postCount: 390,
+    mediaCount: 310,
+  },
+  {
+    slug: "fernandaalves",
+    name: "Fernanda Alves",
+    username: "@fernandaalves",
+    avatar: "https://i.pravatar.cc/200?img=23",
+    banner: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=800&q=80",
+    bio: "Eai gatinhos! 😻 Sou a Fer, 25 anos e cheia de conteúdo quente pra vocês! Ensaios profissionais, vídeos explícitos e muito conteúdo exclusivo que você não encontra em nenhum outro lugar 🔥 Me chama no chat! 💋",
+    verified: true,
+    stats: { photos: 478, videos: 356, posts: 35, likes: "167.4K" },
+    mainPlan: { name: "1 mês", price: "15,90" },
+    promos: [
+      { name: "3 meses", discount: "11% off", price: "22,90" },
+      { name: "1 Ano", discount: "24% off", price: "10,90" },
+    ],
+    postCount: 410,
+    mediaCount: 330,
+  },
+];
