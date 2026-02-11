@@ -12,33 +12,32 @@ import preview4 from "@/assets/preview-4.jpg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-const plans = [
+const mainPlan = {
+  name: "60 DIAS",
+  price: "14,90",
+  bonus: "+ CHAMADA DE VÍDEO COMIGO HOJE!",
+};
+
+const promos = [
   {
-    name: "Plano Premium",
-    emoji: "💎",
-    description: "Conteúdo completo + Mensagens diretas",
-    price: "14,90",
-    badge: null,
-  },
-  {
-    name: "Plano Especial",
-    emoji: "🔥",
-    description: "Fotos e vídeos exclusivos + Extras",
-    price: "19,90",
-    badge: "MAIS POPULAR",
-  },
-  {
-    name: "Plano VIP",
+    name: "3 Meses",
     emoji: "👑",
-    description: "Tudo liberado + Conteúdo personalizado",
-    price: "22,90",
-    badge: "MELHOR VALOR",
+    price: "21,90",
+    badge: "Mais popular",
+    badgeEmoji: "🔥",
+  },
+  {
+    name: "1 Ano",
+    emoji: "",
+    price: "9,90",
+    badge: "Melhor oferta",
+    badgeEmoji: "",
   },
 ];
 
 const Index = () => {
   const navigate = useNavigate();
-  const [selectedPlan, setSelectedPlan] = useState(0);
+  const [selectedPlan, setSelectedPlan] = useState<"main" | number>("main");
   const [bannerUrl, setBannerUrl] = useState<string | null>(bannerImage);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profilePhoto);
   const [showFullBio, setShowFullBio] = useState(false);
@@ -142,52 +141,67 @@ const Index = () => {
         </Card>
 
 
-        {/* Plans Card */}
+        {/* Assinaturas */}
         <Card className="mx-3 mt-4 shadow-sm">
           <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Star className="h-5 w-5 text-[hsl(24,95%,53%)] fill-[hsl(24,95%,53%)]" />
-              <h3 className="text-lg font-bold text-foreground">Escolha seu Plano</h3>
+            <h3 className="text-lg font-bold text-foreground mb-3">Assinaturas</h3>
+
+            {/* Header badge */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-sm font-semibold text-foreground">VEJA TUDO AGORA 🔥🔥</span>
+              <span className="bg-[hsl(24,95%,53%)]/10 text-[hsl(24,95%,53%)] text-xs font-bold px-2.5 py-0.5 rounded-full">Promocional</span>
             </div>
 
-            <div className="space-y-3">
-              {plans.map((plan, i) => (
+            {/* Main plan */}
+            <button
+              onClick={() => setSelectedPlan("main")}
+              className={`w-full rounded-xl p-4 text-left transition-all mb-2 ${
+                selectedPlan === "main"
+                  ? "bg-[hsl(24,95%,53%)] text-white shadow-lg"
+                  : "border-2 border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-extrabold">{mainPlan.name}</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-xl font-extrabold">R$ {mainPlan.price}</span>
+                  <span className="text-lg">→</span>
+                </div>
+              </div>
+            </button>
+
+            {/* Bonus */}
+            <p className="text-sm font-bold text-[hsl(140,60%,40%)] mb-3">{mainPlan.bonus}</p>
+
+            {/* Trust badges */}
+            <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mb-5">
+              <span className="flex items-center gap-1">🔒 Pagamento 100% seguro</span>
+              <span>·</span>
+              <span className="flex items-center gap-1">⚡ Acesso imediato</span>
+            </div>
+
+            {/* Promoções */}
+            <p className="text-sm font-semibold text-muted-foreground mb-3">Promoções</p>
+            <div className="space-y-2">
+              {promos.map((promo, i) => (
                 <button
-                  key={plan.name}
+                  key={promo.name}
                   onClick={() => setSelectedPlan(i)}
-                  className={`relative w-full flex items-center justify-between rounded-xl border-2 p-4 text-left transition-all ${
+                  className={`w-full flex items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
                     selectedPlan === i
-                      ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5 shadow-md shadow-[hsl(24,95%,53%)]/10"
+                      ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5 shadow-md"
                       : "border-border bg-background hover:border-muted-foreground/30"
                   }`}
                 >
-                  {plan.badge && (
-                    <span className="absolute -top-2.5 right-3 bg-[hsl(24,95%,53%)] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-wide">
-                      {plan.badge}
+                  <div className="flex items-center gap-2">
+                    {promo.emoji && <span className="text-base">{promo.emoji}</span>}
+                    <span className="text-sm font-bold text-foreground">{promo.name}</span>
+                    <span className="bg-[hsl(24,95%,53%)]/10 text-[hsl(24,95%,53%)] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {promo.badge}
                     </span>
-                  )}
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-                        selectedPlan === i
-                          ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]"
-                          : "border-muted-foreground/40"
-                      }`}
-                    >
-                      {selectedPlan === i && <div className="h-2 w-2 rounded-full bg-background" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        <span className="mr-1">{plan.emoji}</span>
-                        {plan.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{plan.description}</p>
-                    </div>
+                    {promo.badgeEmoji && <span className="text-xs">{promo.badgeEmoji}</span>}
                   </div>
-                  <div className="text-right">
-                    <span className="text-xl font-bold text-[hsl(24,95%,53%)]">R$ {plan.price}</span>
-                    <span className="text-xs text-muted-foreground">/mês</span>
-                  </div>
+                  <span className="text-base font-extrabold text-[hsl(24,95%,53%)]">R$ {promo.price}</span>
                 </button>
               ))}
             </div>
@@ -228,13 +242,14 @@ const Index = () => {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
         <Button
           onClick={() => {
-            const plan = plans[selectedPlan];
-            navigate(`/checkout?plan=${encodeURIComponent(plan.name)}&price=${plan.price.replace(",", ".")}`);
+            const price = selectedPlan === "main" ? mainPlan.price : promos[selectedPlan].price;
+            const name = selectedPlan === "main" ? mainPlan.name : promos[selectedPlan].name;
+            navigate(`/checkout?plan=${encodeURIComponent(name)}&price=${price.replace(",", ".")}`);
           }}
           className="w-full max-w-lg mx-auto block h-12 text-base font-bold rounded-xl"
           style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
         >
-          ASSINAR POR R$ {plans[selectedPlan].price}
+          ASSINAR POR R$ {selectedPlan === "main" ? mainPlan.price : promos[selectedPlan].price}
         </Button>
       </div>
     </div>
