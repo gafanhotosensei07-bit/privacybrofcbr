@@ -4,7 +4,7 @@ import { Camera, Heart, Image, MessageSquare, Lock, FileText, Search, Plus, Mess
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import logoIcon from "@/assets/logo-icon.png";
 import bannerImage from "@/assets/banner.jpg";
-import verifiedBadge from "@/assets/verified-badge.jpeg";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import preview1 from "@/assets/preview-1.jpeg";
 import preview2 from "@/assets/preview-2.jpeg";
 import preview3 from "@/assets/preview-3.jpeg";
@@ -159,7 +159,7 @@ const Index = () => {
         <div className="px-4 pt-14 pb-4">
           <div className="flex items-center gap-1.5 mb-0.5">
             <h2 className="text-base font-bold text-foreground">Ester Muniz</h2>
-            <img src={verifiedBadge} alt="Verificado" className="h-5 w-5 object-contain" />
+            <VerifiedBadge className="h-5 w-5" />
           </div>
           <p className="text-sm text-muted-foreground mb-2">@estermuniz</p>
           <p className="text-sm text-foreground leading-relaxed">

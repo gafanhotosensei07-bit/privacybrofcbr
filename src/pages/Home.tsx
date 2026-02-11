@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, Image, Search, Plus, MessageCircle, Flame, Star, TrendingUp, Crown } from "lucide-react";
 import logoIcon from "@/assets/logo-icon.png";
-import verifiedBadge from "@/assets/verified-badge.jpeg";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { models } from "@/data/models";
 
 const Home = () => {
@@ -95,7 +95,7 @@ const Home = () => {
                   </div>
                   {model.verified && (
                     <div className="absolute -bottom-0.5 -right-0.5 bg-background rounded-full p-0.5">
-                      <img src={verifiedBadge} alt="✓" className="h-4 w-4 object-contain" />
+                      <VerifiedBadge className="h-4 w-4" />
                     </div>
                   )}
                 </div>
@@ -133,7 +133,7 @@ const Home = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
                       <h3 className="text-base font-bold text-white truncate">{featured.name}</h3>
-                      {featured.verified && <img src={verifiedBadge} alt="✓" className="h-4 w-4 object-contain" />}
+                      {featured.verified && <VerifiedBadge className="h-4 w-4" />}
                     </div>
                     <p className="text-xs text-white/70">{featured.username}</p>
                   </div>
@@ -215,7 +215,7 @@ const Home = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
                         <h3 className="text-sm font-bold text-foreground truncate">{model.name}</h3>
-                        {model.verified && <img src={verifiedBadge} alt="✓" className="h-3.5 w-3.5 object-contain flex-shrink-0" />}
+                        {model.verified && <VerifiedBadge className="h-3.5 w-3.5 flex-shrink-0" />}
                       </div>
                       <p className="text-[11px] text-muted-foreground">{model.username}</p>
                     </div>
