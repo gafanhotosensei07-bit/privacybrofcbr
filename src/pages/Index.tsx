@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Heart, Image, MessageSquare, Star, Check, Lock } from "lucide-react";
+import { Camera, Heart, Image, MessageSquare, Star, Check, Lock, Search, Plus, MessageCircle } from "lucide-react";
 import logoImage from "@/assets/logo.webp";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import bannerImage from "@/assets/banner.jpg";
@@ -58,6 +58,22 @@ const Index = () => {
         <img src={logoImage} alt="Privacy" className="h-8 brightness-0 invert" />
         <span className="text-xs font-bold text-white tracking-wide">ESSA PROMOÇÃO É VÁLIDA ATÉ 11/02/2026</span>
       </header>
+
+      {/* Search bar */}
+      <div className="flex items-center gap-3 px-4 py-3 bg-background border-b border-border">
+        <img src={logoImage} alt="Privacy" className="h-8" />
+        <div className="flex-1 flex items-center gap-2 rounded-full border border-border px-4 py-2">
+          <input
+            type="text"
+            placeholder="Pesquise aqui..."
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            readOnly
+          />
+          <Search className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <Plus className="h-5 w-5 text-muted-foreground" />
+        <MessageCircle className="h-5 w-5 text-muted-foreground" />
+      </div>
 
       <div className="mx-auto w-full max-w-lg flex-1 pb-24">
         {/* Banner + Avatar */}
