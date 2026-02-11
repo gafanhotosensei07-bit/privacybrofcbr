@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Heart, Image, MessageSquare, Star, Check, Lock, Search, Plus, MessageCircle } from "lucide-react";
-import logoImage from "@/assets/logo.webp";
+import { Camera, Heart, Image, MessageSquare, Lock, FileText } from "lucide-react";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import logoIcon from "@/assets/logo-icon.png";
 import bannerImage from "@/assets/banner.jpg";
@@ -11,7 +10,6 @@ import preview2 from "@/assets/preview-2.jpeg";
 import preview3 from "@/assets/preview-3.jpeg";
 import preview4 from "@/assets/preview-4.jpg";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 const mainPlan = {
   name: "1 mês",
@@ -52,34 +50,17 @@ const Index = () => {
     "Oi, meu amor... sou Ester Muniz 💋 Tenho um lado intenso, atrevido e perigosamente viciante — e hoje eu decidi não esconder mais nada. Aqui você vai encontrar meus vídeos exclusivos, momentos íntimos onde me entrego de corpo e alma. 😏 Cada centímetro do meu corpo é pura tentação e minhas fotos são um convite exclusivo para você explorar seus desejos mais secretos, tudo sem censura! Se você tem coragem de se perder nessa paixão sem limites, vem comigo... Estou te esperando para uma experiência única e irresistível.😈💋";
 
   return (
-    <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col">
-      {/* Top bar */}
-      <header className="flex items-center justify-between px-4 py-1 bg-[hsl(24,95%,53%)]">
-        <img src={logoIcon} alt="Privacy" className="h-14 brightness-0 invert" />
-        <span className="text-xs font-bold text-white tracking-wide">ESSA PROMOÇÃO É VÁLIDA ATÉ 11/02/2026</span>
+    <div className="min-h-screen bg-[hsl(30,20%,97%)] flex flex-col">
+      {/* Header - Privacy style centered logo */}
+      <header className="flex items-center justify-center py-3 bg-background border-b border-border">
+        <img src={logoIcon} alt="Privacy" className="h-10" />
       </header>
-
-      {/* Search bar */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-background border-b border-border">
-        <img src={logoIcon} alt="Privacy" className="h-20" />
-        <div className="flex-1 flex items-center gap-2 rounded-full border border-border px-4 py-2">
-          <input
-            type="text"
-            placeholder="Pesquise aqui..."
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
-            readOnly
-          />
-          <Search className="h-4 w-4 text-muted-foreground" />
-        </div>
-        <Plus className="h-5 w-5 text-muted-foreground" />
-        <MessageCircle className="h-5 w-5 text-muted-foreground" />
-      </div>
 
       <div className="mx-auto w-full max-w-lg flex-1 pb-24">
         {/* Banner + Avatar */}
         <div className="relative">
           <div
-            className="h-52 bg-muted cursor-pointer group overflow-hidden"
+            className="h-36 bg-muted cursor-pointer overflow-hidden"
             onClick={() => bannerRef.current?.click()}
           >
             {bannerUrl ? (
@@ -94,7 +75,7 @@ const Index = () => {
 
           {/* Avatar */}
           <div
-            className="absolute -bottom-12 left-4 h-24 w-24 rounded-full border-4 border-background bg-muted overflow-hidden cursor-pointer group"
+            className="absolute -bottom-10 left-4 h-20 w-20 rounded-full border-3 border-background bg-muted overflow-hidden cursor-pointer"
             onClick={() => avatarRef.current?.click()}
           >
             {avatarUrl ? (
@@ -107,110 +88,120 @@ const Index = () => {
             <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e, setAvatarUrl)} />
           </div>
 
-          {/* Stats bar */}
-          <div className="flex items-center gap-4 absolute bottom-2 right-3 text-xs text-background/90 font-medium">
-            <span className="flex items-center gap-1"><Image className="h-3.5 w-3.5" /> 401</span>
-            <span className="flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" /> 438</span>
-            <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> 229K</span>
+          {/* Stats on banner */}
+          <div className="flex items-center gap-4 absolute bottom-2 right-3 text-[11px] text-background/90 font-medium">
+            <span className="flex items-center gap-1"><Image className="h-3 w-3" /> 711</span>
+            <span className="flex items-center gap-1"><Image className="h-3 w-3" /> 619</span>
+            <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> 54</span>
+            <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> 254.6K</span>
           </div>
         </div>
 
-        {/* Bio Card */}
-        <Card className="mx-3 mt-16 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <h2 className="text-lg font-bold text-foreground">Ester Muniz</h2>
-              <img src={verifiedBadge} alt="Verificado" className="h-7 w-7 object-contain" />
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">@estermuniz</p>
-            <p className="text-sm text-foreground leading-relaxed">
-              {showFullBio ? bio : bio.slice(0, 100) + "..."}
-            </p>
-            <button
-              onClick={() => setShowFullBio(!showFullBio)}
-              className="text-sm font-medium text-[hsl(24,95%,53%)] mt-1 hover:underline"
-            >
-              {showFullBio ? "Mostrar menos" : "Mostrar mais"}
-            </button>
-          </CardContent>
-        </Card>
+        {/* Bio Section - no card, direct on background */}
+        <div className="px-4 pt-14 pb-4">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <h2 className="text-base font-bold text-foreground">Ester Muniz</h2>
+            <img src={verifiedBadge} alt="Verificado" className="h-5 w-5 object-contain" />
+          </div>
+          <p className="text-sm text-muted-foreground mb-2">@estermuniz</p>
+          <p className="text-sm text-foreground leading-relaxed">
+            {showFullBio ? bio : bio.slice(0, 140) + "..."}
+          </p>
+          <button
+            onClick={() => setShowFullBio(!showFullBio)}
+            className="text-sm font-medium text-[hsl(24,95%,53%)] mt-1 hover:underline"
+          >
+            {showFullBio ? "Mostrar menos" : "Ler mais"}
+          </button>
+        </div>
 
+        {/* Divider */}
+        <div className="border-b border-border mx-4" />
 
         {/* Assinaturas */}
-        <Card className="mx-3 mt-4 shadow-sm">
-          <CardContent className="p-5">
-            <h3 className="text-base font-bold text-foreground mb-3">Assinaturas</h3>
+        <div className="px-4 py-4">
+          <h3 className="text-base font-bold text-foreground mb-3">Assinaturas</h3>
 
-            {/* Main plan - orange gradient pill */}
-            <button
-              onClick={() => setSelectedPlan("main")}
-              className="w-full rounded-full py-3 px-5 text-left transition-all mb-5"
-              style={{
-                background: selectedPlan === "main"
-                  ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
-                  : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <span className={`text-sm font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>{mainPlan.name}</span>
-                <span className={`text-base font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>R$ {mainPlan.price}</span>
-              </div>
-            </button>
-
-            {/* Promoções */}
-            <p className="text-base font-bold text-foreground mb-3">Promoções</p>
-            <div className="space-y-2.5">
-              {promos.map((promo, i) => (
-                <button
-                  key={promo.name}
-                  onClick={() => setSelectedPlan(i)}
-                  className="w-full rounded-full py-3 px-5 text-left transition-all"
-                  style={{
-                    background: selectedPlan === i
-                      ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
-                      : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-sm font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>
-                      {promo.name} ({promo.discount})
-                    </span>
-                    <span className={`text-base font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>R$ {promo.price}</span>
-                  </div>
-                </button>
-              ))}
+          {/* Main plan - orange gradient pill */}
+          <button
+            onClick={() => setSelectedPlan("main")}
+            className="w-full rounded-full py-3 px-5 text-left transition-all mb-5"
+            style={{
+              background: selectedPlan === "main"
+                ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
+                : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`text-sm font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>{mainPlan.name}</span>
+              <span className={`text-base font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>R$ {mainPlan.price}</span>
             </div>
-          </CardContent>
-        </Card>
+          </button>
 
-        {/* Prévias */}
-        <Card className="mx-3 mt-4 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Image className="h-5 w-5 text-[hsl(24,95%,53%)]" />
-              <h3 className="text-lg font-bold text-foreground">Prévias</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {[preview1, preview2, preview3, preview4].map((src, i) => (
-                <div
-                  key={i}
-                  className="relative aspect-square rounded-xl bg-gradient-to-br from-muted to-muted-foreground/10 overflow-hidden group cursor-pointer"
-                >
-                  {src && <img src={src} alt={`Preview ${i + 1}`} className="h-full w-full object-cover" />}
-                  {!src && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30 backdrop-blur-sm">
-                      <Lock className="h-5 w-5 text-background mb-1" />
-                      <span className="text-[10px] font-semibold text-background">VIP</span>
-                    </div>
-                  )}
+          {/* Promoções */}
+          <p className="text-base font-bold text-foreground mb-3">Promoções</p>
+          <div className="space-y-2.5">
+            {promos.map((promo, i) => (
+              <button
+                key={promo.name}
+                onClick={() => setSelectedPlan(i)}
+                className="w-full rounded-full py-3 px-5 text-left transition-all"
+                style={{
+                  background: selectedPlan === i
+                    ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
+                    : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>
+                    {promo.name} ({promo.discount})
+                  </span>
+                  <span className={`text-base font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>R$ {promo.price}</span>
                 </div>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground text-center mt-3">
-              Assine para desbloquear todo o conteúdo 🔥
-            </p>
-          </CardContent>
-        </Card>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-b border-border mx-4" />
+
+        {/* Tabs - Postagens / Mídias */}
+        <div className="flex border-b border-border">
+          <button className="flex-1 py-3 text-center text-sm font-semibold text-[hsl(24,95%,53%)] border-b-2 border-[hsl(24,95%,53%)]">
+            <span className="flex items-center justify-center gap-1.5">
+              <FileText className="h-4 w-4" /> 502 Postagens
+            </span>
+          </button>
+          <button className="flex-1 py-3 text-center text-sm font-semibold text-muted-foreground">
+            <span className="flex items-center justify-center gap-1.5">
+              <Image className="h-4 w-4" /> 354 Mídias
+            </span>
+          </button>
+        </div>
+
+        {/* Content Grid */}
+        <div className="p-4">
+          <div className="grid grid-cols-2 gap-2">
+            {[preview1, preview2, preview3, preview4].map((src, i) => (
+              <div
+                key={i}
+                className="relative aspect-square rounded-lg bg-muted overflow-hidden cursor-pointer"
+              >
+                {src && <img src={src} alt={`Preview ${i + 1}`} className="h-full w-full object-cover" />}
+                {!src && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30 backdrop-blur-sm">
+                    <Lock className="h-5 w-5 text-background mb-1" />
+                    <span className="text-[10px] font-semibold text-background">VIP</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground text-center mt-3">
+            Assine para desbloquear todo o conteúdo 🔥
+          </p>
+        </div>
       </div>
 
       {/* Fixed CTA */}
