@@ -11,6 +11,7 @@ import kamylinhaPreview1 from "@/assets/kamylinha-preview-1.png";
 import kamylinhaPreview2 from "@/assets/kamylinha-preview-2.png";
 import kamylinhaPreview3 from "@/assets/kamylinha-preview-3.png";
 import kamylinhaPreview4 from "@/assets/kamylinha-preview-4.png";
+import brunaPreview1 from "@/assets/bruna-preview-1.webp";
 
 export interface ModelData {
   slug: string;
@@ -114,6 +115,7 @@ export const models: ModelData[] = [
     ],
     postCount: 210,
     mediaCount: 180,
+    previews: [brunaPreview1],
   },
   {
     slug: "julianalima",
