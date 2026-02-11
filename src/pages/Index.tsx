@@ -32,6 +32,7 @@ const promos = [
 ];
 
 const suggestedModels = models.filter((m) => m.slug !== "estermuniz");
+const allModels = models;
 
 const Index = () => {
   const navigate = useNavigate();
@@ -85,7 +86,7 @@ const Index = () => {
         {searchFocused && (
           <div className="absolute left-0 right-0 top-full z-50 bg-background border-b border-border shadow-lg max-h-72 overflow-y-auto">
             <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sugestões</p>
-            {suggestedModels
+            {allModels
               .filter((m) => m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.username.includes(searchQuery.toLowerCase()))
               .map((model) => (
                 <button
@@ -94,7 +95,12 @@ const Index = () => {
                   onClick={() => {
                     setSearchQuery("");
                     setSearchFocused(false);
-                    navigate(`/modelo/${model.slug}`);
+                    if (model.slug === "estermuniz") {
+                      navigate("/");
+                      window.scrollTo(0, 0);
+                    } else {
+                      navigate(`/modelo/${model.slug}`);
+                    }
                   }}
                 >
                   <img src={model.avatar} alt={model.name} className="h-10 w-10 rounded-full object-cover" />
