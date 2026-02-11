@@ -18,6 +18,7 @@ import melMaiaPreview2 from "@/assets/mel-maia-preview-2.png";
 import melMaiaPreview3 from "@/assets/mel-maia-preview-3.png";
 import melMaiaPreview4 from "@/assets/mel-maia-preview-4.png";
 import melMaiaBanner from "@/assets/mel-maia-banner.jpg";
+import mcMelodyPreview1 from "@/assets/mc-melody-preview-1.jpeg";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
@@ -165,6 +166,7 @@ export const models: ModelData[] = [
     ],
     postCount: 390,
     mediaCount: 310,
+    previews: [mcMelodyPreview1],
   },
   {
     slug: "fernandaalves",
