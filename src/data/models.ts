@@ -174,9 +174,9 @@ export const models: ModelData[] = [
     previews: [mcMelodyPreview1, mcMelodyPreview2, mcMelodyPreview3, mcMelodyPreview4],
   },
   {
-    slug: "fernandaalves",
-    name: "Fernanda Alves",
-    username: "@fernandaalves",
+    slug: "julianabonde",
+    name: "Juliana Bonde",
+    username: "@julianabonde",
     avatar: "https://i.pravatar.cc/200?img=23",
     banner: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=800&q=80",
     bio: "Eai gatinhos! 😻 Sou a Fer, 25 anos e cheia de conteúdo quente pra vocês! Ensaios profissionais, vídeos explícitos e muito conteúdo exclusivo que você não encontra em nenhum outro lugar 🔥 Me chama no chat! 💋",
