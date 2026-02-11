@@ -1,3 +1,5 @@
+import profilePhoto from "@/assets/profile-photo.jpeg";
+import bannerImage from "@/assets/banner.jpg";
 import andressaAvatar from "@/assets/andressa-urach-avatar.png";
 import andressaBanner from "@/assets/andressa-urach-banner.png";
 import andressaPreview1 from "@/assets/andressa-preview-1.jpeg";
@@ -70,8 +72,8 @@ export const models: ModelData[] = [
     slug: "estermuniz",
     name: "Ester Muniz",
     username: "@estermuniz",
-    avatar: "",
-    banner: "",
+    avatar: profilePhoto,
+    banner: bannerImage,
     bio: "Sou muito safadinha e tenho 22 aninhos. PRINCESINHA +18 🥇 Sexo EXPLÍCITO 😈 Aqui você vai conhecer o meu jeito de menina e o meu lado safada. Aqui você encontrará vídeos de sexo, vídeos com amiguinhas, muito anal, vídeos solos e packs personalizados, totalmente sem CENSURA. Estou aqui para te fazer feliz todos os dias 🔥 Respondo rapidamente no Chat 💋",
     verified: true,
     stats: { photos: 711, videos: 619, posts: 54, likes: "254.6K" },
