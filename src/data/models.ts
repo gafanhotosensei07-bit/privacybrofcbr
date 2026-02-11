@@ -23,6 +23,7 @@ import mcMelodyPreview2 from "@/assets/mc-melody-preview-2.jpeg";
 import mcMelodyPreview3 from "@/assets/mc-melody-preview-3.jpeg";
 import mcMelodyPreview4 from "@/assets/mc-melody-preview-4.jpeg";
 import mcMelodyAvatar from "@/assets/mc-melody-avatar.jpg";
+import mcMelodyBanner from "@/assets/mc-melody-banner.webp";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
@@ -158,7 +159,7 @@ export const models: ModelData[] = [
     name: "Mc Melody",
     username: "@mcmelody",
     avatar: mcMelodyAvatar,
-    banner: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80",
+    banner: mcMelodyBanner,
     bio: "Oi meu bem! 💜 Amanda aqui, 22 anos. Morena, gostosa e muito atrevida 😈 Conteúdo novo todo dia! Vídeos solo, com amigas, ensaios sensuais e packs personalizados. Venha fazer parte da minha turma VIP 🔥",
     verified: true,
     stats: { photos: 512, videos: 387, posts: 41, likes: "203.8K" },
