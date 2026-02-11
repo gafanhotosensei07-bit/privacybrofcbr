@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Heart, Image, Lock, FileText, Search, Plus, MessageCircle } from "lucide-react";
 import logoIcon from "@/assets/logo-icon.png";
-import verifiedBadge from "@/assets/verified-badge.jpeg";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import preview1 from "@/assets/preview-1.jpeg";
 import preview2 from "@/assets/preview-2.jpeg";
 import preview3 from "@/assets/preview-3.jpeg";
@@ -128,7 +128,7 @@ const ModelProfile = () => {
           <div className="flex items-center gap-1.5 mb-0.5">
             <h2 className="text-base font-bold text-foreground">{model.name}</h2>
             {model.verified && (
-              <img src={verifiedBadge} alt="Verificado" className="h-5 w-5 object-contain" />
+              <VerifiedBadge className="h-5 w-5" />
             )}
           </div>
           <p className="text-sm text-muted-foreground mb-2">{model.username}</p>
