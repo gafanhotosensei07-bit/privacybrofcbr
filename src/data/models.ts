@@ -39,6 +39,17 @@ import mcPipokinhaPreview4 from "@/assets/mc-pipokinha-preview-4.png";
 import mcPipokinhaPreview5 from "@/assets/mc-pipokinha-preview-5.png";
 import mcPipokinhaBanner from "@/assets/mc-pipokinha-banner.png";
 
+export interface ModelTheme {
+  accentColor: string;       // HSL main accent
+  accentColorEnd: string;    // HSL gradient end
+  accentLight: string;       // HSL light version for promo buttons
+  accentLightEnd: string;    // HSL gradient end light
+  badge: string;             // Emoji + label
+  tagline: string;           // Unique tagline for urgency
+  promoText: string;         // Unique promo CTA
+  onlineCount: number;       // Fake online viewers
+}
+
 export interface ModelData {
   slug: string;
   name: string;
@@ -65,6 +76,7 @@ export interface ModelData {
   postCount: number;
   mediaCount: number;
   previews?: string[];
+  theme: ModelTheme;
 }
 
 export const models: ModelData[] = [
@@ -85,6 +97,16 @@ export const models: ModelData[] = [
     ],
     postCount: 502,
     mediaCount: 354,
+    theme: {
+      accentColor: "24 95% 53%",
+      accentColorEnd: "340 80% 55%",
+      accentLight: "24 95% 80%",
+      accentLightEnd: "30 95% 90%",
+      badge: "🔥 MAIS POPULAR",
+      tagline: "Conteúdo novo TODOS os dias!",
+      promoText: "🔥 ASSINAR AGORA",
+      onlineCount: 847,
+    },
   },
   {
     slug: "andressaurach",
@@ -104,6 +126,16 @@ export const models: ModelData[] = [
     postCount: 380,
     mediaCount: 290,
     previews: [andressaPreview1, andressaPreview2, andressaPreview3, andressaPreview4],
+    theme: {
+      accentColor: "280 70% 50%",
+      accentColorEnd: "320 70% 60%",
+      accentLight: "280 60% 85%",
+      accentLightEnd: "320 60% 90%",
+      badge: "💎 PREMIUM VIP",
+      tagline: "Experiência PREMIUM exclusiva!",
+      promoText: "💎 QUERO SER VIP",
+      onlineCount: 1243,
+    },
   },
   {
     slug: "camilasantos",
@@ -123,6 +155,16 @@ export const models: ModelData[] = [
     postCount: 445,
     mediaCount: 380,
     previews: [kamylinhaPreview1, kamylinhaPreview2, kamylinhaPreview3, kamylinhaPreview4],
+    theme: {
+      accentColor: "340 80% 55%",
+      accentColorEnd: "350 90% 65%",
+      accentLight: "340 70% 85%",
+      accentLightEnd: "350 80% 92%",
+      badge: "💕 NOVINHA QUENTE",
+      tagline: "18 aninhos e MUITA ousadia!",
+      promoText: "💕 ASSINAR E CURTIR",
+      onlineCount: 1532,
+    },
   },
   {
     slug: "mcpipokinha",
@@ -142,6 +184,16 @@ export const models: ModelData[] = [
     postCount: 210,
     mediaCount: 180,
     previews: [mcPipokinhaPreview2, mcPipokinhaPreview3, mcPipokinhaPreview4, mcPipokinhaPreview5],
+    theme: {
+      accentColor: "0 85% 55%",
+      accentColorEnd: "30 90% 55%",
+      accentLight: "0 75% 85%",
+      accentLightEnd: "30 80% 90%",
+      badge: "⚡ EXPLOSIVA",
+      tagline: "Doce com picante 🌶️ Todo dia!",
+      promoText: "⚡ ENTRAR AGORA",
+      onlineCount: 634,
+    },
   },
   {
     slug: "melmaia",
@@ -161,6 +213,16 @@ export const models: ModelData[] = [
     postCount: 520,
     mediaCount: 410,
     previews: [melMaiaPreview1, melMaiaPreview2, melMaiaPreview3, melMaiaPreview4],
+    theme: {
+      accentColor: "150 70% 40%",
+      accentColorEnd: "170 60% 50%",
+      accentLight: "150 50% 85%",
+      accentLightEnd: "170 50% 90%",
+      badge: "🏋️ FITNESS SENSUAL",
+      tagline: "Corpo fitness + conteúdo 🔥",
+      promoText: "🏋️ QUERO VER TUDO",
+      onlineCount: 978,
+    },
   },
   {
     slug: "mcmelody",
@@ -180,6 +242,16 @@ export const models: ModelData[] = [
     postCount: 390,
     mediaCount: 310,
     previews: [mcMelodyPreview1, mcMelodyPreview2, mcMelodyPreview3, mcMelodyPreview4],
+    theme: {
+      accentColor: "270 65% 55%",
+      accentColorEnd: "290 70% 65%",
+      accentLight: "270 55% 85%",
+      accentLightEnd: "290 55% 90%",
+      badge: "💜 TURMA VIP",
+      tagline: "Morena atrevida, conteúdo todo dia!",
+      promoText: "💜 FAZER PARTE",
+      onlineCount: 756,
+    },
   },
   {
     slug: "julianabonde",
@@ -199,5 +271,15 @@ export const models: ModelData[] = [
     postCount: 410,
     mediaCount: 330,
     previews: [julianaBondePreview1, julianaBondePreview2, julianaBondePreview3, julianaBondePreview4],
+    theme: {
+      accentColor: "40 90% 50%",
+      accentColorEnd: "25 85% 55%",
+      accentLight: "40 80% 85%",
+      accentLightEnd: "25 75% 90%",
+      badge: "🌟 EXCLUSIVA",
+      tagline: "Conteúdo que NINGUÉM mais tem!",
+      promoText: "🌟 DESBLOQUEAR AGORA",
+      onlineCount: 689,
+    },
   },
 ];
