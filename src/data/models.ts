@@ -59,7 +59,7 @@ export const models: ModelData[] = [
     promos: [
       { name: "Semanal", discount: "", price: "9,90" },
       { name: "3 meses", discount: "10% off", price: "19,90" },
-      { name: "1 Ano", discount: "25% off", price: "8,90" },
+      { name: "1 Ano", discount: "25% off", price: "38,90" },
     ],
     postCount: 380,
     mediaCount: 290,
