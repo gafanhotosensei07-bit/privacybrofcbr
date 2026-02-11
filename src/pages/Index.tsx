@@ -14,17 +14,17 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const plans = [
   {
-    name: "Plano Especial",
-    emoji: "🔥",
-    description: "Fotos e vídeos exclusivos + Extras",
-    price: "19,90",
-    badge: null,
-  },
-  {
     name: "Plano Premium",
     emoji: "💎",
     description: "Conteúdo completo + Mensagens diretas",
     price: "14,90",
+    badge: null,
+  },
+  {
+    name: "Plano Especial",
+    emoji: "🔥",
+    description: "Fotos e vídeos exclusivos + Extras",
+    price: "19,90",
     badge: "MAIS POPULAR",
   },
   {
