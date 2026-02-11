@@ -136,9 +136,9 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[hsl(24,95%,53%)] via-[hsl(24,80%,45%)] to-[hsl(20,30%,15%)] flex flex-col">
+    <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col">
       {/* Header */}
-      <header className="flex items-center gap-3 py-5 px-4">
+      <header className="flex items-center gap-3 py-4 px-4 bg-[hsl(24,95%,53%)]">
         <button onClick={() => navigate("/")} className="text-white/90 hover:text-white transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -147,17 +147,17 @@ const Checkout = () => {
 
       <div className="mx-auto w-full max-w-lg flex-1 px-4 pb-8">
         {/* Plan summary card */}
-        <div className="mb-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-5">
+        <div className="mb-5 rounded-2xl bg-[hsl(24,95%,53%)]/10 border border-[hsl(24,95%,53%)]/20 p-5">
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-bold text-white text-lg">{planName}</p>
-              <p className="text-sm text-white/60 mt-0.5">Assinatura mensal • PIX</p>
+              <p className="font-bold text-foreground text-lg">{planName}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">Assinatura mensal • PIX</p>
             </div>
             <div className="text-right">
-              <span className="text-3xl font-extrabold text-white">
+              <span className="text-3xl font-extrabold text-[hsl(24,95%,53%)]">
                 R$ {planPrice.toFixed(2).replace(".", ",")}
               </span>
-              <p className="text-xs text-white/50">/mês</p>
+              <p className="text-xs text-muted-foreground">/mês</p>
             </div>
           </div>
         </div>
@@ -213,11 +213,11 @@ const Checkout = () => {
 
             {/* Trust badges */}
             <div className="flex items-center justify-center gap-6 py-3">
-              <div className="flex items-center gap-1.5 text-white/50 text-xs">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
                 <Shield className="h-3.5 w-3.5" />
                 <span>Pagamento seguro</span>
               </div>
-              <div className="flex items-center gap-1.5 text-white/50 text-xs">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
                 <Clock className="h-3.5 w-3.5" />
                 <span>Aprovação instantânea</span>
               </div>
