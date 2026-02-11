@@ -8,6 +8,9 @@ import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 import ModelProfile from "./pages/ModelProfile";
+import Auth from "./pages/Auth";
+import Chat from "./pages/Chat";
+import ChatConversation from "./pages/ChatConversation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,11 +23,13 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:slug" element={<ChatConversation />} />
           <Route path="/modelo/estermuniz" element={<Index />} />
           <Route path="/perfil" element={<Profile />} />
           <Route path="/modelo/:slug" element={<ModelProfile />} />
           <Route path="/checkout" element={<Checkout />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
