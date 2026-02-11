@@ -135,7 +135,7 @@ export const models: ModelData[] = [
     username: "@melmaia",
     avatar: melMaiaAvatar,
     banner: melMaiaBanner,
-    bio: "Oii amores! 🥰 Sou a Ju, 24 anos, fitness e muito safada! Aqui tem conteúdo exclusivo, vídeos de treino sensual, ensaios e muito +18 🔥 Adoro conversar no chat e fazer conteúdo personalizado pra vocês 💕",
+    bio: "Oii amores! 🥰 Sou a Mel Maia, 21 anos, fitness e muito safada! Aqui tem conteúdo exclusivo, vídeos de treino sensual, ensaios e muito +18 🔥 Adoro conversar no chat e fazer conteúdo personalizado pra vocês 💕",
     verified: true,
     stats: { photos: 634, videos: 521, posts: 48, likes: "276.3K" },
     mainPlan: { name: "1 mês", price: "12,90" },
