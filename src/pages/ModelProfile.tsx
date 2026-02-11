@@ -7,13 +7,12 @@ import preview1 from "@/assets/preview-1.jpeg";
 import preview2 from "@/assets/preview-2.jpeg";
 import preview3 from "@/assets/preview-3.jpeg";
 import preview4 from "@/assets/preview-4.jpg";
-import { Button } from "@/components/ui/button";
 import { models } from "@/data/models";
 
 const ModelProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [selectedPlan, setSelectedPlan] = useState<"main" | number>("main");
+  
   const [showFullBio, setShowFullBio] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -98,7 +97,7 @@ const ModelProfile = () => {
         )}
       </div>
 
-      <div className="mx-auto w-full max-w-lg flex-1 pb-24">
+      <div className="mx-auto w-full max-w-lg flex-1 pb-8">
         {/* Banner + Avatar */}
         <div className="relative">
           <div className="h-36 bg-muted overflow-hidden">
@@ -151,19 +150,19 @@ const ModelProfile = () => {
           <h3 className="text-base font-bold text-foreground mb-3">Assinaturas</h3>
 
           <button
-            onClick={() => setSelectedPlan("main")}
-            className="w-full rounded-full py-3 px-5 text-left transition-all mb-5"
+            onClick={() => {
+              navigate(`/checkout?plan=${encodeURIComponent(model.mainPlan.name)}&price=${model.mainPlan.price.replace(",", ".")}&model=${model.name}`);
+            }}
+            className="w-full rounded-full py-3 px-5 text-left transition-all mb-5 active:scale-[0.97]"
             style={{
-              background: selectedPlan === "main"
-                ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
-                : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
+              background: "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)",
             }}
           >
             <div className="flex items-center justify-between">
-              <span className={`text-sm font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>
+              <span className="text-sm font-bold text-white">
                 {model.mainPlan.name}
               </span>
-              <span className={`text-base font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>
+              <span className="text-base font-bold text-white">
                 R$ {model.mainPlan.price}
               </span>
             </div>
@@ -174,19 +173,19 @@ const ModelProfile = () => {
             {model.promos.map((promo, i) => (
               <button
                 key={promo.name}
-                onClick={() => setSelectedPlan(i)}
-                className="w-full rounded-full py-3 px-5 text-left transition-all"
+                onClick={() => {
+                  navigate(`/checkout?plan=${encodeURIComponent(promo.name)}&price=${promo.price.replace(",", ".")}&model=${model.name}`);
+                }}
+                className="w-full rounded-full py-3 px-5 text-left transition-all active:scale-[0.97]"
                 style={{
-                  background: selectedPlan === i
-                    ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
-                    : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
+                  background: "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-sm font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>
+                  <span className="text-sm font-bold text-foreground">
                     {promo.name}{promo.discount ? ` (${promo.discount})` : ""}
                   </span>
-                  <span className={`text-base font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>
+                  <span className="text-base font-bold text-foreground">
                     R$ {promo.price}
                   </span>
                 </div>
@@ -230,20 +229,6 @@ const ModelProfile = () => {
         </div>
       </div>
 
-      {/* Fixed CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
-        <Button
-          onClick={() => {
-            const price = selectedPlan === "main" ? model.mainPlan.price : model.promos[selectedPlan as number].price;
-            const name = selectedPlan === "main" ? model.mainPlan.name : model.promos[selectedPlan as number].name;
-            navigate(`/checkout?plan=${encodeURIComponent(name)}&price=${price.replace(",", ".")}&model=${model.name}`);
-          }}
-          className="w-full max-w-lg mx-auto block h-12 text-base font-bold rounded-xl"
-          style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
-        >
-          ASSINAR POR R$ {selectedPlan === "main" ? model.mainPlan.price : model.promos[selectedPlan as number].price}
-        </Button>
-      </div>
     </div>
   );
 };
