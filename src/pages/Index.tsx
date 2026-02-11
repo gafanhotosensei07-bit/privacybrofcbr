@@ -14,25 +14,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 const mainPlan = {
-  name: "60 DIAS",
+  name: "1 mês",
   price: "14,90",
   bonus: "+ CHAMADA DE VÍDEO COMIGO HOJE!",
 };
 
 const promos = [
   {
-    name: "3 Meses",
-    emoji: "👑",
+    name: "3 meses",
+    discount: "9% off",
     price: "21,90",
-    badge: "Mais popular",
-    badgeEmoji: "🔥",
   },
   {
     name: "1 Ano",
-    emoji: "",
+    discount: "21% off",
     price: "9,90",
-    badge: "Melhor oferta",
-    badgeEmoji: "",
   },
 ];
 
@@ -143,64 +139,44 @@ const Index = () => {
         {/* Assinaturas */}
         <Card className="mx-3 mt-4 shadow-sm">
           <CardContent className="p-5">
-            <h3 className="text-lg font-bold text-foreground mb-3">Assinaturas</h3>
+            <h3 className="text-base font-bold text-foreground mb-3">Assinaturas</h3>
 
-            {/* Header badge */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm font-semibold text-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/15 px-3 py-1 rounded-full">VEJA TUDO AGORA 🔥🔥</span>
-              <span className="bg-[hsl(24,95%,53%)]/10 text-[hsl(24,95%,53%)] text-xs font-bold px-2.5 py-0.5 rounded-full">Promocional</span>
-            </div>
-
-            {/* Main plan */}
+            {/* Main plan - orange gradient pill */}
             <button
               onClick={() => setSelectedPlan("main")}
-              className={`w-full rounded-xl p-4 text-left transition-all mb-2 ${
-                selectedPlan === "main"
-                  ? "bg-[hsl(24,95%,53%)] text-white shadow-lg"
-                  : "border-2 border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5"
-              }`}
+              className="w-full rounded-full py-3 px-5 text-left transition-all mb-5"
+              style={{
+                background: selectedPlan === "main"
+                  ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
+                  : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
+              }}
             >
               <div className="flex items-center justify-between">
-                <span className="text-lg font-extrabold">{mainPlan.name}</span>
-                <div className="flex items-center gap-1">
-                  <span className="text-xl font-extrabold">R$ {mainPlan.price}</span>
-                  <span className="text-lg">→</span>
-                </div>
+                <span className={`text-sm font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>{mainPlan.name}</span>
+                <span className={`text-base font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>R$ {mainPlan.price}</span>
               </div>
             </button>
 
-            {/* Bonus */}
-            <p className="text-sm font-bold text-[hsl(140,60%,40%)] mb-3">{mainPlan.bonus}</p>
-
-            {/* Trust badges */}
-            <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mb-5">
-              <span className="flex items-center gap-1">🔒 Pagamento 100% seguro</span>
-              <span>·</span>
-              <span className="flex items-center gap-1">⚡ Acesso imediato</span>
-            </div>
-
             {/* Promoções */}
-            <p className="text-sm font-semibold text-muted-foreground mb-3">Promoções</p>
-            <div className="space-y-2">
+            <p className="text-base font-bold text-foreground mb-3">Promoções</p>
+            <div className="space-y-2.5">
               {promos.map((promo, i) => (
                 <button
                   key={promo.name}
                   onClick={() => setSelectedPlan(i)}
-                  className={`w-full flex items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
-                    selectedPlan === i
-                      ? "border-[hsl(24,95%,53%)] bg-[hsl(24,95%,53%)]/5 shadow-md"
-                      : "border-border bg-background hover:border-muted-foreground/30"
-                  }`}
+                  className="w-full rounded-full py-3 px-5 text-left transition-all"
+                  style={{
+                    background: selectedPlan === i
+                      ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
+                      : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
+                  }}
                 >
-                  <div className="flex items-center gap-2">
-                    {promo.emoji && <span className="text-base">{promo.emoji}</span>}
-                    <span className="text-sm font-bold text-foreground">{promo.name}</span>
-                    <span className="bg-[hsl(24,95%,53%)]/10 text-[hsl(24,95%,53%)] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      {promo.badge}
+                  <div className="flex items-center justify-between">
+                    <span className={`text-sm font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>
+                      {promo.name} ({promo.discount})
                     </span>
-                    {promo.badgeEmoji && <span className="text-xs">{promo.badgeEmoji}</span>}
+                    <span className={`text-base font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>R$ {promo.price}</span>
                   </div>
-                  <span className="text-base font-extrabold text-[hsl(24,95%,53%)]">R$ {promo.price}</span>
                 </button>
               ))}
             </div>
