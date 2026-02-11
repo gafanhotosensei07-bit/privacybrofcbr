@@ -28,6 +28,7 @@ import julianaBondeAvatar from "@/assets/juliana-bonde-avatar.webp";
 import julianaBondePreview1 from "@/assets/juliana-bonde-preview-1.webp";
 import julianaBondePreview2 from "@/assets/juliana-bonde-preview-2.jpg";
 import julianaBondePreview3 from "@/assets/juliana-bonde-preview-3.webp";
+import julianaBondePreview4 from "@/assets/juliana-bonde-preview-4.jpg";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
@@ -194,6 +195,6 @@ export const models: ModelData[] = [
     ],
     postCount: 410,
     mediaCount: 330,
-    previews: [julianaBondePreview1, julianaBondePreview2, julianaBondePreview3],
+    previews: [julianaBondePreview1, julianaBondePreview2, julianaBondePreview3, julianaBondePreview4],
   },
 ];
