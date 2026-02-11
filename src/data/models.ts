@@ -29,6 +29,7 @@ import julianaBondePreview1 from "@/assets/juliana-bonde-preview-1.webp";
 import julianaBondePreview2 from "@/assets/juliana-bonde-preview-2.jpg";
 import julianaBondePreview3 from "@/assets/juliana-bonde-preview-3.webp";
 import julianaBondePreview4 from "@/assets/juliana-bonde-preview-4.jpg";
+import julianaBondeBanner from "@/assets/juliana-bonde-banner.jpg";
 import mcPipokinhaAvatar from "@/assets/mc-pipokinha-avatar.webp";
 import mcPipokinhaPreview2 from "@/assets/mc-pipokinha-preview-2.png";
 import mcPipokinhaPreview3 from "@/assets/mc-pipokinha-preview-3.png";
@@ -183,7 +184,7 @@ export const models: ModelData[] = [
     name: "Juliana Bonde",
     username: "@julianabonde",
     avatar: julianaBondeAvatar,
-    banner: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=800&q=80",
+    banner: julianaBondeBanner,
     bio: "Eai gatinhos! 😻 Sou a Fer, 25 anos e cheia de conteúdo quente pra vocês! Ensaios profissionais, vídeos explícitos e muito conteúdo exclusivo que você não encontra em nenhum outro lugar 🔥 Me chama no chat! 💋",
     verified: true,
     stats: { photos: 478, videos: 356, posts: 35, likes: "167.4K" },
