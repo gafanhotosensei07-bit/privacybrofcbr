@@ -30,12 +30,23 @@ const promos = [
   },
 ];
 
+const suggestedModels = [
+  { name: "Luana Silva", username: "@luanasilva", avatar: "https://i.pravatar.cc/100?img=1" },
+  { name: "Camila Santos", username: "@camilasantos", avatar: "https://i.pravatar.cc/100?img=5" },
+  { name: "Bruna Costa", username: "@brunacosta", avatar: "https://i.pravatar.cc/100?img=9" },
+  { name: "Juliana Lima", username: "@julianalima", avatar: "https://i.pravatar.cc/100?img=16" },
+  { name: "Amanda Rocha", username: "@amandarocha", avatar: "https://i.pravatar.cc/100?img=20" },
+  { name: "Fernanda Alves", username: "@fernandaalves", avatar: "https://i.pravatar.cc/100?img=23" },
+];
+
 const Index = () => {
   const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<"main" | number>("main");
   const [bannerUrl, setBannerUrl] = useState<string | null>(bannerImage);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profilePhoto);
   const [showFullBio, setShowFullBio] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const bannerRef = useRef<HTMLInputElement>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
@@ -58,19 +69,48 @@ const Index = () => {
       </header>
 
       {/* Search bar */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-background border-b border-border">
-        <img src={logoIcon} alt="Privacy" className="h-16" />
-        <div className="flex-1 flex items-center gap-2 rounded-full border border-border px-4 py-2">
-          <input
-            type="text"
-            placeholder="Pesquise aqui..."
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
-            
-          />
-          <Search className="h-4 w-4 text-muted-foreground" />
+      <div className="relative">
+        <div className="flex items-center gap-3 px-4 py-3 bg-background border-b border-border">
+          <img src={logoIcon} alt="Privacy" className="h-16" />
+          <div className="flex-1 flex items-center gap-2 rounded-full border border-border px-4 py-2">
+            <input
+              type="text"
+              placeholder="Pesquise aqui..."
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+            />
+            <Search className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <Plus className="h-5 w-5 text-muted-foreground" />
+          <MessageCircle className="h-5 w-5 text-muted-foreground" />
         </div>
-        <Plus className="h-5 w-5 text-muted-foreground" />
-        <MessageCircle className="h-5 w-5 text-muted-foreground" />
+
+        {searchFocused && (
+          <div className="absolute left-0 right-0 top-full z-50 bg-background border-b border-border shadow-lg max-h-72 overflow-y-auto">
+            <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sugestões</p>
+            {suggestedModels
+              .filter((m) => m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.username.includes(searchQuery.toLowerCase()))
+              .map((model) => (
+                <button
+                  key={model.username}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-muted/50 transition-colors text-left"
+                  onClick={() => {
+                    setSearchQuery(model.name);
+                    setSearchFocused(false);
+                  }}
+                >
+                  <img src={model.avatar} alt={model.name} className="h-10 w-10 rounded-full object-cover" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{model.name}</p>
+                    <p className="text-xs text-muted-foreground">{model.username}</p>
+                  </div>
+                </button>
+              ))}
+          </div>
+        )}
       </div>
 
       <div className="mx-auto w-full max-w-lg flex-1 pb-24">
