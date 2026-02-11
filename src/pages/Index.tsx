@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Camera, Heart, Image, MessageSquare, Star, Check, Lock } from "lucide-react";
 import profilePhoto from "@/assets/profile-photo.jpeg";
+import bannerImage from "@/assets/banner.jpg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -27,7 +28,7 @@ const plans = [
 
 const Index = () => {
   const [selectedPlan, setSelectedPlan] = useState(0);
-  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(bannerImage);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profilePhoto);
   const [showFullBio, setShowFullBio] = useState(false);
 
