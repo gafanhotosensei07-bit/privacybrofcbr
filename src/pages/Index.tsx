@@ -54,11 +54,11 @@ const Index = () => {
     <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col">
       {/* Top bar */}
       <header className="flex items-center justify-center py-4 bg-[hsl(24,95%,53%)]">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-background font-bold text-[hsl(24,95%,53%)] text-lg">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-background font-bold text-[hsl(24,95%,53%)] text-2xl">
             P
           </div>
-          <span className="text-xl font-bold text-background tracking-tight">privacy</span>
+          <span className="text-3xl font-bold text-background tracking-tight">privacy</span>
         </div>
       </header>
 
