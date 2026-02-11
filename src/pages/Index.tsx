@@ -3,6 +3,7 @@ import { Camera, Heart, Image, MessageSquare, Star, Check, Lock } from "lucide-r
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import bannerImage from "@/assets/banner.jpg";
 import preview1 from "@/assets/preview-1.jpeg";
+import preview2 from "@/assets/preview-2.jpeg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -172,7 +173,7 @@ const Index = () => {
               <h3 className="text-lg font-bold text-foreground">Prévias</h3>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {[preview1, null, null, null].map((src, i) => (
+              {[preview1, preview2, null, null].map((src, i) => (
                 <div
                   key={i}
                   className="relative aspect-square rounded-xl bg-gradient-to-br from-muted to-muted-foreground/10 overflow-hidden group cursor-pointer"
