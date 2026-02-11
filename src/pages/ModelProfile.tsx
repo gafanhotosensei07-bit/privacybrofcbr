@@ -184,7 +184,7 @@ const ModelProfile = () => {
               >
                 <div className="flex items-center justify-between">
                   <span className={`text-sm font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>
-                    {promo.name} ({promo.discount})
+                    {promo.name}{promo.discount ? ` (${promo.discount})` : ""}
                   </span>
                   <span className={`text-base font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>
                     R$ {promo.price}
