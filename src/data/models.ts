@@ -57,6 +57,7 @@ export const models: ModelData[] = [
     stats: { photos: 423, videos: 312, posts: 38, likes: "189.2K" },
     mainPlan: { name: "1 mês", price: "12,90" },
     promos: [
+      { name: "Semanal", discount: "", price: "9,90" },
       { name: "3 meses", discount: "10% off", price: "19,90" },
       { name: "1 Ano", discount: "25% off", price: "8,90" },
     ],
