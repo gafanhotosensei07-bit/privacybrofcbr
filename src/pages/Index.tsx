@@ -54,7 +54,7 @@ const Index = () => {
       {/* Top promo bar */}
       <header className="flex items-center justify-between px-4 py-1 bg-[hsl(24,95%,53%)]">
         <img src={logoIcon} alt="Privacy" className="h-10 brightness-0 invert" />
-        <span className="text-xs font-bold text-white tracking-wide">ESSA PROMOÇÃO É VÁLIDA ATÉ 11/02/2026</span>
+        <span className="text-xs font-bold text-white tracking-wide bg-white/20 px-3 py-1 rounded-full">ESSA PROMOÇÃO É VÁLIDA ATÉ 11/02/2026</span>
       </header>
 
       {/* Search bar */}
