@@ -77,7 +77,7 @@ export const models: ModelData[] = [
     bio: "Sou muito safadinha e tenho 22 aninhos. PRINCESINHA +18 🥇 Sexo EXPLÍCITO 😈 Aqui você vai conhecer o meu jeito de menina e o meu lado safada. Aqui você encontrará vídeos de sexo, vídeos com amiguinhas, muito anal, vídeos solos e packs personalizados, totalmente sem CENSURA. Estou aqui para te fazer feliz todos os dias 🔥 Respondo rapidamente no Chat 💋",
     verified: true,
     stats: { photos: 711, videos: 619, posts: 54, likes: "254.6K" },
-    mainPlan: { name: "1 mês", price: "12,90" },
+    mainPlan: { name: "1 mês", price: "19,90" },
     promos: [
       { name: "Semanal", discount: "", price: "9,90" },
       { name: "3 meses", discount: "10% off", price: "28,90" },
@@ -95,7 +95,7 @@ export const models: ModelData[] = [
     bio: "Olá meus amores 💕 Tenho 38 anos e sou apaixonada por criar conteúdo exclusivo pra vocês! Aqui você vai encontrar muito conteúdo +18, fotos sensuais e vídeos que vão te deixar louco 🔥 Venha se divertir comigo! Respondo todas as mensagens 💋",
     verified: true,
     stats: { photos: 423, videos: 312, posts: 38, likes: "189.2K" },
-    mainPlan: { name: "1 mês", price: "12,90" },
+    mainPlan: { name: "1 mês", price: "23,90" },
     promos: [
       { name: "Semanal", discount: "", price: "9,90" },
       { name: "3 meses", discount: "10% off", price: "28,90" },
@@ -114,7 +114,7 @@ export const models: ModelData[] = [
     bio: "Oi gatinhos! 😘 Sou a Kamylinha, tenho 18 anos e adoro provocar! Conteúdo exclusivo todos os dias, vídeos explícitos e muita interação no chat. Vem conhecer meu lado mais ousado 🔥💦 Não vai se arrepender!",
     verified: true,
     stats: { photos: 567, videos: 445, posts: 62, likes: "321.5K" },
-    mainPlan: { name: "1 mês", price: "12,90" },
+    mainPlan: { name: "1 mês", price: "14,90" },
     promos: [
       { name: "Semanal", discount: "", price: "9,90" },
       { name: "3 meses", discount: "10% off", price: "28,90" },
@@ -133,7 +133,7 @@ export const models: ModelData[] = [
     bio: "Hey baby! 💋 Tenho 20 aninhos e sou uma mistura de doce com picante 🌶️ Conteúdo +18 todos os dias! Fotos, vídeos solo e muito mais esperando por você. Vem se inscrever e aproveitar! 🔥",
     verified: false,
     stats: { photos: 289, videos: 198, posts: 25, likes: "98.7K" },
-    mainPlan: { name: "1 mês", price: "12,90" },
+    mainPlan: { name: "1 mês", price: "17,90" },
     promos: [
       { name: "Semanal", discount: "", price: "9,90" },
       { name: "3 meses", discount: "10% off", price: "28,90" },
@@ -152,7 +152,7 @@ export const models: ModelData[] = [
     bio: "Oii amores! 🥰 Sou a Mel Maia, 21 anos, fitness e muito safada! Aqui tem conteúdo exclusivo, vídeos de treino sensual, ensaios e muito +18 🔥 Adoro conversar no chat e fazer conteúdo personalizado pra vocês 💕",
     verified: true,
     stats: { photos: 634, videos: 521, posts: 48, likes: "276.3K" },
-    mainPlan: { name: "1 mês", price: "12,90" },
+    mainPlan: { name: "1 mês", price: "21,90" },
     promos: [
       { name: "Semanal", discount: "", price: "9,90" },
       { name: "3 meses", discount: "10% off", price: "28,90" },
@@ -171,7 +171,7 @@ export const models: ModelData[] = [
     bio: "Oi meu bem! 💜 Amanda aqui, 22 anos. Morena, gostosa e muito atrevida 😈 Conteúdo novo todo dia! Vídeos solo, com amigas, ensaios sensuais e packs personalizados. Venha fazer parte da minha turma VIP 🔥",
     verified: true,
     stats: { photos: 512, videos: 387, posts: 41, likes: "203.8K" },
-    mainPlan: { name: "1 mês", price: "12,90" },
+    mainPlan: { name: "1 mês", price: "15,90" },
     promos: [
       { name: "Semanal", discount: "", price: "9,90" },
       { name: "3 meses", discount: "10% off", price: "28,90" },
@@ -190,7 +190,7 @@ export const models: ModelData[] = [
     bio: "Eai gatinhos! 😻 Sou a Juliana, 25 anos e cheia de conteúdo quente pra vocês! Ensaios profissionais, vídeos explícitos e muito conteúdo exclusivo que você não encontra em nenhum outro lugar 🔥 Me chama no chat! 💋",
     verified: true,
     stats: { photos: 478, videos: 356, posts: 35, likes: "167.4K" },
-    mainPlan: { name: "1 mês", price: "12,90" },
+    mainPlan: { name: "1 mês", price: "18,90" },
     promos: [
       { name: "Semanal", discount: "", price: "9,90" },
       { name: "3 meses", discount: "10% off", price: "28,90" },
