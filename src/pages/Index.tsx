@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Camera, Heart, Image, MessageSquare, Star, Check, Lock } from "lucide-react";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import bannerImage from "@/assets/banner.jpg";
+import preview1 from "@/assets/preview-1.jpeg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -171,11 +172,12 @@ const Index = () => {
               <h3 className="text-lg font-bold text-foreground">Prévias</h3>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {[preview1, null, null, null].map((src, i) => (
                 <div
                   key={i}
                   className="relative aspect-square rounded-xl bg-gradient-to-br from-muted to-muted-foreground/10 overflow-hidden group cursor-pointer"
                 >
+                  {src && <img src={src} alt={`Preview ${i + 1}`} className="h-full w-full object-cover" />}
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30 backdrop-blur-sm">
                     <Lock className="h-5 w-5 text-background mb-1" />
                     <span className="text-[10px] font-semibold text-background">VIP</span>
