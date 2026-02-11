@@ -28,7 +28,7 @@ const ModelProfile = () => {
     );
   }
 
-  const previews = [preview1, preview2, preview3, preview4];
+  const previews = model.previews || [preview1, preview2, preview3, preview4];
 
   return (
     <div className="min-h-screen bg-[hsl(30,20%,97%)] flex flex-col">
