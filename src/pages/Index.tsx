@@ -36,7 +36,6 @@ const allModels = models;
 
 const Index = () => {
   const navigate = useNavigate();
-  const [selectedPlan, setSelectedPlan] = useState<"main" | number>("main");
   const [bannerUrl, setBannerUrl] = useState<string | null>(bannerImage);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profilePhoto);
   const [showFullBio, setShowFullBio] = useState(false);
@@ -114,7 +113,7 @@ const Index = () => {
         )}
       </div>
 
-      <div className="mx-auto w-full max-w-lg flex-1 pb-24">
+      <div className="mx-auto w-full max-w-lg flex-1 pb-8">
         {/* Banner + Avatar */}
         <div className="relative">
           <div
@@ -182,17 +181,15 @@ const Index = () => {
 
           {/* Main plan - orange gradient pill */}
           <button
-            onClick={() => setSelectedPlan("main")}
-            className="w-full rounded-full py-3 px-5 text-left transition-all mb-5"
+            onClick={() => navigate(`/checkout?plan=${encodeURIComponent(mainPlan.name)}&price=${mainPlan.price.replace(",", ".")}&model=Ester Muniz`)}
+            className="w-full rounded-full py-3 px-5 text-left transition-all mb-5 active:scale-[0.97]"
             style={{
-              background: selectedPlan === "main"
-                ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
-                : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
+              background: "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)",
             }}
           >
             <div className="flex items-center justify-between">
-              <span className={`text-sm font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>{mainPlan.name}</span>
-              <span className={`text-base font-bold ${selectedPlan === "main" ? "text-white" : "text-foreground"}`}>R$ {mainPlan.price}</span>
+              <span className="text-sm font-bold text-white">{mainPlan.name}</span>
+              <span className="text-base font-bold text-white">R$ {mainPlan.price}</span>
             </div>
           </button>
 
@@ -202,19 +199,17 @@ const Index = () => {
             {promos.map((promo, i) => (
               <button
                 key={promo.name}
-                onClick={() => setSelectedPlan(i)}
-                className="w-full rounded-full py-3 px-5 text-left transition-all"
+                onClick={() => navigate(`/checkout?plan=${encodeURIComponent(promo.name)}&price=${promo.price.replace(",", ".")}&model=Ester Muniz`)}
+                className="w-full rounded-full py-3 px-5 text-left transition-all active:scale-[0.97]"
                 style={{
-                  background: selectedPlan === i
-                    ? "linear-gradient(90deg, hsl(24,95%,53%) 0%, hsl(30,95%,75%) 100%)"
-                    : "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
+                  background: "linear-gradient(90deg, hsl(24,95%,80%) 0%, hsl(30,95%,90%) 100%)",
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-sm font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>
+                  <span className="text-sm font-bold text-foreground">
                     {promo.name} ({promo.discount})
                   </span>
-                  <span className={`text-base font-bold ${selectedPlan === i ? "text-white" : "text-foreground"}`}>R$ {promo.price}</span>
+                  <span className="text-base font-bold text-foreground">R$ {promo.price}</span>
                 </div>
               </button>
             ))}
@@ -262,20 +257,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Fixed CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
-        <Button
-          onClick={() => {
-            const price = selectedPlan === "main" ? mainPlan.price : promos[selectedPlan].price;
-            const name = selectedPlan === "main" ? mainPlan.name : promos[selectedPlan].name;
-            navigate(`/checkout?plan=${encodeURIComponent(name)}&price=${price.replace(",", ".")}`);
-          }}
-          className="w-full max-w-lg mx-auto block h-12 text-base font-bold rounded-xl"
-          style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
-        >
-          ASSINAR POR R$ {selectedPlan === "main" ? mainPlan.price : promos[selectedPlan].price}
-        </Button>
-      </div>
     </div>
   );
 };
