@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Copy, CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Copy, CheckCircle, Loader2, AlertCircle, Shield, Clock, Sparkles, User, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -136,127 +136,184 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-[hsl(24,95%,53%)] via-[hsl(24,80%,45%)] to-[hsl(20,30%,15%)] flex flex-col">
       {/* Header */}
-      <header className="flex items-center gap-3 py-4 px-4 bg-[hsl(24,95%,53%)]">
-        <button onClick={() => navigate("/")} className="text-background">
+      <header className="flex items-center gap-3 py-5 px-4">
+        <button onClick={() => navigate("/")} className="text-white/90 hover:text-white transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <span className="text-lg font-bold text-background">Checkout</span>
+        <span className="text-lg font-bold text-white">Checkout</span>
       </header>
 
-      <div className="mx-auto w-full max-w-lg flex-1 p-4">
-        {/* Plan summary */}
-        <Card className="mb-4 shadow-sm">
-          <CardContent className="p-4 flex justify-between items-center">
+      <div className="mx-auto w-full max-w-lg flex-1 px-4 pb-8">
+        {/* Plan summary card */}
+        <div className="mb-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-5">
+          <div className="flex justify-between items-center">
             <div>
-              <p className="font-semibold text-foreground">{planName}</p>
-              <p className="text-sm text-muted-foreground">Assinatura mensal</p>
+              <p className="font-bold text-white text-lg">{planName}</p>
+              <p className="text-sm text-white/60 mt-0.5">Assinatura mensal • PIX</p>
             </div>
-            <span className="text-xl font-bold text-[hsl(24,95%,53%)]">
-              R$ {planPrice.toFixed(2).replace(".", ",")}
-            </span>
-          </CardContent>
-        </Card>
+            <div className="text-right">
+              <span className="text-3xl font-extrabold text-white">
+                R$ {planPrice.toFixed(2).replace(".", ",")}
+              </span>
+              <p className="text-xs text-white/50">/mês</p>
+            </div>
+          </div>
+        </div>
 
         {/* Form step */}
         {step === "form" && (
-          <Card className="shadow-sm">
-            <CardContent className="p-5 space-y-4">
-              <h3 className="text-lg font-bold text-foreground">Seus dados</h3>
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="name">Nome completo *</Label>
-                  <Input
-                    id="name"
-                    placeholder="Seu nome"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  />
+          <div className="space-y-4">
+            <Card className="shadow-xl border-0 rounded-2xl overflow-hidden">
+              <CardContent className="p-6 space-y-5">
+                <div className="text-center">
+                  <h3 className="text-xl font-bold text-foreground">Complete sua assinatura</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Preencha seus dados para gerar o PIX</p>
                 </div>
-                <div>
-                  <Label htmlFor="email">E-mail *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  />
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Label htmlFor="name" className="text-sm font-medium text-foreground mb-1.5 block">Nome completo</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="name"
+                        placeholder="Seu nome completo"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        className="pl-10 h-12 rounded-xl border-border/60 focus:border-[hsl(24,95%,53%)] focus:ring-[hsl(24,95%,53%)]/20 transition-all"
+                      />
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <Label htmlFor="email" className="text-sm font-medium text-foreground mb-1.5 block">E-mail</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        className="pl-10 h-12 rounded-xl border-border/60 focus:border-[hsl(24,95%,53%)] focus:ring-[hsl(24,95%,53%)]/20 transition-all"
+                      />
+                    </div>
+                  </div>
                 </div>
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full h-14 text-base font-bold rounded-xl shadow-lg shadow-[hsl(24,95%,53%)]/30 hover:shadow-[hsl(24,95%,53%)]/50 transition-all"
+                  style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
+                >
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  PAGAR COM PIX
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Trust badges */}
+            <div className="flex items-center justify-center gap-6 py-3">
+              <div className="flex items-center gap-1.5 text-white/50 text-xs">
+                <Shield className="h-3.5 w-3.5" />
+                <span>Pagamento seguro</span>
               </div>
-              <Button
-                onClick={handleSubmit}
-                className="w-full h-12 text-base font-bold rounded-xl"
-                style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
-              >
-                PAGAR COM PIX
-              </Button>
-            </CardContent>
-          </Card>
+              <div className="flex items-center gap-1.5 text-white/50 text-xs">
+                <Clock className="h-3.5 w-3.5" />
+                <span>Aprovação instantânea</span>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Loading */}
         {step === "loading" && (
-          <Card className="shadow-sm">
-            <CardContent className="p-10 flex flex-col items-center gap-4">
-              <Loader2 className="h-10 w-10 animate-spin text-[hsl(24,95%,53%)]" />
-              <p className="text-foreground font-medium">Gerando código PIX...</p>
+          <Card className="shadow-xl border-0 rounded-2xl">
+            <CardContent className="p-14 flex flex-col items-center gap-5">
+              <div className="h-16 w-16 rounded-full bg-[hsl(24,95%,53%)]/10 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)]" />
+              </div>
+              <div className="text-center">
+                <p className="text-foreground font-bold text-lg">Gerando código PIX...</p>
+                <p className="text-sm text-muted-foreground mt-1">Aguarde um instante</p>
+              </div>
             </CardContent>
           </Card>
         )}
 
         {/* PIX display */}
         {step === "pix" && (
-          <Card className="shadow-sm">
-            <CardContent className="p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-foreground">Pague com PIX</h3>
-                <span className="px-2 py-1 rounded text-sm font-medium bg-destructive text-destructive-foreground">
+          <Card className="shadow-xl border-0 rounded-2xl overflow-hidden">
+            <CardContent className="p-0">
+              {/* Timer header */}
+              <div className="bg-[hsl(24,95%,53%)] px-5 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-white">
+                  <Clock className="h-4 w-4" />
+                  <span className="text-sm font-medium">Aguardando pagamento</span>
+                </div>
+                <span className="px-3 py-1 rounded-full text-sm font-bold bg-white/20 text-white backdrop-blur-sm">
                   {formatTime(timeLeft)}
                 </span>
               </div>
 
-              {qrCodeUrl && (
-                <div className="flex justify-center py-4">
-                  <img src={qrCodeUrl} alt="QR Code PIX" className="w-48 h-48 rounded-lg" />
+              <div className="p-5 space-y-5">
+                {/* Amount */}
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">Valor a pagar</p>
+                  <p className="text-3xl font-extrabold text-foreground">
+                    R$ {planPrice.toFixed(2).replace(".", ",")}
+                  </p>
                 </div>
-              )}
 
-              <div className="bg-muted rounded-lg p-3">
-                <p className="text-xs text-muted-foreground break-all text-center leading-relaxed">
-                  {pixCode}
+                {/* QR Code */}
+                {qrCodeUrl && (
+                  <div className="flex justify-center py-2">
+                    <div className="p-3 bg-white rounded-2xl shadow-inner border border-border/40">
+                      <img src={qrCodeUrl} alt="QR Code PIX" className="w-44 h-44" />
+                    </div>
+                  </div>
+                )}
+
+                {/* PIX code */}
+                <div className="bg-muted/60 rounded-xl p-4 border border-border/40">
+                  <p className="text-[11px] text-muted-foreground break-all text-center leading-relaxed font-mono">
+                    {pixCode}
+                  </p>
+                </div>
+
+                {/* Copy button */}
+                <Button
+                  onClick={copyPix}
+                  className="w-full h-14 text-base font-bold rounded-xl gap-2 shadow-lg shadow-[hsl(24,95%,53%)]/30"
+                  style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
+                >
+                  <Copy className="h-5 w-5" />
+                  Copiar código PIX
+                </Button>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  Após o pagamento, a confirmação será automática ✅
                 </p>
               </div>
-
-              <Button
-                onClick={copyPix}
-                className="w-full h-12 text-base font-bold rounded-xl gap-2"
-                style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
-              >
-                <Copy className="h-4 w-4" />
-                Copiar código PIX
-              </Button>
-
-              <p className="text-xs text-muted-foreground text-center">
-                Após o pagamento, a confirmação será automática ✅
-              </p>
             </CardContent>
           </Card>
         )}
 
         {/* Success */}
         {step === "success" && (
-          <Card className="shadow-sm">
-            <CardContent className="p-10 flex flex-col items-center gap-4">
-              <CheckCircle className="h-16 w-16 text-[hsl(var(--success))]" />
-              <h3 className="text-xl font-bold text-foreground">Pagamento Confirmado!</h3>
-              <p className="text-muted-foreground text-center">
-                Obrigado pela sua assinatura. Seu acesso foi liberado!
-              </p>
+          <Card className="shadow-xl border-0 rounded-2xl">
+            <CardContent className="p-12 flex flex-col items-center gap-5">
+              <div className="h-20 w-20 rounded-full bg-[hsl(142,71%,45%)]/10 flex items-center justify-center">
+                <CheckCircle className="h-12 w-12 text-[hsl(142,71%,45%)]" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-foreground">Pagamento Confirmado!</h3>
+                <p className="text-muted-foreground mt-2">
+                  Obrigado pela sua assinatura. Seu acesso foi liberado! 🎉
+                </p>
+              </div>
               <Button
                 onClick={() => navigate("/")}
-                className="rounded-xl"
+                className="rounded-xl h-12 px-8 mt-2"
                 style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
               >
                 Voltar ao perfil
@@ -267,14 +324,18 @@ const Checkout = () => {
 
         {/* Error */}
         {step === "error" && (
-          <Card className="shadow-sm">
-            <CardContent className="p-10 flex flex-col items-center gap-4">
-              <AlertCircle className="h-16 w-16 text-destructive" />
-              <h3 className="text-xl font-bold text-foreground">Erro no pagamento</h3>
-              <p className="text-muted-foreground text-center">{errorMsg}</p>
+          <Card className="shadow-xl border-0 rounded-2xl">
+            <CardContent className="p-12 flex flex-col items-center gap-5">
+              <div className="h-20 w-20 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertCircle className="h-12 w-12 text-destructive" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-foreground">Erro no pagamento</h3>
+                <p className="text-muted-foreground mt-2">{errorMsg}</p>
+              </div>
               <Button
-                onClick={() => { setStep("form"); setErrorMsg(""); }}
-                className="rounded-xl"
+                onClick={() => { setStep("form"); setErrorMsg(""); setTimeLeft(900); }}
+                className="rounded-xl h-12 px-8 mt-2"
                 style={{ backgroundColor: "hsl(24, 95%, 53%)", color: "white" }}
               >
                 Tentar novamente
