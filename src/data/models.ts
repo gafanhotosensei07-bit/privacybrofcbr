@@ -185,7 +185,7 @@ export const models: ModelData[] = [
     username: "@julianabonde",
     avatar: julianaBondeAvatar,
     banner: julianaBondeBanner,
-    bio: "Eai gatinhos! 😻 Sou a Fer, 25 anos e cheia de conteúdo quente pra vocês! Ensaios profissionais, vídeos explícitos e muito conteúdo exclusivo que você não encontra em nenhum outro lugar 🔥 Me chama no chat! 💋",
+    bio: "Eai gatinhos! 😻 Sou a Juliana, 25 anos e cheia de conteúdo quente pra vocês! Ensaios profissionais, vídeos explícitos e muito conteúdo exclusivo que você não encontra em nenhum outro lugar 🔥 Me chama no chat! 💋",
     verified: true,
     stats: { photos: 478, videos: 356, posts: 35, likes: "167.4K" },
     mainPlan: { name: "1 mês", price: "12,90" },
