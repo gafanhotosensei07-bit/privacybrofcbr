@@ -41,7 +41,7 @@ const Index = () => {
   };
 
   const bio =
-    "Oi, meu amor... sou sua criadora de conteúdo favorita 🧡 Tenho um lado intenso, atrevido e perigosamente viciante — e hoje eu decidi não esconder mais nada.";
+    "Oi, meu amor... sou Ester Muniz 💋 Tenho um lado intenso, atrevido e perigosamente viciante — e hoje eu decidi não esconder mais nada. Aqui você vai encontrar meus vídeos exclusivos, momentos íntimos onde me entrego de corpo e alma. 😏 Cada centímetro do meu corpo é pura tentação e minhas fotos são um convite exclusivo para você explorar seus desejos mais secretos, tudo sem censura! Se você tem coragem de se perder nessa paixão sem limites, vem comigo... Estou te esperando para uma experiência única e irresistível.😈💋";
 
   return (
     <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col">
