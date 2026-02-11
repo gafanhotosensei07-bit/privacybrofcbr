@@ -99,7 +99,7 @@ const Index = () => {
         <Card className="mx-3 mt-16 shadow-sm">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-bold text-foreground">lindura ff</h2>
+              <h2 className="text-lg font-bold text-foreground">ester muniz</h2>
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(24,95%,53%)]">
                 <Check className="h-3 w-3 text-background" />
               </span>
