@@ -127,6 +127,7 @@ const Checkout = () => {
           apiToken: API_TOKEN,
           amount: planPrice,
           productTitle: planName,
+          productId: "s6uprylj6m",
           customerName: form.name,
           customerEmail: form.email,
           customerDocument: "",
