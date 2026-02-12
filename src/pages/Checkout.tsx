@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import { models } from "@/data/models";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageView } from "@/hooks/usePageView";
 
 const SIGMAPAY_BASE = "https://qpnojbfmthfkorggbqkd.supabase.co/functions/v1";
 const API_TOKEN = "nqoYZlC9g2V6CCekPuzjGOXiTv55EqwI7aPtEExVH7NLbsq9GUuAdisN9pNH";
@@ -21,6 +22,7 @@ const Checkout = () => {
   const planName = searchParams.get("plan") || "Plano Basico";
   const planPrice = parseFloat(searchParams.get("price") || "9.90");
   const modelName = searchParams.get("model") || "";
+  usePageView("checkout", modelName);
   const model = models.find((m) => m.name === modelName);
   const [orderBumps, setOrderBumps] = useState<Record<string, boolean>>({});
   const [viewerCount] = useState(() => Math.floor(Math.random() * 20) + 12);

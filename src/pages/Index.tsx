@@ -11,6 +11,7 @@ import preview3 from "@/assets/preview-3.jpeg";
 import preview4 from "@/assets/preview-4.jpg";
 import { Button } from "@/components/ui/button";
 import { models } from "@/data/models";
+import { usePageView } from "@/hooks/usePageView";
 
 const mainPlan = {
   name: "1 mês",
@@ -36,6 +37,7 @@ const allModels = models;
 
 const Index = () => {
   const navigate = useNavigate();
+  usePageView("modelo", "estermuniz");
   const [bannerUrl, setBannerUrl] = useState<string | null>(bannerImage);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profilePhoto);
   const [showFullBio, setShowFullBio] = useState(false);

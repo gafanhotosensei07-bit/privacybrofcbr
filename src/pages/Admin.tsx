@@ -1,46 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-data`;
 
-interface Profile {
-  id: string;
-  user_id: string;
-  display_name: string;
-  created_at: string;
+interface Profile { id: string; user_id: string; display_name: string; created_at: string; }
+interface Conversation { id: string; user_id: string; model_slug: string; created_at: string; }
+interface CheckoutAttempt { id: string; customer_name: string; customer_email: string; model_name: string; plan_name: string; plan_price: number; payment_status: string; payment_id: string; created_at: string; }
+interface DashboardData {
+  totalUsers: number; totalConversations: number; totalCheckouts: number;
+  approvedCheckouts: number; totalRevenue: number; totalPageViews: number;
+  recentViews24h: number; recentCheckouts24h: number;
+  modelViews: Record<string, number>; modelCheckouts: Record<string, number>;
+  pageTypeBreakdown: Record<string, number>; conversionRate: string;
 }
 
-interface Conversation {
-  id: string;
-  user_id: string;
-  model_slug: string;
-  created_at: string;
-}
-
-interface CheckoutAttempt {
-  id: string;
-  customer_name: string;
-  customer_email: string;
-  model_name: string;
-  plan_name: string;
-  plan_price: number;
-  payment_status: string;
-  payment_id: string;
-  created_at: string;
-}
+const CHART_COLORS = ["hsl(24, 95%, 53%)", "hsl(280, 70%, 50%)", "hsl(340, 80%, 55%)", "hsl(150, 70%, 40%)", "hsl(270, 65%, 55%)", "hsl(40, 90%, 50%)", "hsl(0, 85%, 55%)"];
 
 const Admin = () => {
   const [password, setPassword] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [checkouts, setCheckouts] = useState<CheckoutAttempt[]>([]);
@@ -59,62 +48,77 @@ const Admin = () => {
       return json.data || [];
     } catch (err: any) {
       setError(err.message);
-      return [];
+      return null;
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogin = async () => {
-    const data = await fetchData("profiles");
-    if (!error) {
+    const data = await fetchData("dashboard");
+    if (data && !error) {
       setAuthenticated(true);
-      setProfiles(data);
+      setDashboard(data);
     }
   };
 
   const loadTab = async (tab: string) => {
-    if (tab === "cadastros") {
-      setProfiles(await fetchData("profiles"));
+    setActiveTab(tab);
+    if (tab === "dashboard") {
+      const d = await fetchData("dashboard");
+      if (d) setDashboard(d);
+    } else if (tab === "cadastros") {
+      setProfiles(await fetchData("profiles") || []);
     } else if (tab === "conversas") {
-      setConversations(await fetchData("conversations"));
+      setConversations(await fetchData("conversations") || []);
     } else if (tab === "checkouts") {
-      setCheckouts(await fetchData("checkouts"));
+      setCheckouts(await fetchData("checkouts") || []);
     }
   };
 
-  const formatDate = (d: string) => {
-    return new Date(d).toLocaleString("pt-BR", {
-      day: "2-digit", month: "2-digit", year: "2-digit",
-      hour: "2-digit", minute: "2-digit",
-    });
-  };
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" });
 
   const statusColor = (s: string) => {
-    if (s === "approved") return "text-green-600 bg-green-50";
-    if (s === "rejected") return "text-red-600 bg-red-50";
-    return "text-yellow-600 bg-yellow-50";
+    if (s === "approved") return "text-emerald-700 bg-emerald-50 border-emerald-200";
+    if (s === "rejected") return "text-red-700 bg-red-50 border-red-200";
+    return "text-amber-700 bg-amber-50 border-amber-200";
   };
 
+  const statusLabel = (s: string) => {
+    if (s === "approved") return "✅ Aprovado";
+    if (s === "rejected") return "❌ Rejeitado";
+    return "⏳ Pendente";
+  };
+
+  // Login screen
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm">
-          <CardHeader className="text-center">
-            <Lock className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-            <CardTitle>Painel Admin</CardTitle>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-sm border-slate-700 bg-slate-800/80 backdrop-blur-sm shadow-2xl">
+          <CardHeader className="text-center pb-2">
+            <div className="mx-auto mb-3 h-14 w-14 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+              <Lock className="h-7 w-7 text-white" />
+            </div>
+            <CardTitle className="text-white text-xl">Painel Administrativo</CardTitle>
+            <p className="text-slate-400 text-sm">Acesso restrito</p>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-2">
             <Input
               type="password"
               placeholder="Senha de administrador"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 h-12"
             />
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button onClick={handleLogin} className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Entrar"}
+            {error && <p className="text-sm text-red-400">{error}</p>}
+            <Button
+              onClick={handleLogin}
+              className="w-full h-12 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold shadow-lg shadow-orange-500/20"
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Acessar Painel"}
             </Button>
           </CardContent>
         </Card>
@@ -122,162 +126,357 @@ const Admin = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Painel Admin</h1>
+  // Model views chart data
+  const modelViewsChart = dashboard
+    ? Object.entries(dashboard.modelViews)
+        .sort(([, a], [, b]) => b - a)
+        .map(([name, views], i) => ({ name, views, fill: CHART_COLORS[i % CHART_COLORS.length] }))
+    : [];
 
-        <Tabs defaultValue="cadastros" onValueChange={loadTab}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="cadastros" className="gap-2">
+  // Page type pie data
+  const pageTypePie = dashboard
+    ? Object.entries(dashboard.pageTypeBreakdown).map(([name, value], i) => ({
+        name: name === "home" ? "Home" : name === "modelo" ? "Perfil Modelo" : name === "checkout" ? "Checkout" : name,
+        value,
+        fill: CHART_COLORS[i % CHART_COLORS.length],
+      }))
+    : [];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Header */}
+      <header className="border-b border-slate-700/50 bg-slate-800/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-white">Admin Dashboard</h1>
+              <p className="text-xs text-slate-400">Monitoramento em tempo real</p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => loadTab(activeTab)}
+            className="text-slate-400 hover:text-white"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Atualizar
+          </Button>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+        <Tabs value={activeTab} onValueChange={loadTab}>
+          <TabsList className="bg-slate-800/50 border border-slate-700/50 mb-6">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-2">
+              <BarChart3 className="h-4 w-4" /> Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="cadastros" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-2">
               <Users className="h-4 w-4" /> Cadastros
             </TabsTrigger>
-            <TabsTrigger value="conversas" className="gap-2">
+            <TabsTrigger value="conversas" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-2">
               <MessageSquare className="h-4 w-4" /> Conversas
             </TabsTrigger>
-            <TabsTrigger value="checkouts" className="gap-2">
+            <TabsTrigger value="checkouts" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-2">
               <CreditCard className="h-4 w-4" /> Checkouts
             </TabsTrigger>
           </TabsList>
 
+          {/* Dashboard */}
+          <TabsContent value="dashboard">
+            {loading && !dashboard ? (
+              <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-orange-500" /></div>
+            ) : dashboard ? (
+              <div className="space-y-6">
+                {/* KPI Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <KpiCard icon={<Eye className="h-5 w-5" />} label="Visualizações" value={dashboard.totalPageViews} sub={`${dashboard.recentViews24h} nas últimas 24h`} color="from-blue-500 to-cyan-500" />
+                  <KpiCard icon={<Users className="h-5 w-5" />} label="Cadastros" value={dashboard.totalUsers} sub={`${dashboard.totalConversations} conversas`} color="from-violet-500 to-purple-500" />
+                  <KpiCard icon={<CreditCard className="h-5 w-5" />} label="Checkouts" value={dashboard.totalCheckouts} sub={`${dashboard.approvedCheckouts} aprovados`} color="from-orange-500 to-pink-500" />
+                  <KpiCard icon={<DollarSign className="h-5 w-5" />} label="Receita" value={`R$ ${dashboard.totalRevenue.toFixed(2).replace(".", ",")}`} sub={`${dashboard.conversionRate}% conversão`} color="from-emerald-500 to-green-500" />
+                </div>
+
+                {/* Activity indicators */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="bg-slate-800/50 border-slate-700/50">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                        <Activity className="h-5 w-5 text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-400">Últimas 24h</p>
+                        <p className="text-lg font-bold text-white">{dashboard.recentViews24h} views · {dashboard.recentCheckouts24h} checkouts</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-slate-800/50 border-slate-700/50">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                        <TrendingUp className="h-5 w-5 text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-400">Taxa de Aprovação</p>
+                        <p className="text-lg font-bold text-white">
+                          {dashboard.totalCheckouts > 0
+                            ? ((dashboard.approvedCheckouts / dashboard.totalCheckouts) * 100).toFixed(0)
+                            : 0}%
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-slate-800/50 border-slate-700/50">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                        <Zap className="h-5 w-5 text-orange-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-400">Ticket Médio</p>
+                        <p className="text-lg font-bold text-white">
+                          R$ {dashboard.approvedCheckouts > 0
+                            ? (dashboard.totalRevenue / dashboard.approvedCheckouts).toFixed(2).replace(".", ",")
+                            : "0,00"}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Charts */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Model Interest Chart */}
+                  <Card className="bg-slate-800/50 border-slate-700/50">
+                    <CardHeader>
+                      <CardTitle className="text-white text-base flex items-center gap-2">
+                        <ArrowUpRight className="h-4 w-4 text-orange-400" />
+                        Interesse por Modelo (Views)
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {modelViewsChart.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={250}>
+                          <BarChart data={modelViewsChart}>
+                            <XAxis dataKey="name" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                            <Tooltip
+                              contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }}
+                              labelStyle={{ color: "#94a3b8" }}
+                            />
+                            <Bar dataKey="views" radius={[6, 6, 0, 0]}>
+                              {modelViewsChart.map((entry, i) => (
+                                <Cell key={i} fill={entry.fill} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <p className="text-center text-slate-500 py-12">Sem dados ainda</p>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Page Type Distribution */}
+                  <Card className="bg-slate-800/50 border-slate-700/50">
+                    <CardHeader>
+                      <CardTitle className="text-white text-base flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-blue-400" />
+                        Distribuição de Páginas
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {pageTypePie.length > 0 ? (
+                        <div className="flex items-center gap-4">
+                          <ResponsiveContainer width="60%" height={200}>
+                            <PieChart>
+                              <Pie data={pageTypePie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} strokeWidth={2} stroke="#1e293b">
+                                {pageTypePie.map((entry, i) => (
+                                  <Cell key={i} fill={entry.fill} />
+                                ))}
+                              </Pie>
+                              <Tooltip
+                                contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="flex-1 space-y-2">
+                            {pageTypePie.map((entry, i) => (
+                              <div key={i} className="flex items-center gap-2">
+                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.fill }} />
+                                <span className="text-xs text-slate-300">{entry.name}</span>
+                                <span className="text-xs text-slate-500 ml-auto">{entry.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-center text-slate-500 py-12">Sem dados ainda</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Model Checkout Ranking */}
+                <Card className="bg-slate-800/50 border-slate-700/50">
+                  <CardHeader>
+                    <CardTitle className="text-white text-base flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-emerald-400" />
+                      Ranking de Checkout por Modelo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {Object.keys(dashboard.modelCheckouts).length > 0 ? (
+                      <div className="space-y-3">
+                        {Object.entries(dashboard.modelCheckouts)
+                          .sort(([, a], [, b]) => b - a)
+                          .map(([name, count], i) => {
+                            const max = Math.max(...Object.values(dashboard.modelCheckouts));
+                            const pct = max > 0 ? (count / max) * 100 : 0;
+                            return (
+                              <div key={name} className="flex items-center gap-3">
+                                <span className="text-sm font-bold text-slate-400 w-6">#{i + 1}</span>
+                                <span className="text-sm text-white w-40 truncate">{name}</span>
+                                <div className="flex-1 h-3 bg-slate-700/50 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full transition-all"
+                                    style={{ width: `${pct}%`, background: CHART_COLORS[i % CHART_COLORS.length] }}
+                                  />
+                                </div>
+                                <span className="text-sm font-bold text-white w-8 text-right">{count}</span>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    ) : (
+                      <p className="text-center text-slate-500 py-8">Sem checkouts ainda</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
+          </TabsContent>
+
           {/* Cadastros */}
           <TabsContent value="cadastros">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg">Usuários cadastrados ({profiles.length})</CardTitle>
-                <Button variant="ghost" size="icon" onClick={() => loadTab("cadastros")}>
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Nome</TableHead>
-                          <TableHead>User ID</TableHead>
-                          <TableHead>Data</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {profiles.map((p) => (
-                          <TableRow key={p.id}>
-                            <TableCell className="font-medium">{p.display_name || "—"}</TableCell>
-                            <TableCell className="text-xs text-muted-foreground font-mono">{p.user_id.slice(0, 8)}...</TableCell>
-                            <TableCell>{formatDate(p.created_at)}</TableCell>
-                          </TableRow>
-                        ))}
-                        {profiles.length === 0 && (
-                          <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">Nenhum cadastro encontrado</TableCell></TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <DataTable
+              title="Usuários cadastrados"
+              count={profiles.length}
+              loading={loading}
+              onRefresh={() => loadTab("cadastros")}
+              headers={["Nome", "User ID", "Data"]}
+              rows={profiles.map((p) => [
+                p.display_name || "—",
+                <span className="font-mono text-xs text-slate-400">{p.user_id.slice(0, 8)}...</span>,
+                formatDate(p.created_at),
+              ])}
+              emptyMsg="Nenhum cadastro encontrado"
+            />
           </TabsContent>
 
           {/* Conversas */}
           <TabsContent value="conversas">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg">Conversas ({conversations.length})</CardTitle>
-                <Button variant="ghost" size="icon" onClick={() => loadTab("conversas")}>
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Modelo</TableHead>
-                          <TableHead>User ID</TableHead>
-                          <TableHead>Data</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {conversations.map((c) => (
-                          <TableRow key={c.id}>
-                            <TableCell className="font-medium">{c.model_slug}</TableCell>
-                            <TableCell className="text-xs text-muted-foreground font-mono">{c.user_id.slice(0, 8)}...</TableCell>
-                            <TableCell>{formatDate(c.created_at)}</TableCell>
-                          </TableRow>
-                        ))}
-                        {conversations.length === 0 && (
-                          <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">Nenhuma conversa encontrada</TableCell></TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <DataTable
+              title="Conversas"
+              count={conversations.length}
+              loading={loading}
+              onRefresh={() => loadTab("conversas")}
+              headers={["Modelo", "User ID", "Data"]}
+              rows={conversations.map((c) => [
+                c.model_slug,
+                <span className="font-mono text-xs text-slate-400">{c.user_id.slice(0, 8)}...</span>,
+                formatDate(c.created_at),
+              ])}
+              emptyMsg="Nenhuma conversa encontrada"
+            />
           </TabsContent>
 
           {/* Checkouts */}
           <TabsContent value="checkouts">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg">Tentativas de checkout ({checkouts.length})</CardTitle>
-                <Button variant="ghost" size="icon" onClick={() => loadTab("checkouts")}>
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Cliente</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Modelo</TableHead>
-                          <TableHead>Plano</TableHead>
-                          <TableHead>Preço</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Data</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {checkouts.map((c) => (
-                          <TableRow key={c.id}>
-                            <TableCell className="font-medium">{c.customer_name}</TableCell>
-                            <TableCell className="text-sm">{c.customer_email}</TableCell>
-                            <TableCell>{c.model_name}</TableCell>
-                            <TableCell>{c.plan_name}</TableCell>
-                            <TableCell>R$ {Number(c.plan_price).toFixed(2).replace(".", ",")}</TableCell>
-                            <TableCell>
-                              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColor(c.payment_status)}`}>
-                                {c.payment_status}
-                              </span>
-                            </TableCell>
-                            <TableCell>{formatDate(c.created_at)}</TableCell>
-                          </TableRow>
-                        ))}
-                        {checkouts.length === 0 && (
-                          <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhum checkout encontrado</TableCell></TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <DataTable
+              title="Tentativas de checkout"
+              count={checkouts.length}
+              loading={loading}
+              onRefresh={() => loadTab("checkouts")}
+              headers={["Cliente", "Email", "Modelo", "Plano", "Preço", "Status", "Data"]}
+              rows={checkouts.map((c) => [
+                c.customer_name,
+                c.customer_email,
+                c.model_name,
+                c.plan_name,
+                `R$ ${Number(c.plan_price).toFixed(2).replace(".", ",")}`,
+                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${statusColor(c.payment_status)}`}>
+                  {statusLabel(c.payment_status)}
+                </span>,
+                formatDate(c.created_at),
+              ])}
+              emptyMsg="Nenhum checkout encontrado"
+            />
           </TabsContent>
         </Tabs>
       </div>
     </div>
   );
 };
+
+// KPI Card component
+const KpiCard = ({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: string | number; sub: string; color: string }) => (
+  <Card className="bg-slate-800/50 border-slate-700/50 overflow-hidden">
+    <CardContent className="p-4 relative">
+      <div className={`absolute -top-4 -right-4 h-20 w-20 rounded-full bg-gradient-to-br ${color} opacity-10 blur-xl`} />
+      <div className={`h-9 w-9 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white mb-3 shadow-lg`}>
+        {icon}
+      </div>
+      <p className="text-xs text-slate-400 font-medium">{label}</p>
+      <p className="text-2xl font-bold text-white mt-0.5">{value}</p>
+      <p className="text-xs text-slate-500 mt-1">{sub}</p>
+    </CardContent>
+  </Card>
+);
+
+// Reusable data table
+const DataTable = ({ title, count, loading, onRefresh, headers, rows, emptyMsg }: {
+  title: string; count: number; loading: boolean; onRefresh: () => void;
+  headers: string[]; rows: React.ReactNode[][]; emptyMsg: string;
+}) => (
+  <Card className="bg-slate-800/50 border-slate-700/50">
+    <CardHeader className="flex flex-row items-center justify-between border-b border-slate-700/50">
+      <CardTitle className="text-white text-base">{title} ({count})</CardTitle>
+      <Button variant="ghost" size="icon" onClick={onRefresh} className="text-slate-400 hover:text-white">
+        <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+      </Button>
+    </CardHeader>
+    <CardContent className="p-0">
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
+      ) : (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-slate-700/50 hover:bg-transparent">
+                {headers.map((h, i) => (
+                  <TableHead key={i} className="text-slate-400 text-xs font-semibold uppercase tracking-wider">{h}</TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row, i) => (
+                <TableRow key={i} className="border-slate-700/30 hover:bg-slate-700/20">
+                  {row.map((cell, j) => (
+                    <TableCell key={j} className="text-slate-300 text-sm">{cell}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+              {rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={headers.length} className="text-center text-slate-500 py-12">{emptyMsg}</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+);
 
 export default Admin;
