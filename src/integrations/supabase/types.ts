@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      checkout_attempts: {
+        Row: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          id: string
+          model_name: string
+          payment_id: string | null
+          payment_status: string
+          plan_name: string
+          plan_price: number
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          model_name?: string
+          payment_id?: string | null
+          payment_status?: string
+          plan_name?: string
+          plan_price?: number
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          model_name?: string
+          payment_id?: string | null
+          payment_status?: string
+          plan_name?: string
+          plan_price?: number
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string

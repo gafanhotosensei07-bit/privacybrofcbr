@@ -8,6 +8,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import { models } from "@/data/models";
+import { supabase } from "@/integrations/supabase/client";
 
 const SIGMAPAY_BASE = "https://qpnojbfmthfkorggbqkd.supabase.co/functions/v1";
 const API_TOKEN = "nqoYZlC9g2V6CCekPuzjGOXiTv55EqwI7aPtEExVH7NLbsq9GUuAdisN9pNH";
@@ -98,10 +99,13 @@ const Checkout = () => {
         if (data.status === "approved") {
           if (statusInterval.current) clearInterval(statusInterval.current);
           if (timerInterval.current) clearInterval(timerInterval.current);
+          // Update payment status in database
+          await supabase.from("checkout_attempts").update({ payment_status: "approved" }).eq("payment_id", id);
           setStep("success");
         } else if (data.status === "rejected") {
           if (statusInterval.current) clearInterval(statusInterval.current);
           if (timerInterval.current) clearInterval(timerInterval.current);
+          await supabase.from("checkout_attempts").update({ payment_status: "rejected" }).eq("payment_id", id);
           setErrorMsg("Pagamento não aprovado. Tente novamente.");
           setStep("error");
         }
@@ -141,6 +145,19 @@ const Checkout = () => {
       }
 
       setPaymentId(data.id);
+
+      // Save checkout attempt to database
+      const { error: dbError } = await supabase.from("checkout_attempts").insert({
+        customer_name: form.name,
+        customer_email: form.email,
+        model_name: modelName,
+        plan_name: planName,
+        plan_price: planPrice,
+        payment_status: "pending",
+        payment_id: data.id,
+      });
+      if (dbError) console.error("Erro ao salvar checkout:", dbError);
+
       const pix = data.copyPaste || "";
       let qr = "";
       if (data.qrCode && data.qrCode.startsWith("data:")) {
