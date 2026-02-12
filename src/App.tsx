@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
 import ChatConversation from "./pages/ChatConversation";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/perfil" element={<Profile />} />
           <Route path="/modelo/:slug" element={<ModelProfile />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
