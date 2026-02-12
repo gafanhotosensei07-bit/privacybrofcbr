@@ -8,10 +8,12 @@ import preview2 from "@/assets/preview-2.jpeg";
 import preview3 from "@/assets/preview-3.jpeg";
 import preview4 from "@/assets/preview-4.jpg";
 import { models } from "@/data/models";
+import { usePageView } from "@/hooks/usePageView";
 
 const ModelProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  usePageView("modelo", slug || "");
 
   const [showFullBio, setShowFullBio] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);

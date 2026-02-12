@@ -4,11 +4,13 @@ import { Heart, Image, Search, Plus, MessageCircle, Flame, Star, TrendingUp, Cro
 import logoIcon from "@/assets/logo-icon.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { models } from "@/data/models";
+import { usePageView } from "@/hooks/usePageView";
 
 const Home = () => {
   const navigate = useNavigate();
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  usePageView("home", "catalogo");
 
   const goToModel = (slug: string) => navigate(`/modelo/${slug}`);
 

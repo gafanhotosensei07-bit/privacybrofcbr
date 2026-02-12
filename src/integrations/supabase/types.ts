@@ -103,6 +103,30 @@ export type Database = {
           },
         ]
       }
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          page_slug: string
+          page_type: string
+          referrer: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_slug?: string
+          page_type?: string
+          referrer?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_slug?: string
+          page_type?: string
+          referrer?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
