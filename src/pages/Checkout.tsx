@@ -10,7 +10,7 @@ import profilePhoto from "@/assets/profile-photo.jpeg";
 import { models } from "@/data/models";
 
 const SIGMAPAY_BASE = "https://qpnojbfmthfkorggbqkd.supabase.co/functions/v1";
-const API_TOKEN = "C4Jv1h6JTzYZA1RNEjVSHfVBVp9EpBTl0izjwhy3KHz7tLjusTdlDsZZGS3q";
+const API_TOKEN = "nqoYZlC9g2V6CCekPuzjGOXiTv55EqwI7aPtEExVH7NLbsq9GUuAdisN9pNH";
 
 type Step = "form" | "loading" | "pix" | "success" | "error";
 
