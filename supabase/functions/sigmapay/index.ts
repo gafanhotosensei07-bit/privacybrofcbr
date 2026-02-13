@@ -43,7 +43,8 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const apiToken = Deno.env.get("SIGMAPAY_API_TOKEN") || Deno.env.get("SIGMAPAY_PUBLIC_KEY") || "";
+    const apiToken = Deno.env.get("SIGMAPAY_PUBLIC_KEY") || Deno.env.get("SIGMAPAY_API_TOKEN") || "";
+    console.log("sigmapay v30 - using token starts:", apiToken.substring(0, 6));
     if (!apiToken) {
       return new Response(JSON.stringify({ error: "Token não configurado" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
