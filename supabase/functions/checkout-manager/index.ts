@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     );
 
     if (action === "insert") {
-      const { customer_name, customer_email, model_name, plan_name, plan_price, payment_id } = body;
+      const { customer_name, customer_email, model_name, plan_name, plan_price, payment_id, user_id } = body;
 
       // Validate inputs
       if (!customer_name || typeof customer_name !== "string" || customer_name.trim().length === 0 || customer_name.length > 200) {
@@ -57,6 +57,7 @@ Deno.serve(async (req) => {
         plan_price: price,
         payment_status: "pending",
         payment_id: payment_id || null,
+        user_id: user_id || null,
       }).select("id").single();
 
       if (error) throw error;
