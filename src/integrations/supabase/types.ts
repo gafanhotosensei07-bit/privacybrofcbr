@@ -110,6 +110,11 @@ export type Database = {
           page_slug: string
           page_type: string
           referrer: string | null
+          utm_campaign: string
+          utm_content: string
+          utm_medium: string
+          utm_source: string
+          utm_term: string
         }
         Insert: {
           created_at?: string
@@ -117,6 +122,11 @@ export type Database = {
           page_slug?: string
           page_type?: string
           referrer?: string | null
+          utm_campaign?: string
+          utm_content?: string
+          utm_medium?: string
+          utm_source?: string
+          utm_term?: string
         }
         Update: {
           created_at?: string
@@ -124,6 +134,11 @@ export type Database = {
           page_slug?: string
           page_type?: string
           referrer?: string | null
+          utm_campaign?: string
+          utm_content?: string
+          utm_medium?: string
+          utm_source?: string
+          utm_term?: string
         }
         Relationships: []
       }
