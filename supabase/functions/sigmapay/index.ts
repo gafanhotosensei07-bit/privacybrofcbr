@@ -6,7 +6,7 @@ const corsHeaders = {
 const SIGMAPAY_BASE = "https://api.sigmapay.com.br/api/public/v1";
 const PRODUCT_CODE = "xdoszqormp";
 
-// Real offers from SigmaPay product
+// Real offers from SigmaPay product (fetched via API)
 const OFFER_MAP: Record<string, { hash: string; priceCentavos: number }> = {
   "9.90":  { hash: "99ep6", priceCentavos: 990 },
   "14.90": { hash: "1juqsagaaq", priceCentavos: 1490 },
@@ -30,28 +30,20 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const apiToken = Deno.env.get("SIGMAPAY_API_TOKEN");
-    if (!apiToken) {
-      return new Response(JSON.stringify({ error: "API token não configurado" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const publicKey = Deno.env.get("SIGMAPAY_PUBLIC_KEY");
+    const secretKey = Deno.env.get("SIGMAPAY_API_TOKEN");
 
     const body = await req.json();
     const { action } = body;
 
-    if (action === "get_offers") {
-      const offers = Object.entries(OFFER_MAP).map(([price, o]) => ({
-        priceBrl: parseFloat(price),
-        priceCentavos: o.priceCentavos,
-        offerHash: o.hash,
-      }));
-      return new Response(JSON.stringify({ offers }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (action === "create") {
+      if (!publicKey) {
+        return new Response(JSON.stringify({ error: "Chave pública não configurada" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    } else if (action === "create") {
       const { amount, customerName, customerEmail, customerDocument, customerPhone, productTitle } = body;
 
       if (!amount || typeof amount !== "number" || amount <= 0) {
@@ -83,9 +75,9 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Try approach: api_token in body + full payload matching docs exactly
+      // Use PUBLIC key for creating transactions (as per reference implementation)
       const payload = {
-        api_token: apiToken,
+        api_token: publicKey,
         amount: offer.priceCentavos,
         offer_hash: offer.hash,
         payment_method: "pix",
@@ -117,7 +109,7 @@ Deno.serve(async (req) => {
         transaction_origin: "api",
       };
 
-      console.log("sigmapay v19 - trying with api_token in body");
+      console.log("sigmapay v20 - PUBLIC key, offer:", offer.hash, "price:", offer.priceCentavos);
       let res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
         method: "POST",
         headers: {
@@ -128,55 +120,73 @@ Deno.serve(async (req) => {
       });
 
       let rawText = await res.text();
-      console.log("Attempt 1 (token in body) status:", res.status, "response:", rawText.substring(0, 500));
+      console.log("Attempt 1 (public key in body) status:", res.status, "response:", rawText.substring(0, 500));
 
-      // If failed, try with Authorization header instead
+      // If failed with public key, try secret key
       if (!res.ok) {
-        const { api_token: _removed, ...payloadNoToken } = payload;
-        console.log("sigmapay v19 - trying with Authorization header");
+        if (secretKey) {
+          const payload2 = { ...payload, api_token: secretKey };
+          console.log("sigmapay v20 - retrying with SECRET key");
+          res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+            },
+            body: JSON.stringify(payload2),
+          });
+          rawText = await res.text();
+          console.log("Attempt 2 (secret key) status:", res.status, "response:", rawText.substring(0, 500));
+        }
+      }
+
+      // If still failed, try without offer_hash (dynamic creation)
+      if (!res.ok) {
+        const amountCentavos = Math.round(amount * 100);
+        const dynamicPayload = {
+          api_token: publicKey,
+          amount: amountCentavos,
+          payment_method: "pix",
+          customer: payload.customer,
+          cart: [
+            {
+              product_hash: PRODUCT_CODE,
+              title: productTitle || "ACESSO POR 30 DIAS",
+              cover: null,
+              price: amountCentavos,
+              quantity: 1,
+              operation_type: 1,
+              tangible: false,
+            },
+          ],
+          expire_in_days: 1,
+          transaction_origin: "api",
+        };
+        console.log("sigmapay v20 - retrying WITHOUT offer_hash");
         res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "Authorization": `Bearer ${apiToken}`,
           },
-          body: JSON.stringify(payloadNoToken),
+          body: JSON.stringify(dynamicPayload),
         });
-
         rawText = await res.text();
-        console.log("Attempt 2 (Bearer header) status:", res.status, "response:", rawText.substring(0, 500));
+        console.log("Attempt 3 (no offer_hash) status:", res.status, "response:", rawText.substring(0, 500));
       }
 
-      // If still failed, try with api_token as query param
-      if (!res.ok) {
-        const { api_token: _removed2, ...payloadNoToken2 } = payload;
-        console.log("sigmapay v19 - trying with query param");
-        res = await fetch(`${SIGMAPAY_BASE}/transactions?api_token=${encodeURIComponent(apiToken)}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-          body: JSON.stringify(payloadNoToken2),
-        });
-
-        rawText = await res.text();
-        console.log("Attempt 3 (query param) status:", res.status, "response:", rawText.substring(0, 500));
-      }
-      
       let data: any;
       try {
         data = JSON.parse(rawText);
       } catch {
-        return new Response(JSON.stringify({ error: "Resposta inválida da SigmaPay", raw: rawText.substring(0, 200) }), {
+        return new Response(JSON.stringify({ error: "Resposta inválida", raw: rawText.substring(0, 200) }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
       if (!res.ok) {
-        return new Response(JSON.stringify({ error: data.message || "Erro ao criar pagamento", details: data.errors || null, raw: rawText.substring(0, 300) }), {
+        return new Response(JSON.stringify({ error: data.message || "Erro ao criar pagamento", details: data.errors || null }), {
           status: res.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -194,16 +204,27 @@ Deno.serve(async (req) => {
       });
 
     } else if (action === "check_status") {
-      const { transactionHash } = body;
+      // Use SECRET key for checking status (as per reference implementation)
+      const apiToken = secretKey || publicKey;
+      if (!apiToken) {
+        return new Response(JSON.stringify({ error: "Token não configurado" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-      if (!transactionHash || typeof transactionHash !== "string") {
+      const { transactionHash } = body;
+      // Also accept paymentId from reference implementation
+      const txHash = transactionHash || body.paymentId;
+
+      if (!txHash || typeof txHash !== "string") {
         return new Response(JSON.stringify({ error: "Hash da transação obrigatório" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      const res = await fetch(`${SIGMAPAY_BASE}/transactions/${encodeURIComponent(transactionHash)}`, {
+      const res = await fetch(`${SIGMAPAY_BASE}/transactions/${encodeURIComponent(txHash)}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
