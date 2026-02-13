@@ -50,32 +50,40 @@ Deno.serve(async (req) => {
       // Amount in centavos
       const amountCentavos = Math.round(amount * 100);
 
-      // Build form data for PHP-based API
-      const formData = new URLSearchParams();
-      formData.append("api_token", apiToken);
-      formData.append("offer_hash", OFFER_CODE);
-      formData.append("product_hash", PRODUCT_CODE);
-      formData.append("operation_type", "sale");
-      formData.append("amount", String(amountCentavos));
-      formData.append("title", productTitle || "Assinatura");
-      formData.append("payment_method", "pix");
-      formData.append("cart[0][product_hash]", PRODUCT_CODE);
-      formData.append("cart[0][offer_hash]", OFFER_CODE);
-      formData.append("cart[0][title]", productTitle || "Assinatura");
-      formData.append("cart[0][price]", String(amountCentavos));
-      formData.append("cart[0][quantity]", "1");
-      formData.append("customer[name]", customerName.trim().slice(0, 200));
-      formData.append("customer[email]", customerEmail.trim().toLowerCase().slice(0, 255));
-      if (customerDocument) formData.append("customer[document]", customerDocument);
-      if (customerPhone) formData.append("customer[phone]", customerPhone);
+      // Build JSON payload
+      const payload: Record<string, unknown> = {
+        api_token: apiToken,
+        offer_hash: OFFER_CODE,
+        product_hash: PRODUCT_CODE,
+        operation_type: 1,
+        amount: amountCentavos,
+        title: productTitle || "Assinatura",
+        payment_method: "pix",
+        cart: [
+          {
+            product_hash: PRODUCT_CODE,
+            offer_hash: OFFER_CODE,
+            title: productTitle || "Assinatura",
+            price: amountCentavos,
+            quantity: 1,
+          },
+        ],
+        customer: {
+          name: customerName.trim().slice(0, 200),
+          email: customerEmail.trim().toLowerCase().slice(0, 255),
+          ...(customerDocument ? { document: customerDocument } : {}),
+          ...(customerPhone ? { phone: customerPhone } : {}),
+        },
+      };
 
-      console.log("sigmapay v6 - form data entries:", [...formData.entries()].map(([k]) => k).join(", "));
+      console.log("sigmapay v7 - JSON payload keys:", Object.keys(payload).join(", "));
       const res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: formData,
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
