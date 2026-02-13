@@ -134,6 +134,7 @@ const Checkout = () => {
         body: {
           action: "create",
           amount: planPrice,
+          productTitle: planName,
           customerName: form.name,
           customerEmail: form.email,
           customerDocument: "",

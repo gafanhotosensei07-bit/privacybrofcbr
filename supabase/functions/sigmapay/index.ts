@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const { action } = body;
 
     if (action === "create") {
-      const { amount, customerName, customerEmail, customerDocument, customerPhone } = body;
+      const { amount, customerName, customerEmail, customerDocument, customerPhone, productTitle } = body;
 
       // Validate inputs
       if (!amount || typeof amount !== "number" || amount <= 0 || amount > 999999) {
@@ -50,36 +50,40 @@ Deno.serve(async (req) => {
       // Amount in centavos
       const amountCentavos = Math.round(amount * 100);
 
-      const payload = {
-        api_token: apiToken,
-        product_code: PRODUCT_CODE,
-        offer_code: OFFER_CODE,
-        amount: amountCentavos,
-        payment_method: "pix",
-        customer: {
-          name: customerName.trim().slice(0, 200),
-          email: customerEmail.trim().toLowerCase().slice(0, 255),
-          document: customerDocument || "",
-          phone: customerPhone || "",
-        },
-      };
+      // Build form data for PHP-based API
+      const formData = new URLSearchParams();
+      formData.append("api_token", apiToken);
+      formData.append("offer_hash", OFFER_CODE);
+      formData.append("product_hash", PRODUCT_CODE);
+      formData.append("operation_type", "sale");
+      formData.append("amount", String(amountCentavos));
+      formData.append("title", productTitle || "Assinatura");
+      formData.append("payment_method", "pix");
+      formData.append("cart[0][product_hash]", PRODUCT_CODE);
+      formData.append("cart[0][offer_hash]", OFFER_CODE);
+      formData.append("cart[0][title]", productTitle || "Assinatura");
+      formData.append("cart[0][price]", String(amountCentavos));
+      formData.append("cart[0][quantity]", "1");
+      formData.append("customer[name]", customerName.trim().slice(0, 200));
+      formData.append("customer[email]", customerEmail.trim().toLowerCase().slice(0, 255));
+      if (customerDocument) formData.append("customer[document]", customerDocument);
+      if (customerPhone) formData.append("customer[phone]", customerPhone);
 
-      console.log("SigmaPay request payload:", JSON.stringify(payload));
-
+      console.log("sigmapay v6 - form data entries:", [...formData.entries()].map(([k]) => k).join(", "));
       const res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiToken}`,
+          "Accept": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        console.error("SigmaPay create error:", JSON.stringify(data));
-        return new Response(JSON.stringify({ error: data.message || "Erro ao criar pagamento" }), {
+        const fullError = JSON.stringify(data);
+        console.error("SigmaPay create error (status " + res.status + "):", fullError);
+        return new Response(JSON.stringify({ error: data.message || data.error || fullError || "Erro ao criar pagamento" }), {
           status: res.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
