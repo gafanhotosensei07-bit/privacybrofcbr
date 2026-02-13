@@ -25,6 +25,7 @@ export type Database = {
           payment_status: string
           plan_name: string
           plan_price: number
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -36,6 +37,7 @@ export type Database = {
           payment_status?: string
           plan_name?: string
           plan_price?: number
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -47,6 +49,7 @@ export type Database = {
           payment_status?: string
           plan_name?: string
           plan_price?: number
+          user_id?: string | null
         }
         Relationships: []
       }
