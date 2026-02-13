@@ -156,11 +156,15 @@ Deno.serve(async (req) => {
 
       console.log("SigmaPay SUCCESS:", JSON.stringify(data).substring(0, 500));
 
+      const pixData = data.pix || {};
+      const pixCopyPaste = data.pix_copy_paste || pixData.pix_qr_code || pixData.copy_paste || "";
+      const pixQrBase64 = pixData.qr_code_base64 || data.qr_code_base64 || "";
+
       return new Response(JSON.stringify({
         id: data.hash || data.id || data.transaction_hash,
-        copyPaste: data.pix_copy_paste || data.copyPaste || data.pix?.copy_paste || "",
-        qrCode: data.pix_qr_code || data.qrCode || data.pix?.qr_code || "",
-        status: data.status || "pending",
+        copyPaste: pixCopyPaste,
+        qrCode: pixQrBase64,
+        status: data.status || data.payment_status || "pending",
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
