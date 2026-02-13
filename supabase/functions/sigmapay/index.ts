@@ -64,9 +64,14 @@ Deno.serve(async (req) => {
         },
       };
 
+      console.log("SigmaPay request payload:", JSON.stringify(payload));
+
       const res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiToken}`,
+        },
         body: JSON.stringify(payload),
       });
 
@@ -100,9 +105,12 @@ Deno.serve(async (req) => {
         });
       }
 
-      const res = await fetch(`${SIGMAPAY_BASE}/transactions/${encodeURIComponent(transactionHash)}?api_token=${encodeURIComponent(apiToken)}`, {
+      const res = await fetch(`${SIGMAPAY_BASE}/transactions/${encodeURIComponent(transactionHash)}`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiToken}`,
+        },
       });
 
       const data = await res.json();
