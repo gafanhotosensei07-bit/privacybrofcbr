@@ -5,7 +5,24 @@ const corsHeaders = {
 
 const SIGMAPAY_BASE = "https://api.sigmapay.com.br/api/public/v1";
 const PRODUCT_CODE = "xdoszqormp";
-const OFFER_CODE = "1juqsagaaq";
+
+// Real offers from SigmaPay product
+const OFFER_MAP: Record<string, { hash: string; priceCentavos: number }> = {
+  "9.90":  { hash: "99ep6", priceCentavos: 990 },
+  "14.90": { hash: "1juqsagaaq", priceCentavos: 1490 },
+  "19.90": { hash: "xdoszqormp_np94iv58pz", priceCentavos: 1990 },
+  "21.90": { hash: "xotre", priceCentavos: 2190 },
+};
+
+function findOffer(amountBrl: number) {
+  const key = amountBrl.toFixed(2);
+  if (OFFER_MAP[key]) return OFFER_MAP[key];
+  const centavos = Math.round(amountBrl * 100);
+  for (const offer of Object.values(OFFER_MAP)) {
+    if (offer.priceCentavos === centavos) return offer;
+  }
+  return null;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -24,11 +41,20 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
-    if (action === "create") {
+    if (action === "get_offers") {
+      const offers = Object.entries(OFFER_MAP).map(([price, o]) => ({
+        priceBrl: parseFloat(price),
+        priceCentavos: o.priceCentavos,
+        offerHash: o.hash,
+      }));
+      return new Response(JSON.stringify({ offers }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+
+    } else if (action === "create") {
       const { amount, customerName, customerEmail, customerDocument, customerPhone, productTitle } = body;
 
-      // Validate inputs
-      if (!amount || typeof amount !== "number" || amount <= 0 || amount > 999999) {
+      if (!amount || typeof amount !== "number" || amount <= 0) {
         return new Response(JSON.stringify({ error: "Valor inválido" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -47,27 +73,41 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Amount in centavos (R$ 9.90 = 990)
-      const amountCentavos = Math.round(amount * 100);
+      const offer = findOffer(amount);
+      if (!offer) {
+        return new Response(JSON.stringify({ 
+          error: `Nenhuma oferta para R$ ${amount.toFixed(2)}. Disponíveis: ${Object.keys(OFFER_MAP).join(', ')}` 
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-      // Build payload matching SigmaPay API docs
+      // Try approach: api_token in body + full payload matching docs exactly
       const payload = {
         api_token: apiToken,
-        amount: amountCentavos,
-        offer_hash: OFFER_CODE,
+        amount: offer.priceCentavos,
+        offer_hash: offer.hash,
         payment_method: "pix",
         customer: {
-          name: customerName.trim().slice(0, 200),
-          email: customerEmail.trim().toLowerCase().slice(0, 255),
-          ...(customerPhone ? { phone_number: customerPhone } : {}),
-          ...(customerDocument ? { document: customerDocument } : {}),
+          name: customerName.trim(),
+          email: customerEmail.trim().toLowerCase(),
+          phone_number: customerPhone || "11999999999",
+          document: customerDocument || "00000000000",
+          street_name: "Rua Exemplo",
+          number: "100",
+          complement: "",
+          neighborhood: "Centro",
+          city: "Rio de Janeiro",
+          state: "RJ",
+          zip_code: "20040020",
         },
         cart: [
           {
             product_hash: PRODUCT_CODE,
-            title: productTitle || "Assinatura",
+            title: productTitle || "ACESSO POR 30 DIAS",
             cover: null,
-            price: amountCentavos,
+            price: offer.priceCentavos,
             quantity: 1,
             operation_type: 1,
             tangible: false,
@@ -77,8 +117,8 @@ Deno.serve(async (req) => {
         transaction_origin: "api",
       };
 
-      console.log("sigmapay v16 - JSON payload:", JSON.stringify(payload).substring(0, 400));
-      const res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
+      console.log("sigmapay v19 - trying with api_token in body");
+      let res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,8 +127,43 @@ Deno.serve(async (req) => {
         body: JSON.stringify(payload),
       });
 
-      const rawText = await res.text();
-      console.log("SigmaPay raw response (status " + res.status + "):", rawText.substring(0, 1000));
+      let rawText = await res.text();
+      console.log("Attempt 1 (token in body) status:", res.status, "response:", rawText.substring(0, 500));
+
+      // If failed, try with Authorization header instead
+      if (!res.ok) {
+        const { api_token: _removed, ...payloadNoToken } = payload;
+        console.log("sigmapay v19 - trying with Authorization header");
+        res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": `Bearer ${apiToken}`,
+          },
+          body: JSON.stringify(payloadNoToken),
+        });
+
+        rawText = await res.text();
+        console.log("Attempt 2 (Bearer header) status:", res.status, "response:", rawText.substring(0, 500));
+      }
+
+      // If still failed, try with api_token as query param
+      if (!res.ok) {
+        const { api_token: _removed2, ...payloadNoToken2 } = payload;
+        console.log("sigmapay v19 - trying with query param");
+        res = await fetch(`${SIGMAPAY_BASE}/transactions?api_token=${encodeURIComponent(apiToken)}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+          body: JSON.stringify(payloadNoToken2),
+        });
+
+        rawText = await res.text();
+        console.log("Attempt 3 (query param) status:", res.status, "response:", rawText.substring(0, 500));
+      }
       
       let data: any;
       try {
@@ -101,7 +176,7 @@ Deno.serve(async (req) => {
       }
 
       if (!res.ok) {
-        return new Response(JSON.stringify({ error: data.message || data.error || "Erro ao criar pagamento", details: data.errors || null, raw: rawText.substring(0, 300) }), {
+        return new Response(JSON.stringify({ error: data.message || "Erro ao criar pagamento", details: data.errors || null, raw: rawText.substring(0, 300) }), {
           status: res.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -109,7 +184,6 @@ Deno.serve(async (req) => {
 
       console.log("SigmaPay SUCCESS:", JSON.stringify(data).substring(0, 500));
 
-      // Return only necessary data to client
       return new Response(JSON.stringify({
         id: data.hash || data.id || data.transaction_hash,
         copyPaste: data.pix_copy_paste || data.copyPaste || data.pix?.copy_paste || "",
@@ -147,7 +221,6 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Map SigmaPay status to our status
       let status = "pending";
       const sigmaStatus = (data.status || "").toLowerCase();
       if (sigmaStatus === "paid" || sigmaStatus === "approved" || sigmaStatus === "completed") {
