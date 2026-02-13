@@ -50,40 +50,32 @@ Deno.serve(async (req) => {
       // Amount in centavos
       const amountCentavos = Math.round(amount * 100);
 
-      // Build JSON payload
-      const payload: Record<string, unknown> = {
-        api_token: apiToken,
-        offer_hash: OFFER_CODE,
-        product_hash: PRODUCT_CODE,
-        operation_type: 1,
-        amount: amountCentavos,
-        title: productTitle || "Assinatura",
-        payment_method: "pix",
-        cart: [
-          {
-            product_hash: PRODUCT_CODE,
-            offer_hash: OFFER_CODE,
-            title: productTitle || "Assinatura",
-            price: amountCentavos,
-            quantity: 1,
-          },
-        ],
-        customer: {
-          name: customerName.trim().slice(0, 200),
-          email: customerEmail.trim().toLowerCase().slice(0, 255),
-          ...(customerDocument ? { document: customerDocument } : {}),
-          ...(customerPhone ? { phone: customerPhone } : {}),
-        },
-      };
+      // Build form-urlencoded payload - URLSearchParams as body object (not .toString())
+      const formData = new URLSearchParams();
+      formData.append("api_token", apiToken);
+      formData.append("offer_hash", OFFER_CODE);
+      formData.append("product_hash", PRODUCT_CODE);
+      formData.append("operation_type", "1");
+      formData.append("amount", String(amountCentavos));
+      formData.append("title", productTitle || "Assinatura");
+      formData.append("payment_method", "pix");
+      formData.append("cart[0][product_hash]", PRODUCT_CODE);
+      formData.append("cart[0][offer_hash]", OFFER_CODE);
+      formData.append("cart[0][title]", productTitle || "Assinatura");
+      formData.append("cart[0][price]", String(amountCentavos));
+      formData.append("cart[0][quantity]", "1");
+      formData.append("customer[name]", customerName.trim().slice(0, 200));
+      formData.append("customer[email]", customerEmail.trim().toLowerCase().slice(0, 255));
+      if (customerDocument) formData.append("customer[document]", customerDocument);
+      if (customerPhone) formData.append("customer[phone]", customerPhone);
 
-      console.log("sigmapay v7 - JSON payload keys:", Object.keys(payload).join(", "));
+      console.log("sigmapay v14 - URLSearchParams body object, amount:", amount.toFixed(2));
       const res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const data = await res.json();
@@ -91,7 +83,8 @@ Deno.serve(async (req) => {
       if (!res.ok) {
         const fullError = JSON.stringify(data);
         console.error("SigmaPay create error (status " + res.status + "):", fullError);
-        return new Response(JSON.stringify({ error: data.message || data.error || fullError || "Erro ao criar pagamento" }), {
+        console.error("SigmaPay full response headers:", JSON.stringify(Object.fromEntries(res.headers.entries())));
+        return new Response(JSON.stringify({ error: data.message || data.error || fullError || "Erro ao criar pagamento", details: data.errors || null }), {
           status: res.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
