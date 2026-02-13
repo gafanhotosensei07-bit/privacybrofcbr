@@ -64,8 +64,104 @@ Deno.serve(async (req) => {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(2000));
+    } else if (table === "tracking") {
+      // UTM tracking analytics - UTMify style
+      const [pageViewsRes, checkoutsRes] = await Promise.all([
+        supabase.from("page_views").select("*").order("created_at", { ascending: false }).limit(5000),
+        supabase.from("checkout_attempts").select("*").order("created_at", { ascending: false }).limit(2000),
+      ]);
+
+      const pageViews = pageViewsRes.data || [];
+      const checkouts = checkoutsRes.data || [];
+      const approved = checkouts.filter((c: any) => c.payment_status === "approved");
+      const totalRevenue = approved.reduce((sum: number, c: any) => sum + Number(c.plan_price || 0), 0);
+
+      // Group by UTM source
+      const bySource: Record<string, { clicks: number; checkouts: number; approved: number; revenue: number }> = {};
+      const byMedium: Record<string, { clicks: number; checkouts: number; approved: number; revenue: number }> = {};
+      const byCampaign: Record<string, { clicks: number; checkouts: number; approved: number; revenue: number }> = {};
+
+      pageViews.forEach((pv: any) => {
+        const src = pv.utm_source || "(direto)";
+        const med = pv.utm_medium || "(nenhum)";
+        const camp = pv.utm_campaign || "(nenhuma)";
+
+        if (!bySource[src]) bySource[src] = { clicks: 0, checkouts: 0, approved: 0, revenue: 0 };
+        bySource[src].clicks++;
+
+        if (!byMedium[med]) byMedium[med] = { clicks: 0, checkouts: 0, approved: 0, revenue: 0 };
+        byMedium[med].clicks++;
+
+        if (!byCampaign[camp]) byCampaign[camp] = { clicks: 0, checkouts: 0, approved: 0, revenue: 0 };
+        byCampaign[camp].clicks++;
+      });
+
+      // Map checkouts to sources (best effort via model name matching page views)
+      // Since we don't have UTM on checkouts directly, we attribute based on page_views within a time window
+      // For now, count total checkouts as attribution
+
+      // Daily trend data (last 30 days)
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const dailyData: Record<string, { views: number; checkouts: number; revenue: number }> = {};
+
+      for (let i = 0; i < 30; i++) {
+        const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        const key = d.toISOString().split("T")[0];
+        dailyData[key] = { views: 0, checkouts: 0, revenue: 0 };
+      }
+
+      pageViews.forEach((pv: any) => {
+        const day = pv.created_at.split("T")[0];
+        if (dailyData[day]) dailyData[day].views++;
+      });
+
+      checkouts.forEach((c: any) => {
+        const day = c.created_at.split("T")[0];
+        if (dailyData[day]) {
+          dailyData[day].checkouts++;
+          if (c.payment_status === "approved") {
+            dailyData[day].revenue += Number(c.plan_price || 0);
+          }
+        }
+      });
+
+      const dailyTrend = Object.entries(dailyData)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, d]) => ({ date, ...d }));
+
+      // Top UTM combinations
+      const utmCombos: Record<string, { clicks: number }> = {};
+      pageViews.forEach((pv: any) => {
+        if (pv.utm_source) {
+          const key = `${pv.utm_source} / ${pv.utm_medium || "(nenhum)"} / ${pv.utm_campaign || "(nenhuma)"}`;
+          if (!utmCombos[key]) utmCombos[key] = { clicks: 0 };
+          utmCombos[key].clicks++;
+        }
+      });
+
+      // Referrer breakdown
+      const referrers: Record<string, number> = {};
+      pageViews.forEach((pv: any) => {
+        const ref = pv.referrer ? (() => { try { return new URL(pv.referrer).hostname; } catch { return pv.referrer; } })() : "(direto)";
+        referrers[ref] = (referrers[ref] || 0) + 1;
+      });
+
+      data = {
+        totalClicks: pageViews.length,
+        totalCheckouts: checkouts.length,
+        totalApproved: approved.length,
+        totalRevenue,
+        conversionRate: pageViews.length > 0 ? ((checkouts.length / pageViews.length) * 100).toFixed(2) : "0",
+        bySource: Object.entries(bySource).sort(([, a], [, b]) => b.clicks - a.clicks).map(([name, v]) => ({ name, ...v })),
+        byMedium: Object.entries(byMedium).sort(([, a], [, b]) => b.clicks - a.clicks).map(([name, v]) => ({ name, ...v })),
+        byCampaign: Object.entries(byCampaign).sort(([, a], [, b]) => b.clicks - a.clicks).map(([name, v]) => ({ name, ...v })),
+        dailyTrend,
+        utmCombos: Object.entries(utmCombos).sort(([, a], [, b]) => b.clicks - a.clicks).slice(0, 20).map(([name, v]) => ({ name, ...v })),
+        referrers: Object.entries(referrers).sort(([, a], [, b]) => b - a).slice(0, 15).map(([name, clicks]) => ({ name, clicks })),
+      };
+      error = null;
     } else if (table === "dashboard") {
-      // Return aggregated stats
       const [profilesRes, conversationsRes, checkoutsRes, pageViewsRes] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase.from("conversations").select("*", { count: "exact", head: true }),
@@ -78,7 +174,6 @@ Deno.serve(async (req) => {
       const approved = checkouts.filter((c: any) => c.payment_status === "approved");
       const revenue = approved.reduce((sum: number, c: any) => sum + Number(c.plan_price || 0), 0);
 
-      // Model interest ranking
       const modelViewCounts: Record<string, number> = {};
       pageViews.filter((pv: any) => pv.page_type === "modelo").forEach((pv: any) => {
         modelViewCounts[pv.page_slug] = (modelViewCounts[pv.page_slug] || 0) + 1;
@@ -89,13 +184,11 @@ Deno.serve(async (req) => {
         modelCheckoutCounts[c.model_name] = (modelCheckoutCounts[c.model_name] || 0) + 1;
       });
 
-      // Page type breakdown
       const pageTypeCounts: Record<string, number> = {};
       pageViews.forEach((pv: any) => {
         pageTypeCounts[pv.page_type] = (pageTypeCounts[pv.page_type] || 0) + 1;
       });
 
-      // Recent activity (last 24h)
       const now = new Date();
       const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       const recentViews = pageViews.filter((pv: any) => new Date(pv.created_at) > last24h).length;
