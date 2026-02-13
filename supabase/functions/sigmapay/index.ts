@@ -59,15 +59,8 @@ Deno.serve(async (req) => {
         customer: {
           name: customerName.trim().slice(0, 200),
           email: customerEmail.trim().toLowerCase().slice(0, 255),
-          phone_number: customerPhone || "11999999999",
-          document: customerDocument || "00000000000",
-          street_name: "Rua Exemplo",
-          number: "1",
-          complement: "",
-          neighborhood: "Centro",
-          city: "São Paulo",
-          state: "SP",
-          zip_code: "01001000",
+          ...(customerPhone ? { phone_number: customerPhone } : {}),
+          ...(customerDocument ? { document: customerDocument } : {}),
         },
         cart: [
           {
