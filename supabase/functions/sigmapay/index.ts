@@ -15,7 +15,7 @@ async function apiCall(endpoint: string, method: string, body?: any) {
 }
 
 async function createProductWithOffer(apiToken: string, amount: number, title: string) {
-  console.log("sigmapay v26 - creating product with amount:", amount);
+  console.log("sigmapay v27 - creating product with amount:", amount);
   const productRes = await apiCall("/products", "POST", {
     api_token: apiToken,
     title: title,
@@ -58,9 +58,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const publicKey = Deno.env.get("SIGMAPAY_PUBLIC_KEY");
-    const secretKey = Deno.env.get("SIGMAPAY_API_TOKEN");
-    const apiToken = publicKey || secretKey;
+    const secretKey = Deno.env.get("SIGMAPAY_API_TOKEN") || "";
+    const publicKey = Deno.env.get("SIGMAPAY_PUBLIC_KEY") || "";
+    console.log("sigmapay v27 - secretKey starts:", secretKey.substring(0, 6), "publicKey starts:", publicKey.substring(0, 6));
+    const apiToken = secretKey || publicKey;
 
     const body = await req.json();
     const { action } = body;
