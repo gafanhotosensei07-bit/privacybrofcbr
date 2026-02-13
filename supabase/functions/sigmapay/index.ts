@@ -47,48 +47,74 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Amount in centavos
+      // Amount in centavos (R$ 9.90 = 990)
       const amountCentavos = Math.round(amount * 100);
 
-      // Build form-urlencoded payload - URLSearchParams as body object (not .toString())
-      const formData = new URLSearchParams();
-      formData.append("api_token", apiToken);
-      formData.append("offer_hash", OFFER_CODE);
-      formData.append("product_hash", PRODUCT_CODE);
-      formData.append("operation_type", "1");
-      formData.append("amount", String(amountCentavos));
-      formData.append("title", productTitle || "Assinatura");
-      formData.append("payment_method", "pix");
-      formData.append("cart[0][product_hash]", PRODUCT_CODE);
-      formData.append("cart[0][offer_hash]", OFFER_CODE);
-      formData.append("cart[0][title]", productTitle || "Assinatura");
-      formData.append("cart[0][price]", String(amountCentavos));
-      formData.append("cart[0][quantity]", "1");
-      formData.append("customer[name]", customerName.trim().slice(0, 200));
-      formData.append("customer[email]", customerEmail.trim().toLowerCase().slice(0, 255));
-      if (customerDocument) formData.append("customer[document]", customerDocument);
-      if (customerPhone) formData.append("customer[phone]", customerPhone);
+      // Build payload matching SigmaPay API docs
+      const payload = {
+        api_token: apiToken,
+        amount: amountCentavos,
+        offer_hash: OFFER_CODE,
+        payment_method: "pix",
+        customer: {
+          name: customerName.trim().slice(0, 200),
+          email: customerEmail.trim().toLowerCase().slice(0, 255),
+          phone_number: customerPhone || "11999999999",
+          document: customerDocument || "00000000000",
+          street_name: "Rua Exemplo",
+          number: "1",
+          complement: "",
+          neighborhood: "Centro",
+          city: "São Paulo",
+          state: "SP",
+          zip_code: "01001000",
+        },
+        cart: [
+          {
+            product_hash: PRODUCT_CODE,
+            title: productTitle || "Assinatura",
+            cover: null,
+            price: amountCentavos,
+            quantity: 1,
+            operation_type: 1,
+            tangible: false,
+          },
+        ],
+        expire_in_days: 1,
+        transaction_origin: "api",
+      };
 
-      console.log("sigmapay v14 - URLSearchParams body object, amount:", amount.toFixed(2));
+      console.log("sigmapay v16 - JSON payload:", JSON.stringify(payload).substring(0, 400));
       const res = await fetch(`${SIGMAPAY_BASE}/transactions`, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: formData,
+        body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      const rawText = await res.text();
+      console.log("SigmaPay raw response (status " + res.status + "):", rawText.substring(0, 1000));
+      
+      let data: any;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        return new Response(JSON.stringify({ error: "Resposta inválida da SigmaPay", raw: rawText.substring(0, 200) }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       if (!res.ok) {
-        const fullError = JSON.stringify(data);
-        console.error("SigmaPay create error (status " + res.status + "):", fullError);
-        console.error("SigmaPay full response headers:", JSON.stringify(Object.fromEntries(res.headers.entries())));
-        return new Response(JSON.stringify({ error: data.message || data.error || fullError || "Erro ao criar pagamento", details: data.errors || null }), {
+        return new Response(JSON.stringify({ error: data.message || data.error || "Erro ao criar pagamento", details: data.errors || null, raw: rawText.substring(0, 300) }), {
           status: res.status,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
+      console.log("SigmaPay SUCCESS:", JSON.stringify(data).substring(0, 500));
 
       // Return only necessary data to client
       return new Response(JSON.stringify({
