@@ -11,8 +11,7 @@ import { models } from "@/data/models";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageView } from "@/hooks/usePageView";
 
-const SIGMAPAY_BASE = "https://qpnojbfmthfkorggbqkd.supabase.co/functions/v1";
-const API_TOKEN = "nqoYZlC9g2V6CCekPuzjGOXiTv55EqwI7aPtEExVH7NLbsq9GUuAdisN9pNH";
+// SigmaPay integration via secure edge function
 
 type Step = "form" | "loading" | "pix" | "success" | "error";
 
@@ -101,25 +100,21 @@ const Checkout = () => {
 
   const checkStatus = async (id: string) => {
     try {
-      const res = await fetch(`${SIGMAPAY_BASE}/sigmapay-check-status`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId: id, apiToken: API_TOKEN }),
+      const { data, error } = await supabase.functions.invoke("sigmapay", {
+        body: { action: "check_status", transactionHash: id },
       });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.status === "approved") {
-          if (statusInterval.current) clearInterval(statusInterval.current);
-          if (timerInterval.current) clearInterval(timerInterval.current);
-          await updateCheckoutStatus(id, "approved");
-          setStep("success");
-        } else if (data.status === "rejected") {
-          if (statusInterval.current) clearInterval(statusInterval.current);
-          if (timerInterval.current) clearInterval(timerInterval.current);
-          await updateCheckoutStatus(id, "rejected");
-          setErrorMsg("Pagamento não aprovado. Tente novamente.");
-          setStep("error");
-        }
+      if (error) throw error;
+      if (data?.status === "approved") {
+        if (statusInterval.current) clearInterval(statusInterval.current);
+        if (timerInterval.current) clearInterval(timerInterval.current);
+        await updateCheckoutStatus(id, "approved");
+        setStep("success");
+      } else if (data?.status === "rejected") {
+        if (statusInterval.current) clearInterval(statusInterval.current);
+        if (timerInterval.current) clearInterval(timerInterval.current);
+        await updateCheckoutStatus(id, "rejected");
+        setErrorMsg("Pagamento não aprovado. Tente novamente.");
+        setStep("error");
       }
     } catch (err) {
       console.error("Erro ao verificar status:", err);
@@ -135,24 +130,19 @@ const Checkout = () => {
     setStep("loading");
 
     try {
-      const res = await fetch(`${SIGMAPAY_BASE}/sigmapay-create-payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          apiToken: API_TOKEN,
+      const { data, error } = await supabase.functions.invoke("sigmapay", {
+        body: {
+          action: "create",
           amount: planPrice,
-          productTitle: planName,
           customerName: form.name,
           customerEmail: form.email,
           customerDocument: "",
           customerPhone: "",
-        }),
+        },
       });
 
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        throw new Error(data.error || "Erro ao criar pagamento");
+      if (error || data?.error) {
+        throw new Error(data?.error || "Erro ao criar pagamento");
       }
 
       setPaymentId(data.id);
