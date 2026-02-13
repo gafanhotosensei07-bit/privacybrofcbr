@@ -5,6 +5,28 @@ import logoIcon from "@/assets/logo-icon.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().trim().email("Email inválido").max(255, "Email muito longo"),
+  password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres").max(128, "Senha muito longa"),
+});
+
+const signupSchema = loginSchema.extend({
+  displayName: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
+});
+
+const sanitizeErrorMessage = (msg: string): string => {
+  const lower = msg.toLowerCase();
+  if (lower.includes("invalid login")) return "Email ou senha incorretos.";
+  if (lower.includes("already registered") || lower.includes("already been registered"))
+    return "Este email já está cadastrado. Tente fazer login.";
+  if (lower.includes("rate limit") || lower.includes("too many"))
+    return "Muitas tentativas. Aguarde alguns minutos.";
+  if (lower.includes("weak password") || lower.includes("password"))
+    return "Senha fraca. Use pelo menos 6 caracteres.";
+  return "Ocorreu um erro. Tente novamente.";
+};
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -20,16 +42,30 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Client-side validation
+      const schema = isLogin ? loginSchema : signupSchema;
+      const parsed = schema.safeParse({ email, password, ...(isLogin ? {} : { displayName }) });
+      if (!parsed.success) {
+        toast({
+          title: "Dados inválidos",
+          description: parsed.error.errors[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const trimmedEmail = email.trim().toLowerCase();
+
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password });
         if (error) throw error;
         navigate("/");
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: trimmedEmail,
           password,
           options: {
-            data: { display_name: displayName },
+            data: { display_name: displayName.trim() },
             emailRedirectTo: window.location.origin,
           },
         });
@@ -42,7 +78,7 @@ const Auth = () => {
     } catch (err: any) {
       toast({
         title: "Erro",
-        description: err.message,
+        description: sanitizeErrorMessage(err.message || ""),
         variant: "destructive",
       });
     } finally {
@@ -74,6 +110,8 @@ const Auth = () => {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 required
+                maxLength={100}
+                autoComplete="name"
               />
             )}
             <Input
@@ -82,6 +120,8 @@ const Auth = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              maxLength={255}
+              autoComplete="email"
             />
             <Input
               type="password"
@@ -90,6 +130,8 @@ const Auth = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
+              maxLength={128}
+              autoComplete={isLogin ? "current-password" : "new-password"}
             />
             <Button
               type="submit"
