@@ -89,6 +89,16 @@ const Checkout = () => {
     }, 1000);
   };
 
+  const updateCheckoutStatus = async (paymentId: string, status: string) => {
+    try {
+      await supabase.functions.invoke("checkout-manager", {
+        body: { action: "update_status", payment_id: paymentId, status },
+      });
+    } catch (err) {
+      console.error("Erro ao atualizar status:", err);
+    }
+  };
+
   const checkStatus = async (id: string) => {
     try {
       const res = await fetch(`${SIGMAPAY_BASE}/sigmapay-check-status`, {
@@ -101,13 +111,12 @@ const Checkout = () => {
         if (data.status === "approved") {
           if (statusInterval.current) clearInterval(statusInterval.current);
           if (timerInterval.current) clearInterval(timerInterval.current);
-          // Update payment status in database
-          await supabase.from("checkout_attempts").update({ payment_status: "approved" }).eq("payment_id", id);
+          await updateCheckoutStatus(id, "approved");
           setStep("success");
         } else if (data.status === "rejected") {
           if (statusInterval.current) clearInterval(statusInterval.current);
           if (timerInterval.current) clearInterval(timerInterval.current);
-          await supabase.from("checkout_attempts").update({ payment_status: "rejected" }).eq("payment_id", id);
+          await updateCheckoutStatus(id, "rejected");
           setErrorMsg("Pagamento não aprovado. Tente novamente.");
           setStep("error");
         }
@@ -148,17 +157,19 @@ const Checkout = () => {
 
       setPaymentId(data.id);
 
-      // Save checkout attempt to database
-      const { error: dbError } = await supabase.from("checkout_attempts").insert({
-        customer_name: form.name,
-        customer_email: form.email,
-        model_name: modelName,
-        plan_name: planName,
-        plan_price: planPrice,
-        payment_status: "pending",
-        payment_id: data.id,
+      // Save checkout attempt via secure edge function
+      const { error: fnError } = await supabase.functions.invoke("checkout-manager", {
+        body: {
+          action: "insert",
+          customer_name: form.name,
+          customer_email: form.email,
+          model_name: modelName,
+          plan_name: planName,
+          plan_price: planPrice,
+          payment_id: data.id,
+        },
       });
-      if (dbError) console.error("Erro ao salvar checkout:", dbError);
+      if (fnError) console.error("Erro ao salvar checkout:", fnError);
 
       const pix = data.copyPaste || "";
       let qr = "";
