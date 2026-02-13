@@ -1,1 +1,7 @@
 project_id = "gnngbvebusmoihldbetk"
+
+[functions.sigmapay]
+verify_jwt = false
+
+[functions.checkout-manager]
+verify_jwt = false
