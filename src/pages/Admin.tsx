@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend, AreaChart, Area } from "recharts";
+import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, Legend } from "recharts";
+import { models } from "@/data/models";
+import { toast } from "sonner";
 
 const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-data`;
 
 interface Profile { id: string; user_id: string; display_name: string; created_at: string; }
 interface Conversation { id: string; user_id: string; model_slug: string; created_at: string; }
-interface CheckoutAttempt { id: string; customer_name: string; customer_email: string; model_name: string; plan_name: string; plan_price: number; payment_status: string; payment_id: string; created_at: string; }
+interface CheckoutAttempt { id: string; customer_name: string; customer_email: string; model_name: string; plan_name: string; plan_price: number; payment_status: string; payment_id: string; created_at: string; user_id: string | null; }
 interface DashboardData {
   totalUsers: number; totalConversations: number; totalCheckouts: number;
   approvedCheckouts: number; totalRevenue: number; totalPageViews: number;
@@ -29,6 +31,7 @@ interface TrackingData {
   utmCombos: { name: string; clicks: number }[];
   referrers: { name: string; clicks: number }[];
 }
+interface ContentFile { name: string; path: string; publicUrl: string; created_at: string; metadata: any; }
 
 const CHART_COLORS = ["hsl(24, 95%, 53%)", "hsl(280, 70%, 50%)", "hsl(340, 80%, 55%)", "hsl(150, 70%, 40%)", "hsl(270, 65%, 55%)", "hsl(40, 90%, 50%)", "hsl(0, 85%, 55%)", "hsl(200, 80%, 50%)", "hsl(60, 80%, 45%)", "hsl(320, 75%, 50%)"];
 
@@ -44,15 +47,19 @@ const Admin = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [checkouts, setCheckouts] = useState<CheckoutAttempt[]>([]);
+  const [contentFiles, setContentFiles] = useState<ContentFile[]>([]);
+  const [contentFolder, setContentFolder] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchData = async (table: string) => {
+  const fetchData = async (table: string, extra?: Record<string, any>) => {
     setLoading(true);
     setError("");
     try {
       const res = await fetch(FUNCTION_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password, table }),
+        body: JSON.stringify({ password, table, ...extra }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);
@@ -87,6 +94,55 @@ const Admin = () => {
       setConversations(await fetchData("conversations") || []);
     } else if (tab === "checkouts") {
       setCheckouts(await fetchData("checkouts") || []);
+    } else if (tab === "modelos") {
+      // Models are local, no fetch needed
+    } else if (tab === "conteudo") {
+      await loadContent(contentFolder);
+    }
+  };
+
+  const loadContent = async (folder: string) => {
+    const d = await fetchData("list_content", { folder });
+    if (d) setContentFiles(d.filter((f: any) => f.name !== ".emptyFolderPlaceholder"));
+  };
+
+  const handleUpload = async (files: FileList) => {
+    setUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const filePath = contentFolder ? `${contentFolder}/${file.name}` : file.name;
+        const formData = new FormData();
+        formData.append("password", password);
+        formData.append("table", "upload_content");
+        formData.append("file", file);
+        formData.append("file_path", filePath);
+
+        const res = await fetch(FUNCTION_URL, { method: "POST", body: formData });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error);
+      }
+      toast.success("Upload concluído!");
+      await loadContent(contentFolder);
+    } catch (err: any) {
+      toast.error(err.message || "Erro no upload");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteContent = async (paths: string[]) => {
+    if (!confirm(`Deletar ${paths.length} arquivo(s)?`)) return;
+    await fetchData("delete_content", { file_paths: paths });
+    toast.success("Arquivo(s) deletado(s)!");
+    await loadContent(contentFolder);
+  };
+
+  const updateCheckoutStatus = async (checkoutId: string, newStatus: string) => {
+    if (!confirm(`Alterar status para "${newStatus}"?`)) return;
+    const result = await fetchData("update_checkout_status", { checkout_id: checkoutId, new_status: newStatus });
+    if (result) {
+      toast.success("Status atualizado!");
+      setCheckouts(prev => prev.map(c => c.id === checkoutId ? { ...c, payment_status: newStatus } : c));
     }
   };
 
@@ -114,7 +170,7 @@ const Admin = () => {
             <div className="mx-auto mb-3 h-14 w-14 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
               <Lock className="h-7 w-7 text-white" />
             </div>
-            <CardTitle className="text-white text-xl">Painel de Rastreamento</CardTitle>
+            <CardTitle className="text-white text-xl">Painel Administrativo</CardTitle>
             <p className="text-slate-400 text-sm">Acesso restrito</p>
           </CardHeader>
           <CardContent className="space-y-4 pt-2">
@@ -140,24 +196,19 @@ const Admin = () => {
     );
   }
 
-  // Model views chart data
   const modelViewsChart = dashboard
-    ? Object.entries(dashboard.modelViews)
-        .sort(([, a], [, b]) => b - a)
-        .map(([name, views], i) => ({ name, views, fill: CHART_COLORS[i % CHART_COLORS.length] }))
+    ? Object.entries(dashboard.modelViews).sort(([, a], [, b]) => b - a).map(([name, views], i) => ({ name, views, fill: CHART_COLORS[i % CHART_COLORS.length] }))
     : [];
 
   const pageTypePie = dashboard
     ? Object.entries(dashboard.pageTypeBreakdown).map(([name, value], i) => ({
         name: name === "home" ? "Home" : name === "modelo" ? "Perfil Modelo" : name === "checkout" ? "Checkout" : name,
-        value,
-        fill: CHART_COLORS[i % CHART_COLORS.length],
+        value, fill: CHART_COLORS[i % CHART_COLORS.length],
       }))
     : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
       <header className="border-b border-slate-700/50 bg-slate-800/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -165,16 +216,11 @@ const Admin = () => {
               <Target className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white">Painel de Rastreamento</h1>
-              <p className="text-xs text-slate-400">UTM Tracking & Analytics</p>
+              <h1 className="text-lg font-bold text-white">Painel Administrativo</h1>
+              <p className="text-xs text-slate-400">Gerenciamento completo</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => loadTab(activeTab)}
-            className="text-slate-400 hover:text-white"
-          >
+          <Button variant="ghost" size="sm" onClick={() => loadTab(activeTab)} className="text-slate-400 hover:text-white">
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Atualizar
           </Button>
         </div>
@@ -183,20 +229,26 @@ const Admin = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
         <Tabs value={activeTab} onValueChange={loadTab}>
           <TabsList className="bg-slate-800/50 border border-slate-700/50 mb-6 flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="tracking" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-2">
-              <Target className="h-4 w-4" /> Rastreamento
+            <TabsTrigger value="tracking" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
+              <Target className="h-3.5 w-3.5" /> Rastreamento
             </TabsTrigger>
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-2">
-              <BarChart3 className="h-4 w-4" /> Dashboard
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
+              <BarChart3 className="h-3.5 w-3.5" /> Dashboard
             </TabsTrigger>
-            <TabsTrigger value="cadastros" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-2">
-              <Users className="h-4 w-4" /> Cadastros
+            <TabsTrigger value="modelos" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
+              <Star className="h-3.5 w-3.5" /> Modelos
             </TabsTrigger>
-            <TabsTrigger value="conversas" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-2">
-              <MessageSquare className="h-4 w-4" /> Conversas
+            <TabsTrigger value="cadastros" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
+              <Users className="h-3.5 w-3.5" /> Usuários
             </TabsTrigger>
-            <TabsTrigger value="checkouts" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-2">
-              <CreditCard className="h-4 w-4" /> Checkouts
+            <TabsTrigger value="checkouts" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
+              <CreditCard className="h-3.5 w-3.5" /> Pagamentos
+            </TabsTrigger>
+            <TabsTrigger value="conversas" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
+              <MessageSquare className="h-3.5 w-3.5" /> Conversas
+            </TabsTrigger>
+            <TabsTrigger value="conteudo" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
+              <Image className="h-3.5 w-3.5" /> Conteúdo
             </TabsTrigger>
           </TabsList>
 
@@ -206,7 +258,6 @@ const Admin = () => {
               <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-orange-500" /></div>
             ) : tracking ? (
               <div className="space-y-6">
-                {/* KPI Row */}
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                   <KpiCard icon={<MousePointerClick className="h-5 w-5" />} label="Cliques" value={tracking.totalClicks} sub="Total de visitas" color="from-blue-500 to-cyan-500" />
                   <KpiCard icon={<CreditCard className="h-5 w-5" />} label="Checkouts" value={tracking.totalCheckouts} sub={`${tracking.totalApproved} aprovados`} color="from-orange-500 to-pink-500" />
@@ -215,12 +266,10 @@ const Admin = () => {
                   <KpiCard icon={<Zap className="h-5 w-5" />} label="Ticket Médio" value={`R$ ${tracking.totalApproved > 0 ? (tracking.totalRevenue / tracking.totalApproved).toFixed(2).replace(".", ",") : "0,00"}`} sub="Por aprovado" color="from-amber-500 to-orange-500" />
                 </div>
 
-                {/* Daily Trend Chart */}
                 <Card className="bg-slate-800/50 border-slate-700/50">
                   <CardHeader>
                     <CardTitle className="text-white text-base flex items-center gap-2">
-                      <Activity className="h-4 w-4 text-blue-400" />
-                      Tendência Diária (30 dias)
+                      <Activity className="h-4 w-4 text-blue-400" /> Tendência Diária (30 dias)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -241,31 +290,20 @@ const Admin = () => {
                           <XAxis dataKey="date" tick={{ fill: "#94a3b8", fontSize: 10 }} axisLine={false} tickLine={false}
                             tickFormatter={(v) => { const [,m,d] = v.split("-"); return `${d}/${m}`; }} />
                           <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                          <Tooltip
-                            contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }}
-                            labelFormatter={(v) => { const [y,m,d] = v.split("-"); return `${d}/${m}/${y}`; }}
-                          />
+                          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }}
+                            labelFormatter={(v) => { const [y,m,d] = v.split("-"); return `${d}/${m}/${y}`; }} />
                           <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 12 }} />
                           <Area type="monotone" dataKey="views" name="Visitas" stroke="hsl(200, 80%, 50%)" fill="url(#viewsGrad)" strokeWidth={2} />
                           <Area type="monotone" dataKey="checkouts" name="Checkouts" stroke="hsl(24, 95%, 53%)" fill="url(#checkoutsGrad)" strokeWidth={2} />
                         </AreaChart>
                       </ResponsiveContainer>
-                    ) : (
-                      <p className="text-center text-slate-500 py-12">Sem dados ainda</p>
-                    )}
+                    ) : <p className="text-center text-slate-500 py-12">Sem dados ainda</p>}
                   </CardContent>
                 </Card>
 
-                {/* UTM Source & Medium side by side */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* By Source */}
                   <Card className="bg-slate-800/50 border-slate-700/50">
-                    <CardHeader>
-                      <CardTitle className="text-white text-base flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-cyan-400" />
-                        Por Fonte (utm_source)
-                      </CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-white text-base flex items-center gap-2"><Globe className="h-4 w-4 text-cyan-400" />Por Fonte (utm_source)</CardTitle></CardHeader>
                     <CardContent>
                       {tracking.bySource.length > 0 ? (
                         <div className="space-y-3">
@@ -285,58 +323,31 @@ const Admin = () => {
                             );
                           })}
                         </div>
-                      ) : (
-                        <p className="text-center text-slate-500 py-8">Sem dados UTM ainda</p>
-                      )}
+                      ) : <p className="text-center text-slate-500 py-8">Sem dados UTM ainda</p>}
                     </CardContent>
                   </Card>
 
-                  {/* By Medium */}
                   <Card className="bg-slate-800/50 border-slate-700/50">
-                    <CardHeader>
-                      <CardTitle className="text-white text-base flex items-center gap-2">
-                        <Link2 className="h-4 w-4 text-violet-400" />
-                        Por Mídia (utm_medium)
-                      </CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-white text-base flex items-center gap-2"><Link2 className="h-4 w-4 text-violet-400" />Por Mídia (utm_medium)</CardTitle></CardHeader>
                     <CardContent>
                       {tracking.byMedium.length > 0 ? (
                         <ResponsiveContainer width="100%" height={250}>
                           <PieChart>
-                            <Pie
-                              data={tracking.byMedium.slice(0, 7).map((m, i) => ({ ...m, fill: CHART_COLORS[i % CHART_COLORS.length] }))}
-                              dataKey="clicks"
-                              nameKey="name"
-                              cx="50%"
-                              cy="50%"
-                              outerRadius={80}
-                              innerRadius={45}
-                              strokeWidth={2}
-                              stroke="#1e293b"
-                            >
-                              {tracking.byMedium.slice(0, 7).map((_, i) => (
-                                <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                              ))}
+                            <Pie data={tracking.byMedium.slice(0, 7).map((m, i) => ({ ...m, fill: CHART_COLORS[i % CHART_COLORS.length] }))}
+                              dataKey="clicks" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={45} strokeWidth={2} stroke="#1e293b">
+                              {tracking.byMedium.slice(0, 7).map((_, i) => (<Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />))}
                             </Pie>
                             <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }} />
                             <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 11 }} />
                           </PieChart>
                         </ResponsiveContainer>
-                      ) : (
-                        <p className="text-center text-slate-500 py-8">Sem dados UTM ainda</p>
-                      )}
+                      ) : <p className="text-center text-slate-500 py-8">Sem dados UTM ainda</p>}
                     </CardContent>
                   </Card>
                 </div>
 
-                {/* Campaign Breakdown */}
                 <Card className="bg-slate-800/50 border-slate-700/50">
-                  <CardHeader>
-                    <CardTitle className="text-white text-base flex items-center gap-2">
-                      <Megaphone className="h-4 w-4 text-pink-400" />
-                      Por Campanha (utm_campaign)
-                    </CardTitle>
-                  </CardHeader>
+                  <CardHeader><CardTitle className="text-white text-base flex items-center gap-2"><Megaphone className="h-4 w-4 text-pink-400" />Por Campanha (utm_campaign)</CardTitle></CardHeader>
                   <CardContent>
                     {tracking.byCampaign.length > 0 ? (
                       <ResponsiveContainer width="100%" height={Math.max(200, tracking.byCampaign.slice(0, 10).length * 40)}>
@@ -346,28 +357,17 @@ const Admin = () => {
                           <YAxis dataKey="name" type="category" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={150} />
                           <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }} />
                           <Bar dataKey="clicks" name="Cliques" radius={[0, 6, 6, 0]}>
-                            {tracking.byCampaign.slice(0, 10).map((_, i) => (
-                              <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                            ))}
+                            {tracking.byCampaign.slice(0, 10).map((_, i) => (<Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />))}
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>
-                    ) : (
-                      <p className="text-center text-slate-500 py-8">Sem campanhas rastreadas</p>
-                    )}
+                    ) : <p className="text-center text-slate-500 py-8">Sem campanhas rastreadas</p>}
                   </CardContent>
                 </Card>
 
-                {/* UTM Combos & Referrers */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* UTM Combinations Table */}
                   <Card className="bg-slate-800/50 border-slate-700/50">
-                    <CardHeader>
-                      <CardTitle className="text-white text-base flex items-center gap-2">
-                        <ArrowUpRight className="h-4 w-4 text-orange-400" />
-                        Combinações UTM (Source / Medium / Campaign)
-                      </CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-white text-base flex items-center gap-2"><ArrowUpRight className="h-4 w-4 text-orange-400" />Combinações UTM</CardTitle></CardHeader>
                     <CardContent className="p-0">
                       <div className="overflow-x-auto">
                         <Table>
@@ -384,9 +384,7 @@ const Admin = () => {
                                 <TableCell className="text-white text-sm font-bold text-right">{c.clicks}</TableCell>
                               </TableRow>
                             )) : (
-                              <TableRow>
-                                <TableCell colSpan={2} className="text-center text-slate-500 py-8">Nenhum UTM rastreado</TableCell>
-                              </TableRow>
+                              <TableRow><TableCell colSpan={2} className="text-center text-slate-500 py-8">Nenhum UTM rastreado</TableCell></TableRow>
                             )}
                           </TableBody>
                         </Table>
@@ -394,14 +392,8 @@ const Admin = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Referrers */}
                   <Card className="bg-slate-800/50 border-slate-700/50">
-                    <CardHeader>
-                      <CardTitle className="text-white text-base flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-emerald-400" />
-                        Referrers (Origem do Tráfego)
-                      </CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-white text-base flex items-center gap-2"><Globe className="h-4 w-4 text-emerald-400" />Referrers</CardTitle></CardHeader>
                     <CardContent>
                       {tracking.referrers.length > 0 ? (
                         <div className="space-y-3">
@@ -421,9 +413,7 @@ const Admin = () => {
                             );
                           })}
                         </div>
-                      ) : (
-                        <p className="text-center text-slate-500 py-8">Sem referrers registrados</p>
-                      )}
+                      ) : <p className="text-center text-slate-500 py-8">Sem referrers registrados</p>}
                     </CardContent>
                   </Card>
                 </div>
@@ -476,7 +466,7 @@ const Admin = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card className="bg-slate-800/50 border-slate-700/50">
-                    <CardHeader><CardTitle className="text-white text-base flex items-center gap-2"><ArrowUpRight className="h-4 w-4 text-orange-400" />Interesse por Modelo (Views)</CardTitle></CardHeader>
+                    <CardHeader><CardTitle className="text-white text-base flex items-center gap-2"><ArrowUpRight className="h-4 w-4 text-orange-400" />Interesse por Modelo</CardTitle></CardHeader>
                     <CardContent>
                       {modelViewsChart.length > 0 ? (
                         <ResponsiveContainer width="100%" height={250}>
@@ -534,23 +524,210 @@ const Admin = () => {
             ) : null}
           </TabsContent>
 
-          {/* Cadastros */}
+          {/* =================== MODELOS TAB =================== */}
+          <TabsContent value="modelos">
+            <div className="space-y-4">
+              <Card className="bg-slate-800/50 border-slate-700/50">
+                <CardHeader>
+                  <CardTitle className="text-white text-base flex items-center gap-2">
+                    <Star className="h-4 w-4 text-yellow-400" /> Modelos Cadastradas ({models.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-slate-700/50 hover:bg-transparent">
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Modelo</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Slug</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Fotos</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Vídeos</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Curtidas</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Plano Principal</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Verificada</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Previews</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {models.map((m) => (
+                          <TableRow key={m.slug} className="border-slate-700/30 hover:bg-slate-700/20">
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <img src={m.avatar} alt={m.name} className="h-8 w-8 rounded-full object-cover" />
+                                <div>
+                                  <p className="text-sm font-semibold text-white">{m.name}</p>
+                                  <p className="text-xs text-slate-400">{m.username}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-slate-300 text-sm font-mono">{m.slug}</TableCell>
+                            <TableCell className="text-white text-sm">{m.stats.photos}</TableCell>
+                            <TableCell className="text-white text-sm">{m.stats.videos}</TableCell>
+                            <TableCell className="text-white text-sm">{m.stats.likes}</TableCell>
+                            <TableCell className="text-white text-sm">R$ {m.mainPlan.price}</TableCell>
+                            <TableCell>
+                              {m.verified ? (
+                                <span className="text-emerald-400 text-xs font-semibold">✅ Sim</span>
+                              ) : (
+                                <span className="text-slate-500 text-xs">Não</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-white text-sm">{m.previews?.length || 0}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* =================== USUARIOS TAB =================== */}
           <TabsContent value="cadastros">
             <DataTable title="Usuários cadastrados" count={profiles.length} loading={loading} onRefresh={() => loadTab("cadastros")} headers={["Nome", "User ID", "Data"]}
               rows={profiles.map((p) => [p.display_name || "—", <span className="font-mono text-xs text-slate-400">{p.user_id.slice(0, 8)}...</span>, formatDate(p.created_at)])} emptyMsg="Nenhum cadastro encontrado" />
           </TabsContent>
 
-          {/* Conversas */}
+          {/* =================== PAGAMENTOS TAB =================== */}
+          <TabsContent value="checkouts">
+            <Card className="bg-slate-800/50 border-slate-700/50">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-slate-700/50">
+                <CardTitle className="text-white text-base">Pagamentos ({checkouts.length})</CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => loadTab("checkouts")} className="text-slate-400 hover:text-white">
+                  <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                </Button>
+              </CardHeader>
+              <CardContent className="p-0">
+                {loading ? (
+                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-slate-700/50 hover:bg-transparent">
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Cliente</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Email</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Modelo</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Plano</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Preço</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Status</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Data</TableHead>
+                          <TableHead className="text-slate-400 text-xs font-semibold uppercase">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {checkouts.length > 0 ? checkouts.map((c) => (
+                          <TableRow key={c.id} className="border-slate-700/30 hover:bg-slate-700/20">
+                            <TableCell className="text-slate-300 text-sm">{c.customer_name}</TableCell>
+                            <TableCell className="text-slate-300 text-sm">{c.customer_email}</TableCell>
+                            <TableCell className="text-slate-300 text-sm">{c.model_name}</TableCell>
+                            <TableCell className="text-slate-300 text-sm">{c.plan_name}</TableCell>
+                            <TableCell className="text-white text-sm font-semibold">R$ {Number(c.plan_price).toFixed(2).replace(".", ",")}</TableCell>
+                            <TableCell>
+                              <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${statusColor(c.payment_status)}`}>
+                                {statusLabel(c.payment_status)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-slate-300 text-sm">{formatDate(c.created_at)}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                {c.payment_status !== "approved" && (
+                                  <Button size="sm" variant="ghost" className="h-7 px-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                    onClick={() => updateCheckoutStatus(c.id, "approved")}>
+                                    <CheckCircle className="h-3.5 w-3.5" />
+                                  </Button>
+                                )}
+                                {c.payment_status !== "rejected" && (
+                                  <Button size="sm" variant="ghost" className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    onClick={() => updateCheckoutStatus(c.id, "rejected")}>
+                                    <XCircle className="h-3.5 w-3.5" />
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )) : (
+                          <TableRow><TableCell colSpan={8} className="text-center text-slate-500 py-12">Nenhum checkout encontrado</TableCell></TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* =================== CONVERSAS TAB =================== */}
           <TabsContent value="conversas">
             <DataTable title="Conversas" count={conversations.length} loading={loading} onRefresh={() => loadTab("conversas")} headers={["Modelo", "User ID", "Data"]}
               rows={conversations.map((c) => [c.model_slug, <span className="font-mono text-xs text-slate-400">{c.user_id.slice(0, 8)}...</span>, formatDate(c.created_at)])} emptyMsg="Nenhuma conversa encontrada" />
           </TabsContent>
 
-          {/* Checkouts */}
-          <TabsContent value="checkouts">
-            <DataTable title="Tentativas de checkout" count={checkouts.length} loading={loading} onRefresh={() => loadTab("checkouts")} headers={["Cliente", "Email", "Modelo", "Plano", "Preço", "Status", "Data"]}
-              rows={checkouts.map((c) => [c.customer_name, c.customer_email, c.model_name, c.plan_name, `R$ ${Number(c.plan_price).toFixed(2).replace(".", ",")}`,
-                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${statusColor(c.payment_status)}`}>{statusLabel(c.payment_status)}</span>, formatDate(c.created_at)])} emptyMsg="Nenhum checkout encontrado" />
+          {/* =================== CONTEÚDO TAB =================== */}
+          <TabsContent value="conteudo">
+            <Card className="bg-slate-800/50 border-slate-700/50">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-slate-700/50">
+                <CardTitle className="text-white text-base flex items-center gap-2">
+                  <Image className="h-4 w-4 text-blue-400" /> Gerenciar Conteúdo
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 bg-slate-700/50 rounded-lg px-3 py-1.5">
+                    <FolderOpen className="h-3.5 w-3.5 text-slate-400" />
+                    <Input
+                      placeholder="pasta (ex: estermuniz)"
+                      value={contentFolder}
+                      onChange={(e) => setContentFolder(e.target.value)}
+                      className="bg-transparent border-0 text-white text-xs h-6 w-40 p-0 focus-visible:ring-0 placeholder:text-slate-500"
+                    />
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => loadContent(contentFolder)} className="text-slate-400 hover:text-white">
+                    <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+                  </Button>
+                  <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                    className="bg-gradient-to-r from-orange-500 to-pink-500 text-white text-xs gap-1.5">
+                    {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                    Upload
+                  </Button>
+                  <input ref={fileInputRef} type="file" multiple accept="image/*,video/*" className="hidden"
+                    onChange={(e) => e.target.files && handleUpload(e.target.files)} />
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
+                {loading ? (
+                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
+                ) : contentFiles.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {contentFiles.map((f) => (
+                      <div key={f.path} className="group relative rounded-xl overflow-hidden border border-slate-700/50 bg-slate-900/50">
+                        {f.name.match(/\.(mp4|mov|avi|webm)$/i) ? (
+                          <div className="aspect-square flex items-center justify-center bg-slate-800">
+                            <span className="text-slate-400 text-xs">🎬 {f.name}</span>
+                          </div>
+                        ) : (
+                          <img src={f.publicUrl} alt={f.name} className="aspect-square object-cover w-full" />
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                            onClick={() => handleDeleteContent([f.path])}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="p-1.5">
+                          <p className="text-[10px] text-slate-400 truncate">{f.name}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Image className="h-12 w-12 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-500 text-sm">Nenhum arquivo encontrado</p>
+                    <p className="text-slate-600 text-xs mt-1">Use a pasta para organizar por modelo (ex: "estermuniz")</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
