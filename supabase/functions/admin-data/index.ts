@@ -269,6 +269,46 @@ Deno.serve(async (req) => {
         conversionRate: pageViews.length > 0 ? ((checkouts.length / pageViews.length) * 100).toFixed(1) : "0",
       };
       error = null;
+    } else if (table === "members") {
+      // Get all approved checkout_attempts grouped by model, with user info
+      const { data: approvedCheckouts, error: membersError } = await supabase
+        .from("checkout_attempts")
+        .select("*")
+        .eq("payment_status", "approved")
+        .order("created_at", { ascending: false })
+        .limit(1000);
+      if (membersError) throw membersError;
+
+      // Get profiles for user display names
+      const userIds = [...new Set((approvedCheckouts || []).map((c: any) => c.user_id).filter(Boolean))];
+      let profilesMap: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, display_name")
+          .in("user_id", userIds);
+        (profs || []).forEach((p: any) => { profilesMap[p.user_id] = p.display_name; });
+      }
+
+      data = (approvedCheckouts || []).map((c: any) => ({
+        ...c,
+        display_name: profilesMap[c.user_id] || c.customer_name || "—",
+      }));
+      error = null;
+    } else if (table === "revoke_access") {
+      // Change an approved checkout back to rejected to revoke access
+      const { checkout_id } = body;
+      if (!checkout_id) {
+        return new Response(JSON.stringify({ error: "checkout_id é obrigatório" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      ({ data, error } = await supabase
+        .from("checkout_attempts")
+        .update({ payment_status: "rejected" })
+        .eq("id", checkout_id)
+        .select());
     } else {
       return new Response(JSON.stringify({ error: "Tabela inválida" }), {
         status: 400,
