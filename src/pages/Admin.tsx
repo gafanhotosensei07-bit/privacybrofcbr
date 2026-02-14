@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star, Crown, UserX, Plus, ExternalLink, Power } from "lucide-react";
+import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star, Crown, UserX, Plus, ExternalLink, Power, Copy, Code } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, Legend } from "recharts";
 import { models } from "@/data/models";
 import { toast } from "sonner";
@@ -900,6 +900,27 @@ const Admin = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-4 space-y-4">
+                {/* Tracking Script Install Code */}
+                <div className="bg-slate-700/30 rounded-xl p-4 border border-slate-600/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                      <Code className="h-4 w-4 text-cyan-400" /> Código de Tracking
+                    </h4>
+                    <Button size="sm" variant="ghost" className="text-cyan-400 hover:text-cyan-300 text-xs gap-1.5"
+                      onClick={() => {
+                        const scriptTag = `<script src="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tracking-script" defer></script>`;
+                        navigator.clipboard.writeText(scriptTag);
+                        toast.success("Código copiado!");
+                      }}>
+                      <Copy className="h-3.5 w-3.5" /> Copiar
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-2">Cole este script no HTML do site externo (antes do &lt;/body&gt;) para rastrear page views e UTMs:</p>
+                  <code className="block bg-slate-900/80 text-cyan-300 text-[11px] p-3 rounded-lg font-mono break-all select-all">
+                    {`<script src="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tracking-script" defer></script>`}
+                  </code>
+                  <p className="text-[10px] text-slate-500 mt-2">Os dados aparecerão nas abas Rastreamento e Dashboard com page_type "external".</p>
+                </div>
                 {showAddDomain && (
                   <div className="bg-slate-700/30 rounded-xl p-4 space-y-3 border border-slate-600/50">
                     <h4 className="text-sm font-semibold text-white">Novo Domínio</h4>
