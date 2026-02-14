@@ -1,5 +1,9 @@
 import profilePhoto from "@/assets/profile-photo.jpeg";
 import bannerImage from "@/assets/banner.jpg";
+import esterPreview1 from "@/assets/preview-1.jpeg";
+import esterPreview2 from "@/assets/preview-2.jpeg";
+import esterPreview3 from "@/assets/preview-3.jpeg";
+import esterPreview4 from "@/assets/preview-4.jpg";
 import andressaAvatar from "@/assets/andressa-urach-avatar.png";
 import andressaBanner from "@/assets/andressa-urach-banner.png";
 import andressaPreview1 from "@/assets/andressa-preview-1.jpeg";
@@ -97,6 +101,7 @@ export const models: ModelData[] = [
     ],
     postCount: 502,
     mediaCount: 354,
+    previews: [esterPreview1, esterPreview2, esterPreview3, esterPreview4],
     theme: {
       accentColor: "24 95% 53%",
       accentColorEnd: "340 80% 55%",
