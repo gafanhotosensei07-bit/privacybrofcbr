@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star, Crown, UserX } from "lucide-react";
+import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star, Crown, UserX, Plus, ExternalLink, Power } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, Legend } from "recharts";
 import { models } from "@/data/models";
 import { toast } from "sonner";
@@ -33,6 +33,7 @@ interface TrackingData {
 }
 interface ContentFile { name: string; path: string; publicUrl: string; created_at: string; metadata: any; }
 interface MemberEntry { id: string; customer_name: string; customer_email: string; model_name: string; plan_name: string; plan_price: number; payment_status: string; created_at: string; user_id: string | null; display_name: string; }
+interface MonitoredDomain { id: string; domain: string; label: string; notes: string; is_active: boolean; created_at: string; }
 
 const CHART_COLORS = ["hsl(24, 95%, 53%)", "hsl(280, 70%, 50%)", "hsl(340, 80%, 55%)", "hsl(150, 70%, 40%)", "hsl(270, 65%, 55%)", "hsl(40, 90%, 50%)", "hsl(0, 85%, 55%)", "hsl(200, 80%, 50%)", "hsl(60, 80%, 45%)", "hsl(320, 75%, 50%)"];
 
@@ -53,6 +54,9 @@ const Admin = () => {
   const [uploading, setUploading] = useState(false);
   const [members, setMembers] = useState<MemberEntry[]>([]);
   const [membersFilter, setMembersFilter] = useState("");
+  const [domains, setDomains] = useState<MonitoredDomain[]>([]);
+  const [newDomain, setNewDomain] = useState({ domain: "", label: "", notes: "" });
+  const [showAddDomain, setShowAddDomain] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = async (table: string, extra?: Record<string, any>) => {
@@ -102,6 +106,9 @@ const Admin = () => {
     } else if (tab === "membros") {
       const d = await fetchData("members");
       if (d) setMembers(d);
+    } else if (tab === "dominios") {
+      const d = await fetchData("domains");
+      if (d) setDomains(d);
     } else if (tab === "conteudo") {
       await loadContent(contentFolder);
     }
@@ -158,6 +165,34 @@ const Admin = () => {
     if (result) {
       toast.success("Acesso revogado!");
       setMembers(prev => prev.filter(m => m.id !== checkoutId));
+    }
+  };
+
+  const addDomain = async () => {
+    if (!newDomain.domain.trim()) return toast.error("Domínio é obrigatório");
+    const result = await fetchData("add_domain", newDomain);
+    if (result) {
+      toast.success("Domínio adicionado!");
+      setDomains(prev => [result[0] || result, ...prev]);
+      setNewDomain({ domain: "", label: "", notes: "" });
+      setShowAddDomain(false);
+    }
+  };
+
+  const toggleDomainActive = async (domainId: string, currentActive: boolean) => {
+    const result = await fetchData("update_domain", { domain_id: domainId, is_active: !currentActive });
+    if (result) {
+      toast.success(!currentActive ? "Domínio ativado!" : "Domínio desativado!");
+      setDomains(prev => prev.map(d => d.id === domainId ? { ...d, is_active: !currentActive } : d));
+    }
+  };
+
+  const deleteDomain = async (domainId: string, domainName: string) => {
+    if (!confirm(`Deletar domínio "${domainName}"?`)) return;
+    const result = await fetchData("delete_domain", { domain_id: domainId });
+    if (result) {
+      toast.success("Domínio removido!");
+      setDomains(prev => prev.filter(d => d.id !== domainId));
     }
   };
 
@@ -267,6 +302,9 @@ const Admin = () => {
             </TabsTrigger>
             <TabsTrigger value="membros" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
               <Crown className="h-3.5 w-3.5" /> Membros
+            </TabsTrigger>
+            <TabsTrigger value="dominios" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
+              <Globe className="h-3.5 w-3.5" /> Domínios
             </TabsTrigger>
           </TabsList>
 
@@ -840,6 +878,108 @@ const Admin = () => {
                     </div>
                   );
                 })()}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* =================== DOMÍNIOS TAB =================== */}
+          <TabsContent value="dominios">
+            <Card className="bg-slate-800/50 border-slate-700/50">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-slate-700/50">
+                <CardTitle className="text-white text-base flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-blue-400" /> Domínios Monitorados ({domains.length})
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" onClick={() => setShowAddDomain(!showAddDomain)}
+                    className="bg-gradient-to-r from-orange-500 to-pink-500 text-white text-xs gap-1.5">
+                    <Plus className="h-3.5 w-3.5" /> Adicionar
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => loadTab("dominios")} className="text-slate-400 hover:text-white">
+                    <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4 space-y-4">
+                {showAddDomain && (
+                  <div className="bg-slate-700/30 rounded-xl p-4 space-y-3 border border-slate-600/50">
+                    <h4 className="text-sm font-semibold text-white">Novo Domínio</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <Input
+                        placeholder="dominio.com"
+                        value={newDomain.domain}
+                        onChange={(e) => setNewDomain(prev => ({ ...prev, domain: e.target.value }))}
+                        className="bg-slate-700/50 border-slate-600 text-white text-sm placeholder:text-slate-500"
+                      />
+                      <Input
+                        placeholder="Nome/Label (opcional)"
+                        value={newDomain.label}
+                        onChange={(e) => setNewDomain(prev => ({ ...prev, label: e.target.value }))}
+                        className="bg-slate-700/50 border-slate-600 text-white text-sm placeholder:text-slate-500"
+                      />
+                      <Input
+                        placeholder="Notas (opcional)"
+                        value={newDomain.notes}
+                        onChange={(e) => setNewDomain(prev => ({ ...prev, notes: e.target.value }))}
+                        className="bg-slate-700/50 border-slate-600 text-white text-sm placeholder:text-slate-500"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={addDomain} disabled={loading}
+                        className="bg-gradient-to-r from-orange-500 to-pink-500 text-white text-xs">
+                        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Salvar"}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setShowAddDomain(false)} className="text-slate-400 text-xs">
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {loading && domains.length === 0 ? (
+                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
+                ) : domains.length > 0 ? (
+                  <div className="space-y-3">
+                    {domains.map((d) => (
+                      <div key={d.id} className={`rounded-xl border p-4 flex items-center gap-4 transition-colors ${d.is_active ? "bg-slate-700/20 border-slate-600/50" : "bg-slate-800/30 border-slate-700/30 opacity-60"}`}>
+                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${d.is_active ? "bg-emerald-500/10" : "bg-slate-700/50"}`}>
+                          <Globe className={`h-5 w-5 ${d.is_active ? "text-emerald-400" : "text-slate-500"}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold text-white truncate">{d.domain}</p>
+                            {d.label && <span className="text-xs bg-slate-600/50 text-slate-300 px-2 py-0.5 rounded-full">{d.label}</span>}
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${d.is_active ? "bg-emerald-500/10 text-emerald-400" : "bg-slate-600/50 text-slate-500"}`}>
+                              {d.is_active ? "● Ativo" : "○ Inativo"}
+                            </span>
+                          </div>
+                          {d.notes && <p className="text-xs text-slate-400 mt-0.5 truncate">{d.notes}</p>}
+                          <p className="text-[10px] text-slate-500 mt-1">Adicionado em {new Date(d.created_at).toLocaleDateString("pt-BR")}</p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-white"
+                            onClick={() => window.open(`https://${d.domain}`, "_blank")}>
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button size="sm" variant="ghost"
+                            className={`h-8 w-8 p-0 ${d.is_active ? "text-emerald-400 hover:text-emerald-300" : "text-slate-500 hover:text-slate-300"}`}
+                            onClick={() => toggleDomainActive(d.id, d.is_active)}>
+                            <Power className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            onClick={() => deleteDomain(d.id, d.domain)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Globe className="h-12 w-12 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-500 text-sm">Nenhum domínio cadastrado</p>
+                    <p className="text-slate-600 text-xs mt-1">Adicione domínios para monitorar</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

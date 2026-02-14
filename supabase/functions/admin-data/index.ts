@@ -309,6 +309,54 @@ Deno.serve(async (req) => {
         .update({ payment_status: "rejected" })
         .eq("id", checkout_id)
         .select());
+    } else if (table === "domains") {
+      ({ data, error } = await supabase
+        .from("monitored_domains")
+        .select("*")
+        .order("created_at", { ascending: false }));
+    } else if (table === "add_domain") {
+      const { domain, label, notes } = body;
+      if (!domain) {
+        return new Response(JSON.stringify({ error: "domain é obrigatório" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      ({ data, error } = await supabase
+        .from("monitored_domains")
+        .insert({ domain, label: label || "", notes: notes || "" })
+        .select());
+    } else if (table === "update_domain") {
+      const { domain_id, domain, label, notes, is_active } = body;
+      if (!domain_id) {
+        return new Response(JSON.stringify({ error: "domain_id é obrigatório" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const updates: any = {};
+      if (domain !== undefined) updates.domain = domain;
+      if (label !== undefined) updates.label = label;
+      if (notes !== undefined) updates.notes = notes;
+      if (is_active !== undefined) updates.is_active = is_active;
+      ({ data, error } = await supabase
+        .from("monitored_domains")
+        .update(updates)
+        .eq("id", domain_id)
+        .select());
+    } else if (table === "delete_domain") {
+      const { domain_id } = body;
+      if (!domain_id) {
+        return new Response(JSON.stringify({ error: "domain_id é obrigatório" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      ({ data, error } = await supabase
+        .from("monitored_domains")
+        .delete()
+        .eq("id", domain_id)
+        .select());
     } else {
       return new Response(JSON.stringify({ error: "Tabela inválida" }), {
         status: 400,

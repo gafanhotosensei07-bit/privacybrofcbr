@@ -106,6 +106,33 @@ export type Database = {
           },
         ]
       }
+      monitored_domains: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          is_active: boolean
+          label: string
+          notes: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          notes?: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          notes?: string
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string
