@@ -108,7 +108,7 @@ const Checkout = () => {
         if (statusInterval.current) clearInterval(statusInterval.current);
         if (timerInterval.current) clearInterval(timerInterval.current);
         await updateCheckoutStatus(id, "approved");
-        setStep("success");
+        navigate(`/obrigado?plan=${encodeURIComponent(planName)}&price=${planPrice}&model=${encodeURIComponent(modelName)}`);
       } else if (data?.status === "rejected") {
         if (statusInterval.current) clearInterval(statusInterval.current);
         if (timerInterval.current) clearInterval(timerInterval.current);
