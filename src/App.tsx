@@ -11,6 +11,8 @@ import ModelProfile from "./pages/ModelProfile";
 import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
 import ChatConversation from "./pages/ChatConversation";
+import ThankYou from "./pages/ThankYou";
+import MembersArea from "./pages/MembersArea";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 
@@ -31,6 +33,8 @@ const App = () => (
           <Route path="/perfil" element={<Profile />} />
           <Route path="/modelo/:slug" element={<ModelProfile />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/obrigado" element={<ThankYou />} />
+          <Route path="/membros/:slug" element={<MembersArea />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
