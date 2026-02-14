@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star } from "lucide-react";
+import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star, Crown, UserX } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, Legend } from "recharts";
 import { models } from "@/data/models";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ interface TrackingData {
   referrers: { name: string; clicks: number }[];
 }
 interface ContentFile { name: string; path: string; publicUrl: string; created_at: string; metadata: any; }
+interface MemberEntry { id: string; customer_name: string; customer_email: string; model_name: string; plan_name: string; plan_price: number; payment_status: string; created_at: string; user_id: string | null; display_name: string; }
 
 const CHART_COLORS = ["hsl(24, 95%, 53%)", "hsl(280, 70%, 50%)", "hsl(340, 80%, 55%)", "hsl(150, 70%, 40%)", "hsl(270, 65%, 55%)", "hsl(40, 90%, 50%)", "hsl(0, 85%, 55%)", "hsl(200, 80%, 50%)", "hsl(60, 80%, 45%)", "hsl(320, 75%, 50%)"];
 
@@ -50,6 +51,8 @@ const Admin = () => {
   const [contentFiles, setContentFiles] = useState<ContentFile[]>([]);
   const [contentFolder, setContentFolder] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [members, setMembers] = useState<MemberEntry[]>([]);
+  const [membersFilter, setMembersFilter] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = async (table: string, extra?: Record<string, any>) => {
@@ -96,6 +99,9 @@ const Admin = () => {
       setCheckouts(await fetchData("checkouts") || []);
     } else if (tab === "modelos") {
       // Models are local, no fetch needed
+    } else if (tab === "membros") {
+      const d = await fetchData("members");
+      if (d) setMembers(d);
     } else if (tab === "conteudo") {
       await loadContent(contentFolder);
     }
@@ -143,6 +149,15 @@ const Admin = () => {
     if (result) {
       toast.success("Status atualizado!");
       setCheckouts(prev => prev.map(c => c.id === checkoutId ? { ...c, payment_status: newStatus } : c));
+    }
+  };
+
+  const revokeAccess = async (checkoutId: string, memberName: string) => {
+    if (!confirm(`Revogar acesso de "${memberName}"?`)) return;
+    const result = await fetchData("revoke_access", { checkout_id: checkoutId });
+    if (result) {
+      toast.success("Acesso revogado!");
+      setMembers(prev => prev.filter(m => m.id !== checkoutId));
     }
   };
 
@@ -249,6 +264,9 @@ const Admin = () => {
             </TabsTrigger>
             <TabsTrigger value="conteudo" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
               <Image className="h-3.5 w-3.5" /> Conteúdo
+            </TabsTrigger>
+            <TabsTrigger value="membros" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
+              <Crown className="h-3.5 w-3.5" /> Membros
             </TabsTrigger>
           </TabsList>
 
@@ -726,6 +744,102 @@ const Admin = () => {
                     <p className="text-slate-600 text-xs mt-1">Use a pasta para organizar por modelo (ex: "estermuniz")</p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* =================== MEMBROS TAB =================== */}
+          <TabsContent value="membros">
+            <Card className="bg-slate-800/50 border-slate-700/50">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-slate-700/50">
+                <CardTitle className="text-white text-base flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-yellow-400" /> Membros Ativos ({members.length})
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Filtrar por modelo..."
+                    value={membersFilter}
+                    onChange={(e) => setMembersFilter(e.target.value)}
+                    className="bg-slate-700/50 border-slate-600 text-white text-xs h-8 w-44 placeholder:text-slate-500"
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => loadTab("membros")} className="text-slate-400 hover:text-white">
+                    <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {loading && members.length === 0 ? (
+                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
+                ) : (() => {
+                  // Group members by model
+                  const filtered = membersFilter
+                    ? members.filter(m => m.model_name.toLowerCase().includes(membersFilter.toLowerCase()))
+                    : members;
+                  const grouped = filtered.reduce<Record<string, MemberEntry[]>>((acc, m) => {
+                    const key = m.model_name || "Sem modelo";
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(m);
+                    return acc;
+                  }, {});
+                  const modelEntries = Object.entries(grouped).sort(([, a], [, b]) => b.length - a.length);
+
+                  if (modelEntries.length === 0) {
+                    return <p className="text-center text-slate-500 py-12">Nenhum membro ativo encontrado</p>;
+                  }
+
+                  return (
+                    <div className="divide-y divide-slate-700/30">
+                      {modelEntries.map(([modelName, modelMembers]) => {
+                        const modelData = models.find(m => m.name === modelName);
+                        return (
+                          <div key={modelName} className="p-4">
+                            <div className="flex items-center gap-3 mb-3">
+                              {modelData && (
+                                <img src={modelData.avatar} alt={modelName} className="h-8 w-8 rounded-full object-cover" />
+                              )}
+                              <div>
+                                <h3 className="text-sm font-bold text-white">{modelName}</h3>
+                                <p className="text-xs text-slate-400">{modelMembers.length} membro{modelMembers.length !== 1 ? "s" : ""}</p>
+                              </div>
+                            </div>
+                            <div className="overflow-x-auto">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow className="border-slate-700/50 hover:bg-transparent">
+                                    <TableHead className="text-slate-400 text-xs font-semibold uppercase">Nome</TableHead>
+                                    <TableHead className="text-slate-400 text-xs font-semibold uppercase">Email</TableHead>
+                                    <TableHead className="text-slate-400 text-xs font-semibold uppercase">Plano</TableHead>
+                                    <TableHead className="text-slate-400 text-xs font-semibold uppercase">Preço</TableHead>
+                                    <TableHead className="text-slate-400 text-xs font-semibold uppercase">Data</TableHead>
+                                    <TableHead className="text-slate-400 text-xs font-semibold uppercase">Ações</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {modelMembers.map((m) => (
+                                    <TableRow key={m.id} className="border-slate-700/30 hover:bg-slate-700/20">
+                                      <TableCell className="text-slate-300 text-sm">{m.display_name}</TableCell>
+                                      <TableCell className="text-slate-300 text-sm">{m.customer_email}</TableCell>
+                                      <TableCell className="text-slate-300 text-sm">{m.plan_name}</TableCell>
+                                      <TableCell className="text-white text-sm font-semibold">R$ {Number(m.plan_price).toFixed(2).replace(".", ",")}</TableCell>
+                                      <TableCell className="text-slate-300 text-sm">{formatDate(m.created_at)}</TableCell>
+                                      <TableCell>
+                                        <Button size="sm" variant="ghost" className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 gap-1"
+                                          onClick={() => revokeAccess(m.id, m.display_name)}>
+                                          <UserX className="h-3.5 w-3.5" />
+                                          <span className="text-xs">Revogar</span>
+                                        </Button>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           </TabsContent>
