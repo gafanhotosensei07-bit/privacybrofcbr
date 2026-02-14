@@ -11,10 +11,23 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
-    const { password, table } = body;
-    const adminPassword = Deno.env.get("ADMIN_PASSWORD");
+    const contentType = req.headers.get("content-type") || "";
+    let password = "";
+    let table = "";
+    let body: any = {};
 
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      password = formData.get("password") as string || "";
+      table = formData.get("table") as string || "";
+      body = { password, table, formData };
+    } else {
+      body = await req.json();
+      password = body.password;
+      table = body.table;
+    }
+
+    const adminPassword = Deno.env.get("ADMIN_PASSWORD");
     if (!adminPassword || password !== adminPassword) {
       return new Response(JSON.stringify({ error: "Senha inválida" }), {
         status: 401,
@@ -27,7 +40,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    let data, error;
+    let data: any, error: any;
 
     if (table === "profiles") {
       ({ data, error } = await supabase
@@ -58,6 +71,74 @@ Deno.serve(async (req) => {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(500));
+    } else if (table === "update_checkout_status") {
+      // Manually approve/reject a checkout
+      const { checkout_id, new_status } = body;
+      if (!checkout_id || !new_status) {
+        return new Response(JSON.stringify({ error: "checkout_id e new_status são obrigatórios" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      ({ data, error } = await supabase
+        .from("checkout_attempts")
+        .update({ payment_status: new_status })
+        .eq("id", checkout_id)
+        .select());
+    } else if (table === "upload_content") {
+      // Upload file to model-content bucket
+      const formData = body.formData;
+      if (!formData) {
+        return new Response(JSON.stringify({ error: "FormData necessário" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const file = formData.get("file") as File;
+      const filePath = formData.get("file_path") as string;
+      if (!file || !filePath) {
+        return new Response(JSON.stringify({ error: "file e file_path são obrigatórios" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("model-content")
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage
+        .from("model-content")
+        .getPublicUrl(filePath);
+      data = { path: uploadData?.path, publicUrl: urlData?.publicUrl };
+      error = null;
+    } else if (table === "list_content") {
+      // List files in model-content bucket for a given folder
+      const folder = body.folder || "";
+      const { data: files, error: listError } = await supabase.storage
+        .from("model-content")
+        .list(folder, { limit: 200, sortBy: { column: "created_at", order: "desc" } });
+      if (listError) throw listError;
+      // Get public URLs
+      data = (files || []).map((f: any) => {
+        const path = folder ? `${folder}/${f.name}` : f.name;
+        const { data: urlData } = supabase.storage.from("model-content").getPublicUrl(path);
+        return { ...f, path, publicUrl: urlData?.publicUrl };
+      });
+      error = null;
+    } else if (table === "delete_content") {
+      const { file_paths } = body;
+      if (!file_paths || !Array.isArray(file_paths)) {
+        return new Response(JSON.stringify({ error: "file_paths array é obrigatório" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error: delError } = await supabase.storage
+        .from("model-content")
+        .remove(file_paths);
+      if (delError) throw delError;
+      data = { deleted: file_paths.length };
+      error = null;
     } else if (table === "page_views") {
       ({ data, error } = await supabase
         .from("page_views")
@@ -65,7 +146,6 @@ Deno.serve(async (req) => {
         .order("created_at", { ascending: false })
         .limit(2000));
     } else if (table === "tracking") {
-      // UTM tracking analytics - UTMify style
       const [pageViewsRes, checkoutsRes] = await Promise.all([
         supabase.from("page_views").select("*").order("created_at", { ascending: false }).limit(5000),
         supabase.from("checkout_attempts").select("*").order("created_at", { ascending: false }).limit(2000),
@@ -76,7 +156,6 @@ Deno.serve(async (req) => {
       const approved = checkouts.filter((c: any) => c.payment_status === "approved");
       const totalRevenue = approved.reduce((sum: number, c: any) => sum + Number(c.plan_price || 0), 0);
 
-      // Group by UTM source
       const bySource: Record<string, { clicks: number; checkouts: number; approved: number; revenue: number }> = {};
       const byMedium: Record<string, { clicks: number; checkouts: number; approved: number; revenue: number }> = {};
       const byCampaign: Record<string, { clicks: number; checkouts: number; approved: number; revenue: number }> = {};
@@ -85,52 +164,34 @@ Deno.serve(async (req) => {
         const src = pv.utm_source || "(direto)";
         const med = pv.utm_medium || "(nenhum)";
         const camp = pv.utm_campaign || "(nenhuma)";
-
         if (!bySource[src]) bySource[src] = { clicks: 0, checkouts: 0, approved: 0, revenue: 0 };
         bySource[src].clicks++;
-
         if (!byMedium[med]) byMedium[med] = { clicks: 0, checkouts: 0, approved: 0, revenue: 0 };
         byMedium[med].clicks++;
-
         if (!byCampaign[camp]) byCampaign[camp] = { clicks: 0, checkouts: 0, approved: 0, revenue: 0 };
         byCampaign[camp].clicks++;
       });
 
-      // Map checkouts to sources (best effort via model name matching page views)
-      // Since we don't have UTM on checkouts directly, we attribute based on page_views within a time window
-      // For now, count total checkouts as attribution
-
-      // Daily trend data (last 30 days)
       const now = new Date();
-      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       const dailyData: Record<string, { views: number; checkouts: number; revenue: number }> = {};
-
       for (let i = 0; i < 30; i++) {
         const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
         const key = d.toISOString().split("T")[0];
         dailyData[key] = { views: 0, checkouts: 0, revenue: 0 };
       }
-
       pageViews.forEach((pv: any) => {
         const day = pv.created_at.split("T")[0];
         if (dailyData[day]) dailyData[day].views++;
       });
-
       checkouts.forEach((c: any) => {
         const day = c.created_at.split("T")[0];
         if (dailyData[day]) {
           dailyData[day].checkouts++;
-          if (c.payment_status === "approved") {
-            dailyData[day].revenue += Number(c.plan_price || 0);
-          }
+          if (c.payment_status === "approved") dailyData[day].revenue += Number(c.plan_price || 0);
         }
       });
+      const dailyTrend = Object.entries(dailyData).sort(([a], [b]) => a.localeCompare(b)).map(([date, d]) => ({ date, ...d }));
 
-      const dailyTrend = Object.entries(dailyData)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([date, d]) => ({ date, ...d }));
-
-      // Top UTM combinations
       const utmCombos: Record<string, { clicks: number }> = {};
       pageViews.forEach((pv: any) => {
         if (pv.utm_source) {
@@ -140,7 +201,6 @@ Deno.serve(async (req) => {
         }
       });
 
-      // Referrer breakdown
       const referrers: Record<string, number> = {};
       pageViews.forEach((pv: any) => {
         const ref = pv.referrer ? (() => { try { return new URL(pv.referrer).hostname; } catch { return pv.referrer; } })() : "(direto)";
