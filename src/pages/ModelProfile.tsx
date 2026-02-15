@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { trackViewContent } from "@/lib/meta-pixel";
 import { Heart, Image, Lock, FileText, Search, Plus, MessageCircle, Eye, Users, Zap, Clock } from "lucide-react";
 import logoIcon from "@/assets/logo-icon.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -14,6 +15,16 @@ const ModelProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   usePageView("modelo", slug || "");
+
+  useEffect(() => {
+    if (slug) {
+      trackViewContent({
+        content_name: slug,
+        content_category: "model_profile",
+        content_type: "product",
+      });
+    }
+  }, [slug]);
 
   const [showFullBio, setShowFullBio] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
