@@ -27,7 +27,6 @@ const Home = () => {
         modelSlug={featured.slug}
         modelName={featured.name}
         originalPrice={featured.mainPlan.price}
-        promoPrice={(parseFloat(featured.mainPlan.price.replace(",", ".")) * 0.5).toFixed(2).replace(".", ",")}
       />
       {/* Top promo bar */}
       <header className="flex items-center justify-between px-4 py-1.5 bg-[hsl(24,95%,53%)]">
