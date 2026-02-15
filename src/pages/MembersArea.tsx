@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Lock, Crown, ArrowLeft, CheckCircle, Image, Video, Loader2 } from "lucide-react";
+import { Lock, Crown, ArrowLeft, CheckCircle, Image, Video, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { models } from "@/data/models";
@@ -8,12 +8,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import logoIcon from "@/assets/logo-icon.png";
 
+interface ContentItem {
+  name: string;
+  url: string;
+  type: "image" | "video";
+  created_at: string;
+}
+
 const MembersArea = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(true);
+  const [content, setContent] = useState<ContentItem[]>([]);
+  const [loadingContent, setLoadingContent] = useState(false);
 
   const model = models.find((m) => m.slug === slug);
 
@@ -27,7 +36,6 @@ const MembersArea = () => {
       }
 
       try {
-        // Check if user has an approved payment for this model
         const { data, error } = await supabase
           .from("checkout_attempts")
           .select("id")
@@ -48,6 +56,26 @@ const MembersArea = () => {
 
     checkAccess();
   }, [user, authLoading, model?.name]);
+
+  // Load content from storage when access is granted
+  useEffect(() => {
+    if (!hasAccess || !slug) return;
+    const loadContent = async () => {
+      setLoadingContent(true);
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/model-content?slug=${slug}`
+        );
+        const json = await res.json();
+        if (json.data) setContent(json.data);
+      } catch (err) {
+        console.error("Erro ao carregar conteúdo:", err);
+      } finally {
+        setLoadingContent(false);
+      }
+    };
+    loadContent();
+  }, [hasAccess, slug]);
 
   if (!model) {
     return (
@@ -72,7 +100,6 @@ const MembersArea = () => {
     );
   }
 
-  // Not logged in or no access
   if (!hasAccess) {
     return (
       <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col items-center justify-center px-4 py-8">
@@ -117,8 +144,10 @@ const MembersArea = () => {
     );
   }
 
-  // Has access — show members content
-  const previews = model.previews || [];
+  // Merge storage content + static previews as fallback
+  const images = content.filter((c) => c.type === "image");
+  const videos = content.filter((c) => c.type === "video");
+  const fallbackPreviews = content.length === 0 ? (model.previews || []) : [];
 
   return (
     <div className="min-h-screen bg-[hsl(30,20%,96%)]">
@@ -157,63 +186,78 @@ const MembersArea = () => {
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-background rounded-xl border border-border/40 p-3 text-center">
             <Image className="h-4 w-4 mx-auto mb-1 text-[hsl(24,95%,53%)]" />
-            <p className="text-lg font-bold text-foreground">{model.stats.photos}</p>
+            <p className="text-lg font-bold text-foreground">{images.length || model.stats.photos}</p>
             <p className="text-[10px] text-muted-foreground">Fotos</p>
           </div>
           <div className="bg-background rounded-xl border border-border/40 p-3 text-center">
             <Video className="h-4 w-4 mx-auto mb-1 text-[hsl(24,95%,53%)]" />
-            <p className="text-lg font-bold text-foreground">{model.stats.videos}</p>
+            <p className="text-lg font-bold text-foreground">{videos.length || model.stats.videos}</p>
             <p className="text-[10px] text-muted-foreground">Vídeos</p>
           </div>
           <div className="bg-background rounded-xl border border-border/40 p-3 text-center">
             <Crown className="h-4 w-4 mx-auto mb-1 text-[hsl(24,95%,53%)]" />
-            <p className="text-lg font-bold text-foreground">{model.stats.posts}</p>
+            <p className="text-lg font-bold text-foreground">{content.length || model.stats.posts}</p>
             <p className="text-[10px] text-muted-foreground">Posts</p>
           </div>
         </div>
 
-        {/* Content grid */}
+        {/* Loading */}
+        {loadingContent && (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-[hsl(24,95%,53%)]" />
+          </div>
+        )}
+
+        {/* Videos section */}
+        {videos.length > 0 && (
+          <>
+            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">
+              Vídeos Exclusivos 🎬
+            </h2>
+            <div className="space-y-3 mb-6">
+              {videos.map((v, i) => (
+                <div key={i} className="rounded-xl overflow-hidden border border-border/40 shadow-sm bg-background">
+                  <video
+                    src={v.url}
+                    controls
+                    preload="metadata"
+                    className="w-full aspect-video object-cover"
+                    poster=""
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Photos section */}
         <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">
           Conteúdo Exclusivo 🔥
         </h2>
-        {previews.length > 0 ? (
+
+        {images.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
-            {previews.map((src, i) => (
+            {images.map((img, i) => (
+              <div key={i} className="rounded-xl overflow-hidden border border-border/40 shadow-sm bg-background">
+                <img src={img.url} alt={`Conteúdo ${i + 1}`} className="w-full aspect-[3/4] object-cover" />
+              </div>
+            ))}
+          </div>
+        ) : fallbackPreviews.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3">
+            {fallbackPreviews.map((src, i) => (
               <div key={i} className="rounded-xl overflow-hidden border border-border/40 shadow-sm bg-background">
                 <img src={src} alt={`Conteúdo ${i + 1}`} className="w-full aspect-[3/4] object-cover" />
               </div>
             ))}
           </div>
-        ) : (
+        ) : !loadingContent ? (
           <Card className="border-0 shadow-sm rounded-2xl">
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground text-sm">Conteúdo em breve! 🔜</p>
             </CardContent>
           </Card>
-        )}
-
-        {/* More content placeholder */}
-        <div className="mt-6 space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="border-0 shadow-sm rounded-2xl overflow-hidden">
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-[hsl(24,95%,53%)]/10 to-[hsl(24,95%,53%)]/5 flex items-center justify-center shrink-0">
-                  {i % 2 === 0 ? (
-                    <Video className="h-6 w-6 text-[hsl(24,95%,53%)]" />
-                  ) : (
-                    <Image className="h-6 w-6 text-[hsl(24,95%,53%)]" />
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">
-                    {i % 2 === 0 ? "Vídeo exclusivo" : "Pack de fotos"} #{i}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Conteúdo premium • Disponível agora</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        ) : null}
       </div>
     </div>
   );
