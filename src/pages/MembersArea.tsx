@@ -63,8 +63,15 @@ const MembersArea = () => {
     const loadContent = async () => {
       setLoadingContent(true);
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
         const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/model-content?slug=${slug}`
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/model-content?slug=${slug}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${session.access_token}`,
+            },
+          }
         );
         const json = await res.json();
         if (json.data) setContent(json.data);
