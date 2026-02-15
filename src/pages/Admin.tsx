@@ -340,7 +340,7 @@ const Admin = () => {
                   <KpiCard icon={<DollarSign className="h-5 w-5" />} label="Receita" value={`R$ ${tracking.totalRevenue.toFixed(2).replace(".", ",")}`} sub="Total faturado" color="from-emerald-500 to-green-500" />
                   <KpiCard icon={<TrendingUp className="h-5 w-5" />} label="Conversão" value={`${tracking.conversionRate}%`} sub="Cliques → Checkout" color="from-violet-500 to-purple-500" />
                   <KpiCard icon={<Zap className="h-5 w-5" />} label="Ticket Médio" value={`R$ ${tracking.totalApproved > 0 ? (tracking.totalRevenue / tracking.totalApproved).toFixed(2).replace(".", ",") : "0,00"}`} sub="Por aprovado" color="from-amber-500 to-orange-500" />
-                  <KpiCard icon={<Target className="h-5 w-5" />} label="PIX → Aprovado" value={`${tracking.totalCheckouts > 0 ? ((tracking.totalApproved / tracking.totalCheckouts) * 100).toFixed(1) : "0"}%`} sub={`${tracking.totalApproved}/${tracking.totalCheckouts}`} color="from-teal-500 to-emerald-500" />
+                  <KpiCard icon={<Target className="h-5 w-5" />} label="PIX Gerados" value={tracking.totalCheckouts} sub={`${tracking.totalApproved} aprovados`} color="from-teal-500 to-emerald-500" />
                 </div>
 
                 <Card className="bg-slate-800/50 border-slate-700/50">
