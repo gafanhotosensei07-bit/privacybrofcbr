@@ -423,20 +423,51 @@ const Admin = () => {
                 </div>
 
                 <Card className="bg-slate-800/50 border-slate-700/50">
-                  <CardHeader><CardTitle className="text-white text-base flex items-center gap-2"><Megaphone className="h-4 w-4 text-pink-400" />Por Campanha (utm_campaign)</CardTitle></CardHeader>
-                  <CardContent>
+                  <CardHeader><CardTitle className="text-white text-base flex items-center gap-2"><Megaphone className="h-4 w-4 text-pink-400" />Campanhas — Cliques, Compras, CPC e CTR</CardTitle></CardHeader>
+                  <CardContent className="p-0">
                     {tracking.byCampaign.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={Math.max(200, tracking.byCampaign.slice(0, 10).length * 40)}>
-                        <BarChart data={tracking.byCampaign.slice(0, 10)} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={false} />
-                          <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                          <YAxis dataKey="name" type="category" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={150} />
-                          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }} />
-                          <Bar dataKey="clicks" name="Cliques" radius={[0, 6, 6, 0]}>
-                            {tracking.byCampaign.slice(0, 10).map((_, i) => (<Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="border-slate-700/50 hover:bg-transparent">
+                              <TableHead className="text-slate-400 text-xs font-semibold uppercase">Campanha</TableHead>
+                              <TableHead className="text-slate-400 text-xs font-semibold uppercase text-right">Cliques</TableHead>
+                              <TableHead className="text-slate-400 text-xs font-semibold uppercase text-right">Checkouts</TableHead>
+                              <TableHead className="text-slate-400 text-xs font-semibold uppercase text-right">Aprovados</TableHead>
+                              <TableHead className="text-slate-400 text-xs font-semibold uppercase text-right">Receita</TableHead>
+                              <TableHead className="text-slate-400 text-xs font-semibold uppercase text-right">CTR</TableHead>
+                              <TableHead className="text-slate-400 text-xs font-semibold uppercase text-right">CPC</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {tracking.byCampaign.slice(0, 15).map((c, i) => {
+                              const ctr = c.clicks > 0 ? ((c.checkouts / c.clicks) * 100).toFixed(1) : "0.0";
+                              const cpc = c.clicks > 0 ? (c.revenue / c.clicks).toFixed(2).replace(".", ",") : "0,00";
+                              return (
+                                <TableRow key={i} className="border-slate-700/30 hover:bg-slate-700/20">
+                                  <TableCell className="text-slate-300 text-sm font-medium max-w-[200px] truncate">{c.name}</TableCell>
+                                  <TableCell className="text-white text-sm font-bold text-right">{c.clicks}</TableCell>
+                                  <TableCell className="text-right">
+                                    <span className={`text-sm font-bold ${c.checkouts > 0 ? "text-orange-400" : "text-slate-500"}`}>{c.checkouts}</span>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <span className={`text-sm font-bold ${c.approved > 0 ? "text-emerald-400" : "text-slate-500"}`}>{c.approved}</span>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <span className={`text-sm font-bold ${c.revenue > 0 ? "text-emerald-400" : "text-slate-500"}`}>R$ {c.revenue.toFixed(2).replace(".", ",")}</span>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${Number(ctr) >= 5 ? "bg-emerald-500/10 text-emerald-400" : Number(ctr) > 0 ? "bg-amber-500/10 text-amber-400" : "bg-slate-700/50 text-slate-500"}`}>
+                                      {ctr}%
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-sm text-right font-mono">R$ {cpc}</TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
                     ) : <p className="text-center text-slate-500 py-8">Sem campanhas rastreadas</p>}
                   </CardContent>
                 </Card>
