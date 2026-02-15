@@ -83,9 +83,33 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Calculate expires_at when approving
+      const updateData: Record<string, any> = { payment_status: status };
+
+      if (status === "approved") {
+        // Fetch the checkout to get plan_name
+        const { data: checkout } = await supabase
+          .from("checkout_attempts")
+          .select("plan_name")
+          .eq("payment_id", payment_id)
+          .single();
+
+        if (checkout) {
+          const planName = (checkout.plan_name || "").toLowerCase();
+          let daysToAdd = 30; // default 1 month
+          if (planName.includes("seman")) daysToAdd = 7;
+          else if (planName.includes("3 mes") || planName.includes("trimestral")) daysToAdd = 90;
+          else if (planName.includes("ano") || planName.includes("anual")) daysToAdd = 365;
+
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + daysToAdd);
+          updateData.expires_at = expiresAt.toISOString();
+        }
+      }
+
       const { error } = await supabase
         .from("checkout_attempts")
-        .update({ payment_status: status })
+        .update(updateData)
         .eq("payment_id", payment_id);
 
       if (error) throw error;

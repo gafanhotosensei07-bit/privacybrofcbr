@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Lock, Crown, ArrowLeft, CheckCircle, Image, Video, Loader2, Play, Star, Sparkles, Eye, Zap } from "lucide-react";
+import { Lock, Crown, ArrowLeft, CheckCircle, Image, Video, Loader2, Play, Star, Sparkles, Eye, Zap, Clock, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { models } from "@/data/models";
@@ -16,12 +16,19 @@ interface ContentItem {
   created_at: string;
 }
 
+interface SubscriptionInfo {
+  plan_name: string;
+  expires_at: string | null;
+  created_at: string;
+}
+
 const MembersArea = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(true);
+  const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loadingContent, setLoadingContent] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
@@ -41,14 +48,28 @@ const MembersArea = () => {
       try {
         const { data, error } = await supabase
           .from("checkout_attempts")
-          .select("id")
+          .select("id, plan_name, expires_at, created_at")
           .eq("user_id", user.id)
           .eq("model_name", model?.name || "")
           .eq("payment_status", "approved")
+          .order("created_at", { ascending: false })
           .limit(1);
 
         if (error) throw error;
-        setHasAccess(data && data.length > 0);
+        
+        if (data && data.length > 0) {
+          const sub = data[0];
+          // Check if expired
+          if (sub.expires_at && new Date(sub.expires_at) < new Date()) {
+            setHasAccess(false);
+            setSubscription({ plan_name: sub.plan_name, expires_at: sub.expires_at, created_at: sub.created_at });
+          } else {
+            setHasAccess(true);
+            setSubscription({ plan_name: sub.plan_name, expires_at: sub.expires_at, created_at: sub.created_at });
+          }
+        } else {
+          setHasAccess(false);
+        }
       } catch (err) {
         console.error("Erro ao verificar acesso:", err);
         setHasAccess(false);
@@ -122,13 +143,21 @@ const MembersArea = () => {
           <Card className="shadow-xl border-0 rounded-2xl overflow-hidden">
             <CardContent className="p-8 flex flex-col items-center gap-5">
               <div className="h-20 w-20 rounded-full flex items-center justify-center" style={{ background: `hsl(${t.accentColor} / 0.1)` }}>
-                <Lock className="h-10 w-10" style={{ color: `hsl(${t.accentColor})` }} />
+                {subscription?.expires_at && new Date(subscription.expires_at) < new Date()
+                  ? <AlertTriangle className="h-10 w-10" style={{ color: `hsl(${t.accentColor})` }} />
+                  : <Lock className="h-10 w-10" style={{ color: `hsl(${t.accentColor})` }} />}
               </div>
               <div className="text-center">
-                <h2 className="text-xl font-bold text-foreground">Acesso Restrito</h2>
+                <h2 className="text-xl font-bold text-foreground">
+                  {subscription?.expires_at && new Date(subscription.expires_at) < new Date()
+                    ? "Assinatura Expirada"
+                    : "Acesso Restrito"}
+                </h2>
                 <p className="text-sm text-muted-foreground mt-2">
                   {!user
                     ? "Faça login para acessar o conteúdo exclusivo."
+                    : subscription?.expires_at && new Date(subscription.expires_at) < new Date()
+                    ? `Sua assinatura do plano "${subscription.plan_name}" expirou em ${new Date(subscription.expires_at).toLocaleDateString("pt-BR")}. Renove para continuar acessando!`
                     : `Assine o plano de ${model.name} para desbloquear o conteúdo exclusivo.`}
                 </p>
               </div>
@@ -146,7 +175,9 @@ const MembersArea = () => {
                   className="w-full h-12 font-bold rounded-xl text-white"
                   style={{ background: accentGradient }}
                 >
-                  Ver Planos de {model.name}
+                  {subscription?.expires_at && new Date(subscription.expires_at) < new Date()
+                    ? `Renovar Assinatura de ${model.name}`
+                    : `Ver Planos de ${model.name}`}
                 </Button>
               )}
             </CardContent>
@@ -180,6 +211,18 @@ const MembersArea = () => {
             ✅ Ativo
           </span>
         </div>
+        {/* Subscription info bar */}
+        {subscription && (
+          <div className="flex items-center justify-center gap-2 px-4 py-1.5 text-white/80 text-[11px]" style={{ background: `hsl(${t.accentColorEnd})` }}>
+            <Clock className="h-3 w-3" />
+            <span>
+              Plano: <strong>{subscription.plan_name}</strong>
+              {subscription.expires_at && (
+                <> · Expira em: <strong>{new Date(subscription.expires_at).toLocaleDateString("pt-BR")}</strong></>
+              )}
+            </span>
+          </div>
+        )}
       </header>
 
       <div className="mx-auto max-w-lg">
