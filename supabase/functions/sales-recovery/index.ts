@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
             "Authorization": `Bearer ${resendKey}`,
           },
           body: JSON.stringify({
-            from: "Privacy <onboarding@resend.dev>",
+            from: "Privacy <noreply@privacybrofc.shop>",
             to: [checkout.customer_email],
             subject: subjects[emailNum - 1],
             html: htmlBody,
