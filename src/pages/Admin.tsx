@@ -743,63 +743,99 @@ const Admin = () => {
           {/* =================== CONTEÚDO TAB =================== */}
           <TabsContent value="conteudo">
             <Card className="bg-slate-800/50 border-slate-700/50">
-              <CardHeader className="flex flex-row items-center justify-between border-b border-slate-700/50">
+              <CardHeader className="border-b border-slate-700/50">
                 <CardTitle className="text-white text-base flex items-center gap-2">
                   <Image className="h-4 w-4 text-blue-400" /> Gerenciar Conteúdo
                 </CardTitle>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 bg-slate-700/50 rounded-lg px-3 py-1.5">
-                    <FolderOpen className="h-3.5 w-3.5 text-slate-400" />
-                    <Input
-                      placeholder="pasta (ex: estermuniz)"
-                      value={contentFolder}
-                      onChange={(e) => setContentFolder(e.target.value)}
-                      className="bg-transparent border-0 text-white text-xs h-6 w-40 p-0 focus-visible:ring-0 placeholder:text-slate-500"
-                    />
-                  </div>
-                  <Button size="sm" variant="ghost" onClick={() => loadContent(contentFolder)} className="text-slate-400 hover:text-white">
-                    <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-                  </Button>
-                  <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading}
-                    className="bg-gradient-to-r from-orange-500 to-pink-500 text-white text-xs gap-1.5">
-                    {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-                    Upload
-                  </Button>
-                  <input ref={fileInputRef} type="file" multiple accept="image/*,video/*" className="hidden"
-                    onChange={(e) => e.target.files && handleUpload(e.target.files)} />
-                </div>
+                <p className="text-xs text-slate-400 mt-1">Selecione a modelo para ver/enviar conteúdo</p>
               </CardHeader>
-              <CardContent className="p-4">
-                {loading ? (
-                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
-                ) : contentFiles.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                    {contentFiles.map((f) => (
-                      <div key={f.path} className="group relative rounded-xl overflow-hidden border border-slate-700/50 bg-slate-900/50">
-                        {f.name.match(/\.(mp4|mov|avi|webm)$/i) ? (
-                          <div className="aspect-square flex items-center justify-center bg-slate-800">
-                            <span className="text-slate-400 text-xs">🎬 {f.name}</span>
-                          </div>
-                        ) : (
-                          <img src={f.publicUrl} alt={f.name} className="aspect-square object-cover w-full" />
-                        )}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
-                            onClick={() => handleDeleteContent([f.path])}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="p-1.5">
-                          <p className="text-[10px] text-slate-400 truncate">{f.name}</p>
-                        </div>
+              <CardContent className="p-4 space-y-4">
+                {/* Model folder selector */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {models.map((m) => (
+                    <button
+                      key={m.slug}
+                      onClick={() => {
+                        setContentFolder(m.slug);
+                        loadContent(m.slug);
+                      }}
+                      className={`rounded-xl border p-3 flex items-center gap-3 transition-all text-left ${
+                        contentFolder === m.slug
+                          ? "border-orange-500 bg-orange-500/10 ring-1 ring-orange-500/30"
+                          : "border-slate-700/50 bg-slate-700/20 hover:border-slate-600"
+                      }`}
+                    >
+                      <img src={m.avatar} alt={m.name} className="h-10 w-10 rounded-full object-cover border-2 border-slate-600 shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-xs font-semibold text-white block truncate">{m.name}</span>
+                        <span className="text-[10px] text-slate-500">/{m.slug}</span>
                       </div>
-                    ))}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Upload bar when folder selected */}
+                {contentFolder && (
+                  <div className="flex items-center justify-between bg-slate-700/30 rounded-xl px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <FolderOpen className="h-4 w-4 text-orange-400" />
+                      <span className="text-sm text-white font-semibold">{contentFolder}/</span>
+                      <span className="text-xs text-slate-400">({contentFiles.length} arquivos)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="ghost" onClick={() => loadContent(contentFolder)} className="text-slate-400 hover:text-white">
+                        <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+                      </Button>
+                      <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                        className="bg-gradient-to-r from-orange-500 to-pink-500 text-white text-xs gap-1.5">
+                        {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                        Upload
+                      </Button>
+                      <input ref={fileInputRef} type="file" multiple accept="image/*,video/*" className="hidden"
+                        onChange={(e) => e.target.files && handleUpload(e.target.files)} />
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Image className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-500 text-sm">Nenhum arquivo encontrado</p>
-                    <p className="text-slate-600 text-xs mt-1">Use a pasta para organizar por modelo (ex: "estermuniz")</p>
+                )}
+
+                {/* Files grid */}
+                {contentFolder && (
+                  loading ? (
+                    <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
+                  ) : contentFiles.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                      {contentFiles.map((f) => (
+                        <div key={f.path} className="group relative rounded-xl overflow-hidden border border-slate-700/50 bg-slate-900/50">
+                          {f.name.match(/\.(mp4|mov|avi|webm)$/i) ? (
+                            <div className="aspect-square flex items-center justify-center bg-slate-800">
+                              <span className="text-slate-400 text-xs">🎬 {f.name}</span>
+                            </div>
+                          ) : (
+                            <img src={f.publicUrl} alt={f.name} className="aspect-square object-cover w-full" />
+                          )}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                              onClick={() => handleDeleteContent([f.path])}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="p-1.5">
+                            <p className="text-[10px] text-slate-400 truncate">{f.name}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Upload className="h-10 w-10 text-slate-600 mx-auto mb-3" />
+                      <p className="text-slate-500 text-sm">Nenhum arquivo em <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-orange-400">{contentFolder}/</code></p>
+                      <p className="text-slate-600 text-xs mt-1">Clique em "Upload" para adicionar fotos e vídeos</p>
+                    </div>
+                  )
+                )}
+
+                {!contentFolder && (
+                  <div className="text-center py-6">
+                    <p className="text-slate-500 text-sm">👆 Selecione uma modelo acima para gerenciar o conteúdo</p>
                   </div>
                 )}
               </CardContent>
