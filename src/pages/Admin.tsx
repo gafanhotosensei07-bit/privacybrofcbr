@@ -27,7 +27,7 @@ interface TrackingData {
   bySource: { name: string; clicks: number; checkouts: number; approved: number; revenue: number }[];
   byMedium: { name: string; clicks: number; checkouts: number; approved: number; revenue: number }[];
   byCampaign: { name: string; clicks: number; checkouts: number; approved: number; revenue: number }[];
-  dailyTrend: { date: string; views: number; checkouts: number; revenue: number }[];
+  dailyTrend: { date: string; views: number; pixGerados: number; aprovados: number; revenue: number }[];
   utmCombos: { name: string; clicks: number }[];
   referrers: { name: string; clicks: number }[];
 }
@@ -357,9 +357,13 @@ const Admin = () => {
                               <stop offset="5%" stopColor="hsl(200, 80%, 50%)" stopOpacity={0.3} />
                               <stop offset="95%" stopColor="hsl(200, 80%, 50%)" stopOpacity={0} />
                             </linearGradient>
-                            <linearGradient id="checkoutsGrad" x1="0" y1="0" x2="0" y2="1">
+                            <linearGradient id="pixGrad" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="hsl(24, 95%, 53%)" stopOpacity={0.3} />
                               <stop offset="95%" stopColor="hsl(24, 95%, 53%)" stopOpacity={0} />
+                            </linearGradient>
+                            <linearGradient id="aprovadosGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -370,7 +374,8 @@ const Admin = () => {
                             labelFormatter={(v) => { const [y,m,d] = v.split("-"); return `${d}/${m}/${y}`; }} />
                           <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 12 }} />
                           <Area type="monotone" dataKey="views" name="Visitas" stroke="hsl(200, 80%, 50%)" fill="url(#viewsGrad)" strokeWidth={2} />
-                          <Area type="monotone" dataKey="checkouts" name="Checkouts" stroke="hsl(24, 95%, 53%)" fill="url(#checkoutsGrad)" strokeWidth={2} />
+                          <Area type="monotone" dataKey="pixGerados" name="PIX Gerados" stroke="hsl(24, 95%, 53%)" fill="url(#pixGrad)" strokeWidth={2} />
+                          <Area type="monotone" dataKey="aprovados" name="Aprovados" stroke="hsl(142, 71%, 45%)" fill="url(#aprovadosGrad)" strokeWidth={2} />
                         </AreaChart>
                       </ResponsiveContainer>
                     ) : <p className="text-center text-slate-500 py-12">Sem dados ainda</p>}
