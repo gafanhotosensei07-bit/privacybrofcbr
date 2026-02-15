@@ -25,6 +25,7 @@ export type Database = {
           payment_status: string
           plan_name: string
           plan_price: number
+          recovery_email_sent: boolean
           user_id: string | null
         }
         Insert: {
@@ -37,6 +38,7 @@ export type Database = {
           payment_status?: string
           plan_name?: string
           plan_price?: number
+          recovery_email_sent?: boolean
           user_id?: string | null
         }
         Update: {
@@ -49,6 +51,7 @@ export type Database = {
           payment_status?: string
           plan_name?: string
           plan_price?: number
+          recovery_email_sent?: boolean
           user_id?: string | null
         }
         Relationships: []
