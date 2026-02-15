@@ -121,6 +121,30 @@ Deno.serve(async (req) => {
         if (!byMedium[med]) byMedium[med] = { clicks: 0, checkouts: 0, approved: 0, revenue: 0 }; byMedium[med].clicks++;
         if (!byCampaign[camp]) byCampaign[camp] = { clicks: 0, checkouts: 0, approved: 0, revenue: 0 }; byCampaign[camp].clicks++;
       });
+      // Map checkout page_views to campaigns to attribute conversions
+      const checkoutViews = pageViews.filter((pv: any) => pv.page_type === "checkout");
+      checkoutViews.forEach((pv: any) => {
+        const src = pv.utm_source || "(direto)"; const med = pv.utm_medium || "(nenhum)"; const camp = pv.utm_campaign || "(nenhuma)";
+        if (bySource[src]) bySource[src].checkouts++;
+        if (byMedium[med]) byMedium[med].checkouts++;
+        if (byCampaign[camp]) byCampaign[camp].checkouts++;
+      });
+      // Attribute approved revenue to campaigns by matching checkout model+time proximity
+      approved.forEach((c: any) => {
+        // Find the closest checkout page_view for this model
+        const matchingView = checkoutViews.find((pv: any) => {
+          const pvSlug = pv.page_slug || "";
+          const modelMatch = c.model_name && pvSlug.toLowerCase().includes(c.model_name.toLowerCase().split(" ")[0]);
+          const timeDiff = Math.abs(new Date(pv.created_at).getTime() - new Date(c.created_at).getTime());
+          return modelMatch && timeDiff < 3600000; // within 1 hour
+        });
+        if (matchingView) {
+          const src = matchingView.utm_source || "(direto)"; const med = matchingView.utm_medium || "(nenhum)"; const camp = matchingView.utm_campaign || "(nenhuma)";
+          if (bySource[src]) { bySource[src].approved++; bySource[src].revenue += Number(c.plan_price || 0); }
+          if (byMedium[med]) { byMedium[med].approved++; byMedium[med].revenue += Number(c.plan_price || 0); }
+          if (byCampaign[camp]) { byCampaign[camp].approved++; byCampaign[camp].revenue += Number(c.plan_price || 0); }
+        }
+      });
       const now = new Date();
       const dailyData: Record<string, { views: number; checkouts: number; revenue: number }> = {};
       for (let i = 0; i < 30; i++) { const d = new Date(now.getTime() - i * 86400000); dailyData[d.toISOString().split("T")[0]] = { views: 0, checkouts: 0, revenue: 0 }; }
