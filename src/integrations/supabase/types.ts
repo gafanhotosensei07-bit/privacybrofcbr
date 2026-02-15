@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           customer_email: string
           customer_name: string
+          expires_at: string | null
           id: string
           model_name: string
           payment_id: string | null
@@ -34,6 +35,7 @@ export type Database = {
           created_at?: string
           customer_email?: string
           customer_name?: string
+          expires_at?: string | null
           id?: string
           model_name?: string
           payment_id?: string | null
@@ -49,6 +51,7 @@ export type Database = {
           created_at?: string
           customer_email?: string
           customer_name?: string
+          expires_at?: string | null
           id?: string
           model_name?: string
           payment_id?: string | null

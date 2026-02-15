@@ -58,7 +58,21 @@ Deno.serve(async (req) => {
       if (!checkout_id || !new_status) {
         return new Response(JSON.stringify({ error: "checkout_id e new_status são obrigatórios" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      ({ data, error } = await supabase.from("checkout_attempts").update({ payment_status: new_status }).eq("id", checkout_id).select());
+      const updatePayload: Record<string, any> = { payment_status: new_status };
+      if (new_status === "approved") {
+        // Fetch plan to calculate expiration
+        const { data: existing } = await supabase.from("checkout_attempts").select("plan_name").eq("id", checkout_id).single();
+        if (existing) {
+          const pn = (existing.plan_name || "").toLowerCase();
+          let days = 30;
+          if (pn.includes("seman")) days = 7;
+          else if (pn.includes("3 mes") || pn.includes("trimestral")) days = 90;
+          else if (pn.includes("ano") || pn.includes("anual")) days = 365;
+          const exp = new Date(); exp.setDate(exp.getDate() + days);
+          updatePayload.expires_at = exp.toISOString();
+        }
+      }
+      ({ data, error } = await supabase.from("checkout_attempts").update(updatePayload).eq("id", checkout_id).select());
     } else if (table === "upload_content") {
       const formData = body.formData;
       if (!formData) return new Response(JSON.stringify({ error: "FormData necessário" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
