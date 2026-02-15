@@ -334,12 +334,13 @@ const Admin = () => {
               <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-orange-500" /></div>
             ) : tracking ? (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
                   <KpiCard icon={<MousePointerClick className="h-5 w-5" />} label="Cliques" value={tracking.totalClicks} sub="Total de visitas" color="from-blue-500 to-cyan-500" />
-                  <KpiCard icon={<CreditCard className="h-5 w-5" />} label="Checkouts" value={tracking.totalCheckouts} sub={`${tracking.totalApproved} aprovados`} color="from-orange-500 to-pink-500" />
+                  <KpiCard icon={<CreditCard className="h-5 w-5" />} label="PIX Gerados" value={tracking.totalCheckouts} sub={`${tracking.totalApproved} aprovados`} color="from-orange-500 to-pink-500" />
                   <KpiCard icon={<DollarSign className="h-5 w-5" />} label="Receita" value={`R$ ${tracking.totalRevenue.toFixed(2).replace(".", ",")}`} sub="Total faturado" color="from-emerald-500 to-green-500" />
                   <KpiCard icon={<TrendingUp className="h-5 w-5" />} label="Conversão" value={`${tracking.conversionRate}%`} sub="Cliques → Checkout" color="from-violet-500 to-purple-500" />
                   <KpiCard icon={<Zap className="h-5 w-5" />} label="Ticket Médio" value={`R$ ${tracking.totalApproved > 0 ? (tracking.totalRevenue / tracking.totalApproved).toFixed(2).replace(".", ",") : "0,00"}`} sub="Por aprovado" color="from-amber-500 to-orange-500" />
+                  <KpiCard icon={<Target className="h-5 w-5" />} label="PIX → Aprovado" value={`${tracking.totalCheckouts > 0 ? ((tracking.totalApproved / tracking.totalCheckouts) * 100).toFixed(1) : "0"}%`} sub={`${tracking.totalApproved}/${tracking.totalCheckouts}`} color="from-teal-500 to-emerald-500" />
                 </div>
 
                 <Card className="bg-slate-800/50 border-slate-700/50">
