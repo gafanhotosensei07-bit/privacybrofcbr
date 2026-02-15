@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.model-content]
 verify_jwt = false
+
+[functions.sales-recovery]
+verify_jwt = false
