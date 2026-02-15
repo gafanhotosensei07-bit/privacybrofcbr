@@ -10,6 +10,7 @@ import profilePhoto from "@/assets/profile-photo.jpeg";
 import { models } from "@/data/models";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageView } from "@/hooks/usePageView";
+import { trackInitiateCheckout, trackLead } from "@/lib/meta-pixel";
 
 // SigmaPay integration via secure edge function
 
@@ -22,6 +23,13 @@ const Checkout = () => {
   const planPrice = parseFloat(searchParams.get("price") || "9.90");
   const modelName = searchParams.get("model") || "";
   usePageView("checkout", modelName);
+
+  useEffect(() => {
+    trackInitiateCheckout({
+      content_name: `${modelName} - ${planName}`,
+      value: planPrice,
+    });
+  }, [modelName, planName, planPrice]);
   const model = models.find((m) => m.name === modelName);
   const [orderBumps, setOrderBumps] = useState<Record<string, boolean>>({});
   const [viewerCount] = useState(() => Math.floor(Math.random() * 20) + 12);
@@ -128,6 +136,7 @@ const Checkout = () => {
     }
 
     setStep("loading");
+    trackLead({ content_name: `${modelName} - ${planName}`, value: planPrice });
 
     try {
       const { data, error } = await supabase.functions.invoke("sigmapay", {

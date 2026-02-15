@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { CheckCircle, Crown, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trackPurchase } from "@/lib/meta-pixel";
 import { Card, CardContent } from "@/components/ui/card";
 import { models } from "@/data/models";
 import logoIcon from "@/assets/logo-icon.png";
@@ -12,6 +14,13 @@ const ThankYou = () => {
   const planPrice = searchParams.get("price") || "0";
   const modelName = searchParams.get("model") || "";
   const model = models.find((m) => m.name === modelName);
+
+  useEffect(() => {
+    trackPurchase({
+      content_name: `${modelName} - ${planName}`,
+      value: parseFloat(planPrice),
+    });
+  }, [modelName, planName, planPrice]);
 
   return (
     <div className="min-h-screen bg-[hsl(30,20%,96%)] flex flex-col items-center justify-center px-4 py-8">
