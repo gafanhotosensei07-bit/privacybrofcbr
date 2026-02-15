@@ -146,10 +146,10 @@ Deno.serve(async (req) => {
         }
       });
       const now = new Date();
-      const dailyData: Record<string, { views: number; checkouts: number; revenue: number }> = {};
-      for (let i = 0; i < 30; i++) { const d = new Date(now.getTime() - i * 86400000); dailyData[d.toISOString().split("T")[0]] = { views: 0, checkouts: 0, revenue: 0 }; }
+      const dailyData: Record<string, { views: number; pixGerados: number; aprovados: number; revenue: number }> = {};
+      for (let i = 0; i < 30; i++) { const d = new Date(now.getTime() - i * 86400000); dailyData[d.toISOString().split("T")[0]] = { views: 0, pixGerados: 0, aprovados: 0, revenue: 0 }; }
       pageViews.forEach((pv: any) => { const day = pv.created_at.split("T")[0]; if (dailyData[day]) dailyData[day].views++; });
-      checkouts.forEach((c: any) => { const day = c.created_at.split("T")[0]; if (dailyData[day]) { dailyData[day].checkouts++; if (c.payment_status === "approved") dailyData[day].revenue += Number(c.plan_price || 0); } });
+      checkouts.forEach((c: any) => { const day = c.created_at.split("T")[0]; if (dailyData[day]) { dailyData[day].pixGerados++; if (c.payment_status === "approved") { dailyData[day].aprovados++; dailyData[day].revenue += Number(c.plan_price || 0); } } });
       const dailyTrend = Object.entries(dailyData).sort(([a], [b]) => a.localeCompare(b)).map(([date, d]) => ({ date, ...d }));
       const utmCombos: Record<string, { clicks: number }> = {};
       pageViews.forEach((pv: any) => { if (pv.utm_source) { const key = `${pv.utm_source} / ${pv.utm_medium || "(nenhum)"} / ${pv.utm_campaign || "(nenhuma)"}`; if (!utmCombos[key]) utmCombos[key] = { clicks: 0 }; utmCombos[key].clicks++; } });
