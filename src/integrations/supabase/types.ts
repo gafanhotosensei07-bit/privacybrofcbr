@@ -25,6 +25,8 @@ export type Database = {
           payment_status: string
           plan_name: string
           plan_price: number
+          recovery_email_count: number
+          recovery_email_last_sent_at: string | null
           recovery_email_sent: boolean
           user_id: string | null
         }
@@ -38,6 +40,8 @@ export type Database = {
           payment_status?: string
           plan_name?: string
           plan_price?: number
+          recovery_email_count?: number
+          recovery_email_last_sent_at?: string | null
           recovery_email_sent?: boolean
           user_id?: string | null
         }
@@ -51,6 +55,8 @@ export type Database = {
           payment_status?: string
           plan_name?: string
           plan_price?: number
+          recovery_email_count?: number
+          recovery_email_last_sent_at?: string | null
           recovery_email_sent?: boolean
           user_id?: string | null
         }
