@@ -1,32 +1,71 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
 /**
- * Intercepts browser back button by pushing an extra history state.
- * Calls `onBack` when user presses back instead of leaving.
+ * Intercepts browser back button/gesture (including mobile swipe-back)
+ * and tab/app switching on mobile. Calls `onBack` instead of leaving.
  */
 export const useBackRedirect = (onBack: () => void) => {
   const triggered = useRef(false);
+  const hasInteracted = useRef(false);
+
+  const triggerOnce = useCallback(() => {
+    if (!triggered.current && hasInteracted.current) {
+      triggered.current = true;
+      onBack();
+      // Push state again to keep intercepting
+      window.history.pushState({ backRedirect: true }, "");
+      setTimeout(() => {
+        triggered.current = false;
+      }, 1500);
+    }
+  }, [onBack]);
 
   useEffect(() => {
-    // Push an extra entry so pressing back stays on our page
+    // Push multiple entries for more robust mobile interception
+    window.history.pushState({ backRedirect: true }, "");
     window.history.pushState({ backRedirect: true }, "");
 
-    const handlePopState = (e: PopStateEvent) => {
-      if (!triggered.current) {
-        triggered.current = true;
-        onBack();
-        // Push again so they can't leave on second press either
-        window.history.pushState({ backRedirect: true }, "");
-        // Reset after a delay so it can trigger again
-        setTimeout(() => {
-          triggered.current = false;
-        }, 1000);
+    // Track user interaction so we don't fire on initial load
+    const markInteracted = () => {
+      hasInteracted.current = true;
+    };
+
+    // popstate: handles back button + mobile swipe-back gestures
+    const handlePopState = () => {
+      triggerOnce();
+    };
+
+    // beforeunload: shows native "Leave site?" on desktop tab close
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasInteracted.current) {
+        e.preventDefault();
+        e.returnValue = "";
       }
     };
 
-    window.addEventListener("popstate", handlePopState);
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
+    // visibilitychange: detect mobile app/tab switching
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && hasInteracted.current) {
+        // When user returns, they'll see the promo
+        triggered.current = false;
+      }
     };
-  }, [onBack]);
+
+    // touchstart ensures mobile interaction is tracked
+    document.addEventListener("touchstart", markInteracted, { passive: true, once: true });
+    document.addEventListener("click", markInteracted, { once: true });
+    document.addEventListener("scroll", markInteracted, { passive: true, once: true });
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("touchstart", markInteracted);
+      document.removeEventListener("click", markInteracted);
+      document.removeEventListener("scroll", markInteracted);
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [triggerOnce]);
 };
