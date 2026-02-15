@@ -70,51 +70,53 @@ Deno.serve(async (req) => {
       const planPrice = checkout.plan_price ? `R$ ${Number(checkout.plan_price).toFixed(2).replace(".", ",")}` : "";
       const emailNum = (checkout.recovery_email_count || 0) + 1;
 
-      // Vary subject/urgency based on email number
       const subjects = [
-        `⚡ ${firstName}, seu acesso a ${modelName} ainda está disponível!`,
-        `🔥 ${firstName}, última chance! Seu acesso a ${modelName} vai expirar`,
-        `⏰ ${firstName}, ÚLTIMA CHAMADA — acesso a ${modelName} encerrando`,
+        `${firstName}, seu acesso a ${modelName} ainda está disponível`,
+        `${firstName}, lembrete sobre seu acesso a ${modelName}`,
+        `${firstName}, ultimo lembrete - acesso a ${modelName}`,
       ];
       const urgencyTexts = [
         "Notamos que você gerou o PIX mas o pagamento ainda não foi confirmado.",
-        "Essa é sua <strong>segunda notificação</strong> — as vagas estão acabando!",
-        "Esta é sua <strong>última notificação</strong>. Após isso, não enviaremos mais lembretes.",
+        "Este é um segundo lembrete sobre seu pagamento pendente.",
+        "Este é o último lembrete que enviaremos sobre este pagamento.",
       ];
 
       const htmlBody = `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#111;font-family:Arial,sans-serif;">
-  <div style="max-width:600px;margin:0 auto;background:#1a1a2e;border-radius:12px;overflow:hidden;">
-    <div style="background:linear-gradient(135deg,#ff6b35,#e91e63);padding:30px 20px;text-align:center;">
-      <h1 style="color:#fff;margin:0;font-size:24px;">${emailNum === 3 ? "⏰" : "⚡"} Seu acesso está esperando!</h1>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;">
+    <div style="background:#1a1a2e;padding:25px 20px;text-align:center;">
+      <h1 style="color:#fff;margin:0;font-size:20px;">Seu acesso está esperando</h1>
     </div>
-    <div style="padding:30px 20px;color:#eee;">
-      <p style="font-size:18px;">Oi <strong>${firstName}</strong>! 👋</p>
-      <p style="font-size:16px;line-height:1.6;">
+    <div style="padding:25px 20px;color:#333;">
+      <p style="font-size:16px;">Ola ${firstName},</p>
+      <p style="font-size:15px;line-height:1.6;">
         ${urgencyTexts[emailNum - 1]}
       </p>
-      <p style="font-size:16px;line-height:1.6;">
-        O conteúdo de <strong>${modelName}</strong> é <strong>muito procurado</strong> e as vagas são limitadas! 🔥
+      <p style="font-size:15px;line-height:1.6;">
+        O conteudo exclusivo de <strong>${modelName}</strong> esta disponivel para voce.
       </p>
-      <div style="background:#252545;border-radius:10px;padding:20px;margin:20px 0;text-align:center;">
-        <p style="color:#ff6b35;font-size:14px;margin:0 0 5px;">Plano selecionado</p>
-        <p style="color:#fff;font-size:20px;font-weight:bold;margin:0;">${checkout.plan_name} — ${planPrice}</p>
+      <div style="background:#f8f8f8;border-radius:8px;padding:15px;margin:20px 0;text-align:center;border:1px solid #eee;">
+        <p style="color:#666;font-size:13px;margin:0 0 5px;">Plano selecionado</p>
+        <p style="color:#333;font-size:18px;font-weight:bold;margin:0;">${checkout.plan_name} - ${planPrice}</p>
       </div>
       <div style="text-align:center;margin:25px 0;">
         <a href="https://privacybrofcbr.lovable.app/modelo/${encodeURIComponent(checkout.model_name?.toLowerCase().replace(/\s+/g, '') || '')}" 
-           style="display:inline-block;background:linear-gradient(135deg,#ff6b35,#e91e63);color:#fff;text-decoration:none;padding:16px 40px;border-radius:30px;font-size:18px;font-weight:bold;">
-          🔓 COMPLETAR MEU ACESSO
+           style="display:inline-block;background:#1a1a2e;color:#fff;text-decoration:none;padding:14px 35px;border-radius:6px;font-size:16px;font-weight:bold;">
+          Completar meu acesso
         </a>
       </div>
-      <p style="font-size:14px;color:#888;text-align:center;">
-        Se você já pagou, desconsidere este email. O acesso será liberado automaticamente.
+      <p style="font-size:13px;color:#999;text-align:center;">
+        Se voce ja pagou, desconsidere este email. O acesso sera liberado automaticamente.
       </p>
     </div>
-    <div style="background:#111;padding:15px 20px;text-align:center;">
-      <p style="color:#555;font-size:12px;margin:0;">Privacy — Conteúdo Exclusivo | Email ${emailNum} de 3</p>
+    <div style="background:#f5f5f5;padding:12px 20px;text-align:center;border-top:1px solid #eee;">
+      <p style="color:#999;font-size:11px;margin:0;">Privacy - Conteudo Exclusivo</p>
+      <p style="color:#bbb;font-size:10px;margin:4px 0 0;">
+        <a href="https://privacybrofcbr.lovable.app" style="color:#bbb;">Visitar site</a>
+      </p>
     </div>
   </div>
 </body>
@@ -129,6 +131,7 @@ Deno.serve(async (req) => {
           },
           body: JSON.stringify({
             from: "Privacy <noreply@privacybrofc.shop>",
+            reply_to: "noreply@privacybrofc.shop",
             to: [checkout.customer_email],
             subject: subjects[emailNum - 1],
             html: htmlBody,
