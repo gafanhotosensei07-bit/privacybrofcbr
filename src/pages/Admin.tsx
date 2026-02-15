@@ -1163,74 +1163,196 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
-              {/* Preview content */}
-              {previewSlug && (
-                <Card className="bg-slate-800/50 border-slate-700/50">
-                  <CardHeader className="border-b border-slate-700/50 flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle className="text-white text-base">
-                        {models.find(m => m.slug === previewSlug)?.name} — Conteúdo do Storage
-                      </CardTitle>
-                      <p className="text-xs text-slate-400 mt-1">{previewContent.length} arquivo(s) encontrado(s)</p>
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={async () => {
-                      setPreviewLoading(true);
-                      const d = await fetchData("preview_members", { slug: previewSlug });
-                      if (d) setPreviewContent(d);
-                      setPreviewLoading(false);
-                    }} className="text-slate-400 hover:text-white">
-                      <RefreshCw className={`h-4 w-4 ${previewLoading ? "animate-spin" : ""}`} />
-                    </Button>
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    {previewLoading ? (
-                      <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
-                    ) : previewContent.length > 0 ? (
-                      <div className="space-y-6">
-                        {/* Videos */}
-                        {previewContent.filter(c => c.type === "video").length > 0 && (
+              {/* Preview content — renders like the real members area */}
+              {previewSlug && (() => {
+                const pm = models.find(m => m.slug === previewSlug);
+                if (!pm) return null;
+                const pt = pm.theme;
+                const pGradient = `linear-gradient(135deg, hsl(${pt.accentColor}) 0%, hsl(${pt.accentColorEnd}) 100%)`;
+                const pVideos = previewContent.filter(c => c.type === "video");
+                const pImages = previewContent.filter(c => c.type === "image");
+                const pFallback = previewContent.length === 0 ? (pm.previews || []) : [];
+
+                return (
+                  <div className="max-w-lg mx-auto rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50">
+                    {/* Header */}
+                    <header className="flex items-center justify-between px-4 py-3" style={{ background: pGradient }}>
+                      <div className="flex items-center gap-2">
+                        <Crown className="h-5 w-5 text-white" />
+                        <span className="text-sm font-bold text-white">Área VIP</span>
+                      </div>
+                      <span className="text-xs font-bold text-white bg-white/20 px-2.5 py-1 rounded-full">✅ Ativo</span>
+                    </header>
+
+                    <div className="bg-[hsl(30,20%,96%)]">
+                      {/* Model header card */}
+                      <div className="bg-white border-b border-slate-200/60">
+                        <div className="flex items-center gap-3 p-4">
+                          <div className="h-16 w-16 rounded-full p-[2px] shrink-0" style={{ background: pGradient }}>
+                            <img src={pm.avatar} alt={pm.name} className="h-full w-full rounded-full object-cover border-2 border-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-slate-900 flex items-center gap-1.5 text-base">
+                              {pm.name}
+                              {pm.verified && <CheckCircle className="h-4 w-4" style={{ color: `hsl(${pt.accentColor})` }} />}
+                            </p>
+                            <p className="text-xs text-slate-500">{pm.username}</p>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                              <span className="text-[10px] text-green-600 font-semibold">Online agora</span>
+                            </div>
+                          </div>
+                          <span className="px-3 py-2 rounded-xl text-xs font-bold text-white shrink-0" style={{ background: pGradient }}>
+                            💬 Chat
+                          </span>
+                        </div>
+
+                        {/* Stats row */}
+                        <div className="grid grid-cols-3 border-t border-slate-100">
+                          <div className="flex flex-col items-center py-3">
+                            <div className="flex items-center gap-1">
+                              <Image className="h-3.5 w-3.5" style={{ color: `hsl(${pt.accentColor})` }} />
+                              <span className="text-sm font-bold text-slate-900">{pImages.length || pm.stats.photos}</span>
+                            </div>
+                            <span className="text-[10px] text-slate-500">Fotos</span>
+                          </div>
+                          <div className="flex flex-col items-center py-3 border-x border-slate-100">
+                            <div className="flex items-center gap-1">
+                              <Eye className="h-3.5 w-3.5" style={{ color: `hsl(${pt.accentColor})` }} />
+                              <span className="text-sm font-bold text-slate-900">{pVideos.length || pm.stats.videos}</span>
+                            </div>
+                            <span className="text-[10px] text-slate-500">Vídeos</span>
+                          </div>
+                          <div className="flex flex-col items-center py-3">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3.5 w-3.5" style={{ color: `hsl(${pt.accentColor})` }} />
+                              <span className="text-sm font-bold text-slate-900">{previewContent.length || pm.stats.posts}</span>
+                            </div>
+                            <span className="text-[10px] text-slate-500">Posts</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="px-4 py-4">
+                        {previewLoading ? (
+                          <div className="flex justify-center py-8">
+                            <Loader2 className="h-6 w-6 animate-spin" style={{ color: `hsl(${pt.accentColor})` }} />
+                          </div>
+                        ) : (
                           <>
-                            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Vídeos ({previewContent.filter(c => c.type === "video").length})</h3>
+                            {/* Videos */}
+                            {pVideos.length > 0 && (
+                              <div className="mb-6">
+                                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                  <Zap className="h-3.5 w-3.5" style={{ color: `hsl(${pt.accentColor})` }} />
+                                  Vídeos Exclusivos
+                                </h2>
+                                <div className="space-y-3">
+                                  {pVideos.map((v, i) => (
+                                    <div key={i} className="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+                                      <video src={v.url} controls preload="metadata" className="w-full aspect-video object-cover" />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Photos */}
+                            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                              <Zap className="h-3.5 w-3.5" style={{ color: `hsl(${pt.accentColor})` }} />
+                              Conteúdo Exclusivo
+                            </h2>
+
+                            {pImages.length > 0 ? (
+                              <div className="grid grid-cols-2 gap-3">
+                                {pImages.map((img, i) => (
+                                  <div key={i} className="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+                                    <img src={img.url} alt={img.name} className="w-full aspect-[3/4] object-cover" />
+                                  </div>
+                                ))}
+                              </div>
+                            ) : pFallback.length > 0 ? (
+                              <div className="grid grid-cols-2 gap-3">
+                                {pFallback.map((src, i) => (
+                                  <div key={i} className="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+                                    <img src={src} alt={`Preview ${i + 1}`} className="w-full aspect-[3/4] object-cover" />
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-8">
+                                <Image className="h-10 w-10 mx-auto mb-2" style={{ color: `hsl(${pt.accentColor})` }} />
+                                <p className="text-slate-500 text-sm">Nenhum conteúdo no storage</p>
+                                <p className="text-slate-400 text-xs mt-1">Upload na aba "Conteúdo" → pasta <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{previewSlug}/</code></p>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+
+                      {/* Upsell section */}
+                      {models.filter(m => m.slug !== previewSlug).length > 0 && (
+                        <div className="px-4 pb-6">
+                          <div className="border-t border-slate-200 pt-5">
+                            <h2 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-1.5">
+                              <Zap className="h-4 w-4" style={{ color: `hsl(${pt.accentColor})` }} />
+                              Você também vai amar 🔥
+                            </h2>
                             <div className="space-y-3">
-                              {previewContent.filter(c => c.type === "video").map((v, i) => (
-                                <div key={i} className="rounded-xl overflow-hidden border border-slate-700/50 bg-slate-900/50">
-                                  <video src={v.url} controls preload="metadata" className="w-full max-h-[400px]" />
-                                  <div className="px-3 py-2 flex items-center justify-between">
-                                    <span className="text-xs text-slate-400 truncate">{v.name}</span>
-                                    <span className="text-[10px] text-slate-500">{new Date(v.created_at).toLocaleDateString("pt-BR")}</span>
+                              {models.filter(m => m.slug !== previewSlug).map((m) => {
+                                const mGrad = `linear-gradient(135deg, hsl(${m.theme.accentColor}) 0%, hsl(${m.theme.accentColorEnd}) 100%)`;
+                                return (
+                                  <div key={m.slug} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                                    <div className="h-20 relative overflow-hidden">
+                                      <img src={m.banner} alt="" className="w-full h-full object-cover" />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                      <div className="absolute bottom-2 left-3 flex items-center gap-2">
+                                        <div className="h-10 w-10 rounded-full p-[2px]" style={{ background: mGrad }}>
+                                          <img src={m.avatar} alt={m.name} className="h-full w-full rounded-full object-cover border border-white" />
+                                        </div>
+                                        <div>
+                                          <p className="text-white text-sm font-bold flex items-center gap-1">
+                                            {m.name}
+                                            {m.verified && <CheckCircle className="h-3 w-3 text-white" />}
+                                          </p>
+                                          <p className="text-white/70 text-[10px]">{m.username}</p>
+                                        </div>
+                                      </div>
+                                      <span className="absolute top-2 right-2 text-[9px] font-bold text-white px-2 py-0.5 rounded-full" style={{ background: mGrad }}>
+                                        {m.theme.badge}
+                                      </span>
+                                    </div>
+                                    <div className="flex gap-1 px-3 pt-3">
+                                      {(m.previews || []).slice(0, 3).map((src, i) => (
+                                        <div key={i} className="flex-1 aspect-square rounded-lg overflow-hidden relative">
+                                          <img src={src} alt="" className="w-full h-full object-cover" />
+                                          <div className="absolute inset-0 backdrop-blur-sm bg-black/20 flex items-center justify-center">
+                                            <Lock className="h-3.5 w-3.5 text-white" />
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <div className="p-3 flex items-center justify-between">
+                                      <div>
+                                        <p className="text-xs text-slate-500">{m.stats.photos} fotos · {m.stats.videos} vídeos</p>
+                                        <p className="text-sm font-bold text-slate-900">A partir de R$ {m.promos[0]?.price || m.mainPlan.price}</p>
+                                      </div>
+                                      <span className="px-4 py-2 rounded-xl text-xs font-bold text-white" style={{ background: mGrad }}>
+                                        {m.theme.promoText}
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
-                          </>
-                        )}
-                        {/* Images */}
-                        {previewContent.filter(c => c.type === "image").length > 0 && (
-                          <>
-                            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Fotos ({previewContent.filter(c => c.type === "image").length})</h3>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                              {previewContent.filter(c => c.type === "image").map((img, i) => (
-                                <div key={i} className="rounded-xl overflow-hidden border border-slate-700/50 bg-slate-900/50">
-                                  <img src={img.url} alt={img.name} className="w-full aspect-[3/4] object-cover" />
-                                  <div className="px-2 py-1.5">
-                                    <span className="text-[10px] text-slate-500 truncate block">{img.name}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <Image className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                        <p className="text-slate-500 text-sm">Nenhum conteúdo no storage para esta modelo</p>
-                        <p className="text-slate-600 text-xs mt-1">Faça upload na aba "Conteúdo" usando a pasta <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-slate-400">{previewSlug}/</code></p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </TabsContent>
         </Tabs>
