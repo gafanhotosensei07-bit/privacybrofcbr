@@ -1,15 +1,13 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star, Crown, UserX, Plus, ExternalLink, Power, Copy, Code, LogOut } from "lucide-react";
+import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star, Crown, UserX, Plus, ExternalLink, Power, Copy, Code } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, Legend } from "recharts";
 import { models } from "@/data/models";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { Label } from "@/components/ui/label";
 
 const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-data`;
 
@@ -40,10 +38,8 @@ interface MonitoredDomain { id: string; domain: string; label: string; notes: st
 const CHART_COLORS = ["hsl(24, 95%, 53%)", "hsl(280, 70%, 50%)", "hsl(340, 80%, 55%)", "hsl(150, 70%, 40%)", "hsl(270, 65%, 55%)", "hsl(40, 90%, 50%)", "hsl(0, 85%, 55%)", "hsl(200, 80%, 50%)", "hsl(60, 80%, 45%)", "hsl(320, 75%, 50%)"];
 
 const Admin = () => {
-  const [email, setEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("tracking");
@@ -63,72 +59,17 @@ const Admin = () => {
   const [showAddDomain, setShowAddDomain] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check if user is already logged in and is admin
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // Try a test request to verify admin role
-        const res = await fetch(FUNCTION_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ table: "dashboard" }),
-        });
-        if (res.ok) {
-          setAuthenticated(true);
-          const json = await res.json();
-          setDashboard(json.data);
-          setActiveTab("tracking");
-          // Load tracking after
-          const tRes = await fetch(FUNCTION_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({ table: "tracking" }),
-          });
-          if (tRes.ok) {
-            const tJson = await tRes.json();
-            setTracking(tJson.data);
-          }
-        }
-      }
-      setCheckingAuth(false);
-    };
-    checkAuth();
-  }, []);
-
-  const getAuthHeaders = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error("Sessão expirada. Faça login novamente.");
-    return {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${session.access_token}`,
-    };
-  };
-
   const fetchData = async (table: string, extra?: Record<string, any>) => {
     setLoading(true);
     setError("");
     try {
-      const headers = await getAuthHeaders();
       const res = await fetch(FUNCTION_URL, {
         method: "POST",
-        headers,
-        body: JSON.stringify({ table, ...extra }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password, table, ...extra }),
       });
       const json = await res.json();
-      if (!res.ok) {
-        if (res.status === 401) {
-          setAuthenticated(false);
-          throw new Error("Sessão expirada ou sem permissão de admin.");
-        }
-        throw new Error(json.error);
-      }
+      if (!res.ok) throw new Error(json.error);
       return json.data || [];
     } catch (err: any) {
       setError(err.message);
@@ -139,44 +80,11 @@ const Admin = () => {
   };
 
   const handleLogin = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password: loginPassword,
-      });
-      if (authError) throw new Error("E-mail ou senha inválidos");
-      if (!data.session) throw new Error("Erro ao criar sessão");
-
-      // Verify admin role via edge function
-      const res = await fetch(FUNCTION_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${data.session.access_token}`,
-        },
-        body: JSON.stringify({ table: "tracking" }),
-      });
-      if (!res.ok) {
-        await supabase.auth.signOut();
-        throw new Error("Sua conta não possui permissão de administrador.");
-      }
-      const json = await res.json();
+    const data = await fetchData("tracking");
+    if (data && !error) {
       setAuthenticated(true);
-      setTracking(json.data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      setTracking(data);
     }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setAuthenticated(false);
-    setEmail("");
-    setLoginPassword("");
   };
 
   const loadTab = async (tab: string) => {
@@ -216,15 +124,15 @@ const Admin = () => {
     try {
       for (const file of Array.from(files)) {
         const filePath = contentFolder ? `${contentFolder}/${file.name}` : file.name;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) throw new Error("Sessão expirada");
         const formData = new FormData();
+        formData.append("password", password);
         formData.append("table", "upload_content");
         formData.append("file", file);
         formData.append("file_path", filePath);
 
-        const res = await fetch(FUNCTION_URL, { method: "POST", body: formData, headers: { "Authorization": `Bearer ${session.access_token}` } });
+        const res = await fetch(FUNCTION_URL, { method: "POST", body: formData });
         const json = await res.json();
+        if (!res.ok) throw new Error(json.error);
         if (!res.ok) throw new Error(json.error);
       }
       toast.success("Upload concluído!");
@@ -304,15 +212,6 @@ const Admin = () => {
     return "⏳ Pendente";
   };
 
-  // Loading auth check
-  if (checkingAuth) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
-      </div>
-    );
-  }
-
   // Login screen
   if (!authenticated) {
     return (
@@ -323,30 +222,17 @@ const Admin = () => {
               <Lock className="h-7 w-7 text-white" />
             </div>
             <CardTitle className="text-white text-xl">Painel Administrativo</CardTitle>
-            <p className="text-slate-400 text-sm">Faça login com sua conta de administrador</p>
+            <p className="text-slate-400 text-sm">Acesso restrito</p>
           </CardHeader>
           <CardContent className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <Label className="text-slate-300 text-sm">E-mail</Label>
-              <Input
-                type="email"
-                placeholder="admin@exemplo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 h-12"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-slate-300 text-sm">Senha</Label>
-              <Input
-                type="password"
-                placeholder="Sua senha"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 h-12"
-              />
-            </div>
+            <Input
+              type="password"
+              placeholder="Senha de administrador"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 h-12"
+            />
             {error && <p className="text-sm text-red-400">{error}</p>}
             <Button
               onClick={handleLogin}
@@ -385,16 +271,10 @@ const Admin = () => {
               <p className="text-[10px] sm:text-xs text-slate-400 hidden sm:block">Gerenciamento completo</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button variant="ghost" size="sm" onClick={() => loadTab(activeTab)} className="text-slate-400 hover:text-white">
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-              <span className="ml-2 hidden sm:inline">Atualizar</span>
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-400 hover:text-red-400">
-              <LogOut className="h-4 w-4" />
-              <span className="ml-2 hidden sm:inline">Sair</span>
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" onClick={() => loadTab(activeTab)} className="text-slate-400 hover:text-white shrink-0">
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <span className="ml-2 hidden sm:inline">Atualizar</span>
+          </Button>
         </div>
       </header>
 
