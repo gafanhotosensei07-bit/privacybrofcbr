@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star, Crown, UserX, Plus, ExternalLink, Power, Copy, Code } from "lucide-react";
+import { Lock, Users, MessageSquare, CreditCard, Loader2, RefreshCw, BarChart3, Eye, TrendingUp, DollarSign, Activity, ArrowUpRight, Zap, Globe, Link2, Megaphone, MousePointerClick, Target, CheckCircle, XCircle, Upload, Trash2, Image, FolderOpen, Star, Crown, UserX, Plus, ExternalLink, Power, Copy, Code, MailCheck, Mail, Send } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, Legend } from "recharts";
 import { models } from "@/data/models";
 import { toast } from "sonner";
@@ -57,6 +57,8 @@ const Admin = () => {
   const [domains, setDomains] = useState<MonitoredDomain[]>([]);
   const [newDomain, setNewDomain] = useState({ domain: "", label: "", notes: "" });
   const [showAddDomain, setShowAddDomain] = useState(false);
+  const [recovery, setRecovery] = useState<{ totalPending: number; emailSent: number; emailNotSent: number; pending: CheckoutAttempt[] } | null>(null);
+  const [triggeringRecovery, setTriggeringRecovery] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = async (table: string, extra?: Record<string, any>) => {
@@ -111,6 +113,9 @@ const Admin = () => {
       if (d) setDomains(d);
     } else if (tab === "conteudo") {
       await loadContent(contentFolder);
+    } else if (tab === "recuperacao") {
+      const d = await fetchData("recovery");
+      if (d) setRecovery(d);
     }
   };
 
@@ -308,6 +313,9 @@ const Admin = () => {
               </TabsTrigger>
               <TabsTrigger value="dominios" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
                 <Globe className="h-3.5 w-3.5" /> Domínios
+              </TabsTrigger>
+              <TabsTrigger value="recuperacao" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <Mail className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Recuperação</span><span className="sm:hidden">Recup</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1007,6 +1015,105 @@ const Admin = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* =================== RECUPERAÇÃO TAB =================== */}
+          <TabsContent value="recuperacao">
+            {loading && !recovery ? (
+              <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-orange-500" /></div>
+            ) : recovery ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <KpiCard icon={<CreditCard className="h-5 w-5" />} label="Pendentes" value={recovery.totalPending} sub="Checkouts sem pagamento" color="from-amber-500 to-orange-500" />
+                  <KpiCard icon={<MailCheck className="h-5 w-5" />} label="Email Enviado" value={recovery.emailSent} sub="Recuperação enviada" color="from-emerald-500 to-green-500" />
+                  <KpiCard icon={<Mail className="h-5 w-5" />} label="Aguardando" value={recovery.emailNotSent} sub="Email ainda não enviado" color="from-blue-500 to-cyan-500" />
+                  <Card className="bg-slate-800/50 border-slate-700/50 overflow-hidden">
+                    <CardContent className="p-4 flex flex-col items-center justify-center h-full">
+                      <Button
+                        onClick={async () => {
+                          setTriggeringRecovery(true);
+                          const result = await fetchData("trigger_recovery");
+                          setTriggeringRecovery(false);
+                          if (result) {
+                            toast.success(`${result.sent || 0} email(s) enviado(s)!`);
+                            loadTab("recuperacao");
+                          }
+                        }}
+                        disabled={triggeringRecovery || loading}
+                        className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold gap-2"
+                      >
+                        {triggeringRecovery ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        Disparar Agora
+                      </Button>
+                      <p className="text-[10px] text-slate-500 mt-2 text-center">Enviar emails manualmente</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card className="bg-slate-800/50 border-slate-700/50">
+                  <CardHeader className="flex flex-row items-center justify-between border-b border-slate-700/50">
+                    <CardTitle className="text-white text-base">Checkouts Pendentes ({recovery.totalPending})</CardTitle>
+                    <Button variant="ghost" size="icon" onClick={() => loadTab("recuperacao")} className="text-slate-400 hover:text-white">
+                      <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-slate-700/50 hover:bg-transparent">
+                            <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Cliente</TableHead>
+                            <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Email</TableHead>
+                            <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Modelo</TableHead>
+                            <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Plano</TableHead>
+                            <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Valor</TableHead>
+                            <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Recup.</TableHead>
+                            <TableHead className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Data</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {recovery.pending.map((c) => (
+                            <TableRow key={c.id} className="border-slate-700/30 hover:bg-slate-700/20">
+                              <TableCell className="text-slate-300 text-sm font-medium">{c.customer_name || "—"}</TableCell>
+                              <TableCell className="text-slate-300 text-sm">{c.customer_email || "—"}</TableCell>
+                              <TableCell className="text-slate-300 text-sm">{c.model_name}</TableCell>
+                              <TableCell className="text-slate-300 text-sm">{c.plan_name}</TableCell>
+                              <TableCell className="text-slate-300 text-sm font-medium">R$ {Number(c.plan_price).toFixed(2).replace(".", ",")}</TableCell>
+                              <TableCell>
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${(c as any).recovery_email_sent ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"}`}>
+                                  {(c as any).recovery_email_sent ? "✅ Enviado" : "⏳ Pendente"}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-slate-400 text-xs">{formatDate(c.created_at)}</TableCell>
+                            </TableRow>
+                          ))}
+                          {recovery.pending.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={7} className="text-center text-slate-500 py-12">
+                                <MailCheck className="h-12 w-12 mx-auto mb-3 text-slate-600" />
+                                Nenhum checkout pendente 🎉
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="bg-slate-800/30 rounded-xl border border-slate-700/50 p-4">
+                  <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-amber-400" /> Como funciona
+                  </h4>
+                  <ul className="text-xs text-slate-400 space-y-1.5">
+                    <li>• O cron verifica checkouts pendentes há +5min automaticamente (a cada minuto)</li>
+                    <li>• Email personalizado é enviado via Resend incentivando o pagamento</li>
+                    <li>• Cada cliente recebe no máximo 1 email de recuperação</li>
+                    <li>• Use "Disparar Agora" para enviar manualmente</li>
+                  </ul>
+                </div>
+              </div>
+            ) : null}
           </TabsContent>
         </Tabs>
       </div>

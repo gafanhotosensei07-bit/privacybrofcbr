@@ -181,6 +181,32 @@ Deno.serve(async (req) => {
       const { domain_id } = body;
       if (!domain_id) return new Response(JSON.stringify({ error: "domain_id é obrigatório" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       ({ data, error } = await supabase.from("monitored_domains").delete().eq("id", domain_id).select());
+    } else if (table === "recovery") {
+      const { data: pending, error: pErr } = await supabase
+        .from("checkout_attempts")
+        .select("*")
+        .eq("payment_status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (pErr) throw pErr;
+      const totalPending = (pending || []).length;
+      const emailSent = (pending || []).filter((c: any) => c.recovery_email_sent).length;
+      const emailNotSent = totalPending - emailSent;
+      data = { totalPending, emailSent, emailNotSent, pending: pending || [] };
+      error = null;
+    } else if (table === "trigger_recovery") {
+      // Manually trigger the sales-recovery edge function
+      const recoveryUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/sales-recovery`;
+      const res = await fetch(recoveryUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+        },
+        body: "{}",
+      });
+      data = await res.json();
+      error = null;
     } else {
       return new Response(JSON.stringify({ error: "Tabela inválida" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
