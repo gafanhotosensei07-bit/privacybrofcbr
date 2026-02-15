@@ -260,53 +260,56 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <header className="border-b border-slate-700/50 bg-slate-800/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center">
-              <Target className="h-5 w-5 text-white" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shrink-0">
+              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">Painel Administrativo</h1>
-              <p className="text-xs text-slate-400">Gerenciamento completo</p>
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-lg font-bold text-white truncate">Painel Admin</h1>
+              <p className="text-[10px] sm:text-xs text-slate-400 hidden sm:block">Gerenciamento completo</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => loadTab(activeTab)} className="text-slate-400 hover:text-white">
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Atualizar
+          <Button variant="ghost" size="sm" onClick={() => loadTab(activeTab)} className="text-slate-400 hover:text-white shrink-0">
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <span className="ml-2 hidden sm:inline">Atualizar</span>
           </Button>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
         <Tabs value={activeTab} onValueChange={loadTab}>
-          <TabsList className="bg-slate-800/50 border border-slate-700/50 mb-6 flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="tracking" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
-              <Target className="h-3.5 w-3.5" /> Rastreamento
-            </TabsTrigger>
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
-              <BarChart3 className="h-3.5 w-3.5" /> Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="modelos" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
-              <Star className="h-3.5 w-3.5" /> Modelos
-            </TabsTrigger>
-            <TabsTrigger value="cadastros" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
-              <Users className="h-3.5 w-3.5" /> Usuários
-            </TabsTrigger>
-            <TabsTrigger value="checkouts" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
-              <CreditCard className="h-3.5 w-3.5" /> Pagamentos
-            </TabsTrigger>
-            <TabsTrigger value="conversas" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
-              <MessageSquare className="h-3.5 w-3.5" /> Conversas
-            </TabsTrigger>
-            <TabsTrigger value="conteudo" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
-              <Image className="h-3.5 w-3.5" /> Conteúdo
-            </TabsTrigger>
-            <TabsTrigger value="membros" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
-              <Crown className="h-3.5 w-3.5" /> Membros
-            </TabsTrigger>
-            <TabsTrigger value="dominios" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs">
-              <Globe className="h-3.5 w-3.5" /> Domínios
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 mb-6 scrollbar-hide">
+            <TabsList className="bg-slate-800/50 border border-slate-700/50 inline-flex w-max md:w-auto md:flex-wrap h-auto gap-1 p-1">
+              <TabsTrigger value="tracking" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <Target className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Rastreamento</span><span className="sm:hidden">Track</span>
+              </TabsTrigger>
+              <TabsTrigger value="dashboard" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <BarChart3 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Dashboard</span><span className="sm:hidden">Dash</span>
+              </TabsTrigger>
+              <TabsTrigger value="modelos" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <Star className="h-3.5 w-3.5" /> Modelos
+              </TabsTrigger>
+              <TabsTrigger value="cadastros" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <Users className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Usuários</span><span className="sm:hidden">Users</span>
+              </TabsTrigger>
+              <TabsTrigger value="checkouts" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <CreditCard className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Pagamentos</span><span className="sm:hidden">Pgtos</span>
+              </TabsTrigger>
+              <TabsTrigger value="conversas" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <MessageSquare className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Conversas</span><span className="sm:hidden">Chat</span>
+              </TabsTrigger>
+              <TabsTrigger value="conteudo" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <Image className="h-3.5 w-3.5" /> Conteúdo
+              </TabsTrigger>
+              <TabsTrigger value="membros" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <Crown className="h-3.5 w-3.5" /> Membros
+              </TabsTrigger>
+              <TabsTrigger value="dominios" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <Globe className="h-3.5 w-3.5" /> Domínios
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* =================== TRACKING TAB =================== */}
           <TabsContent value="tracking">
