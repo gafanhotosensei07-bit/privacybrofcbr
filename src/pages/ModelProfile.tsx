@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { trackViewContent } from "@/lib/meta-pixel";
+import BackPromoModal from "@/components/BackPromoModal";
 import { Heart, Image, Lock, FileText, Search, Plus, MessageCircle, Eye, Users, Zap, Clock } from "lucide-react";
 import logoIcon from "@/assets/logo-icon.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -43,11 +44,21 @@ const ModelProfile = () => {
   const previews = model.previews || [preview1, preview2, preview3, preview4];
   const t = model.theme;
 
+  const promoModal = (
+    <BackPromoModal
+      modelSlug={model.slug}
+      modelName={model.name}
+      originalPrice={model.mainPlan.price}
+      promoPrice={(parseFloat(model.mainPlan.price.replace(",", ".")) * 0.5).toFixed(2).replace(".", ",")}
+    />
+  );
+
   const accentGradient = `linear-gradient(135deg, hsl(${t.accentColor}) 0%, hsl(${t.accentColorEnd}) 100%)`;
   const accentLightGradient = `linear-gradient(135deg, hsl(${t.accentLight}) 0%, hsl(${t.accentLightEnd}) 100%)`;
 
   return (
     <div className="min-h-screen bg-[hsl(30,20%,97%)] flex flex-col">
+      {promoModal}
       {/* Top promo bar - themed */}
       <header
         className="flex items-center justify-between px-4 py-1"
