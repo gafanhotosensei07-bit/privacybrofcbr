@@ -32,7 +32,7 @@ const Home = () => {
       <header className="flex items-center justify-between px-4 py-1.5 bg-[hsl(24,95%,53%)]">
         <img src={logoIcon} alt="Privacy" className="h-10 brightness-0 invert" />
         <span className="text-xs font-bold text-white tracking-wide bg-white/20 px-3 py-1 rounded-full animate-pulse">
-          🔥 PROMOÇÃO VÁLIDA ATÉ 11/02/2026
+          🔥 PROMOÇÃO VÁLIDA ATÉ {new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })}
         </span>
       </header>
 
