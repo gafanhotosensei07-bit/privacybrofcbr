@@ -6,12 +6,14 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import { models } from "@/data/models";
 import { usePageView } from "@/hooks/usePageView";
 import BackPromoModal from "@/components/BackPromoModal";
+import { useBeforeUnload } from "@/hooks/useBackRedirect";
 
 const Home = () => {
   const navigate = useNavigate();
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   usePageView("home", "catalogo");
+  useBeforeUnload();
 
   const goToModel = (slug: string) => navigate(`/modelo/${slug}`);
 

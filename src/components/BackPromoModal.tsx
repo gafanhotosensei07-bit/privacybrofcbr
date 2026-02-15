@@ -1,16 +1,12 @@
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { X, Flame, Clock, ShieldCheck } from "lucide-react";
-import { useBackRedirect } from "@/hooks/useBackRedirect";
 import logoIcon from "@/assets/logo-icon.png";
 
 interface BackPromoModalProps {
-  /** Model slug to redirect to checkout */
   modelSlug?: string;
   modelName?: string;
-  /** Discount text to show */
   discountText?: string;
-  /** Price to display */
   originalPrice?: string;
   promoPrice?: string;
 }
@@ -24,14 +20,31 @@ const BackPromoModal = ({
 }: BackPromoModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const shownRef = useRef(false);
+  const initialPathRef = useRef(location.pathname);
 
-  const handleBack = useCallback(() => {
-    setIsOpen(true);
+  useEffect(() => {
+    // Push a hash state so back button pops the hash first
+    if (!window.location.hash) {
+      window.history.pushState(null, "", window.location.href + "#stay");
+    }
+
+    const handlePopState = () => {
+      // If hash was removed (user pressed back), show modal
+      if (!window.location.hash && !shownRef.current) {
+        shownRef.current = true;
+        // Push the hash back to prevent leaving
+        window.history.pushState(null, "", window.location.href + "#stay");
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
   }, []);
-
-  useBackRedirect(handleBack);
-
-  if (!isOpen) return null;
 
   const handleAccept = () => {
     setIsOpen(false);
@@ -42,25 +55,27 @@ const BackPromoModal = ({
     }
   };
 
+  const handleDismiss = () => {
+    setIsOpen(false);
+  };
+
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fade-in">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={() => setIsOpen(false)}
+        onClick={handleDismiss}
       />
 
-      {/* Modal */}
       <div className="relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl animate-scale-in bg-background border border-border">
-        {/* Close button */}
         <button
-          onClick={() => setIsOpen(false)}
+          onClick={handleDismiss}
           className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
 
-        {/* Header gradient */}
         <div
           className="px-6 pt-8 pb-6 text-center"
           style={{
@@ -80,9 +95,7 @@ const BackPromoModal = ({
           </p>
         </div>
 
-        {/* Body */}
         <div className="px-6 py-5 space-y-4">
-          {/* Discount badge */}
           <div className="flex items-center justify-center gap-3">
             <span className="text-muted-foreground line-through text-lg">
               R$ {originalPrice}
@@ -95,7 +108,6 @@ const BackPromoModal = ({
             </span>
           </div>
 
-          {/* Benefits */}
           <div className="space-y-2.5">
             <div className="flex items-center gap-2.5 text-sm text-foreground">
               <Flame className="h-4 w-4 text-[hsl(24,95%,53%)] flex-shrink-0" />
@@ -111,7 +123,6 @@ const BackPromoModal = ({
             </div>
           </div>
 
-          {/* CTA */}
           <button
             onClick={handleAccept}
             className="w-full rounded-full py-3.5 text-base font-bold text-white shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -124,7 +135,7 @@ const BackPromoModal = ({
           </button>
 
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={handleDismiss}
             className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
           >
             Não, obrigado
