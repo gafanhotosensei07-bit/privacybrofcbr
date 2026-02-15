@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { trackViewContent } from "@/lib/meta-pixel";
 import BackPromoModal from "@/components/BackPromoModal";
+import { useBeforeUnload } from "@/hooks/useBackRedirect";
 import { Heart, Image, Lock, FileText, Search, Plus, MessageCircle, Eye, Users, Zap, Clock } from "lucide-react";
 import logoIcon from "@/assets/logo-icon.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -16,6 +17,7 @@ const ModelProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   usePageView("modelo", slug || "");
+  useBeforeUnload();
 
   useEffect(() => {
     if (slug) {
