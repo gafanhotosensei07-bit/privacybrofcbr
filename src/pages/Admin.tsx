@@ -59,6 +59,9 @@ const Admin = () => {
   const [showAddDomain, setShowAddDomain] = useState(false);
   const [recovery, setRecovery] = useState<{ totalPending: number; emailSent: number; emailNotSent: number; pending: CheckoutAttempt[] } | null>(null);
   const [triggeringRecovery, setTriggeringRecovery] = useState(false);
+  const [previewSlug, setPreviewSlug] = useState("");
+  const [previewContent, setPreviewContent] = useState<{ name: string; url: string; type: string; created_at: string }[]>([]);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = async (table: string, extra?: Record<string, any>) => {
@@ -116,6 +119,8 @@ const Admin = () => {
     } else if (tab === "recuperacao") {
       const d = await fetchData("recovery");
       if (d) setRecovery(d);
+    } else if (tab === "preview") {
+      // Don't auto-load, user picks a model
     }
   };
 
@@ -316,6 +321,9 @@ const Admin = () => {
               </TabsTrigger>
               <TabsTrigger value="recuperacao" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
                 <Mail className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Recuperação</span><span className="sm:hidden">Recup</span>
+              </TabsTrigger>
+              <TabsTrigger value="preview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white gap-1.5 text-xs whitespace-nowrap">
+                <Eye className="h-3.5 w-3.5" /> Preview
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1114,6 +1122,116 @@ const Admin = () => {
                 </div>
               </div>
             ) : null}
+          </TabsContent>
+
+          {/* =================== PREVIEW MEMBROS TAB =================== */}
+          <TabsContent value="preview">
+            <div className="space-y-6">
+              {/* Model selector */}
+              <Card className="bg-slate-800/50 border-slate-700/50">
+                <CardHeader className="border-b border-slate-700/50 pb-4">
+                  <CardTitle className="text-white text-base flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-orange-400" /> Pré-visualizar Área de Membros
+                  </CardTitle>
+                  <p className="text-xs text-slate-400 mt-1">Selecione uma modelo para ver o conteúdo que os assinantes veem</p>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {models.map((m) => (
+                      <button
+                        key={m.slug}
+                        onClick={async () => {
+                          setPreviewSlug(m.slug);
+                          setPreviewLoading(true);
+                          setPreviewContent([]);
+                          const d = await fetchData("preview_members", { slug: m.slug });
+                          if (d) setPreviewContent(d);
+                          setPreviewLoading(false);
+                        }}
+                        className={`rounded-xl border p-3 flex flex-col items-center gap-2 transition-all ${
+                          previewSlug === m.slug
+                            ? "border-orange-500 bg-orange-500/10 ring-1 ring-orange-500/30"
+                            : "border-slate-700/50 bg-slate-700/20 hover:border-slate-600"
+                        }`}
+                      >
+                        <img src={m.avatar} alt={m.name} className="h-12 w-12 rounded-full object-cover border-2 border-slate-600" />
+                        <span className="text-xs font-semibold text-white truncate w-full text-center">{m.name}</span>
+                        <span className="text-[10px] text-slate-500">{m.username}</span>
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Preview content */}
+              {previewSlug && (
+                <Card className="bg-slate-800/50 border-slate-700/50">
+                  <CardHeader className="border-b border-slate-700/50 flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="text-white text-base">
+                        {models.find(m => m.slug === previewSlug)?.name} — Conteúdo do Storage
+                      </CardTitle>
+                      <p className="text-xs text-slate-400 mt-1">{previewContent.length} arquivo(s) encontrado(s)</p>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={async () => {
+                      setPreviewLoading(true);
+                      const d = await fetchData("preview_members", { slug: previewSlug });
+                      if (d) setPreviewContent(d);
+                      setPreviewLoading(false);
+                    }} className="text-slate-400 hover:text-white">
+                      <RefreshCw className={`h-4 w-4 ${previewLoading ? "animate-spin" : ""}`} />
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    {previewLoading ? (
+                      <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
+                    ) : previewContent.length > 0 ? (
+                      <div className="space-y-6">
+                        {/* Videos */}
+                        {previewContent.filter(c => c.type === "video").length > 0 && (
+                          <>
+                            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Vídeos ({previewContent.filter(c => c.type === "video").length})</h3>
+                            <div className="space-y-3">
+                              {previewContent.filter(c => c.type === "video").map((v, i) => (
+                                <div key={i} className="rounded-xl overflow-hidden border border-slate-700/50 bg-slate-900/50">
+                                  <video src={v.url} controls preload="metadata" className="w-full max-h-[400px]" />
+                                  <div className="px-3 py-2 flex items-center justify-between">
+                                    <span className="text-xs text-slate-400 truncate">{v.name}</span>
+                                    <span className="text-[10px] text-slate-500">{new Date(v.created_at).toLocaleDateString("pt-BR")}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                        {/* Images */}
+                        {previewContent.filter(c => c.type === "image").length > 0 && (
+                          <>
+                            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Fotos ({previewContent.filter(c => c.type === "image").length})</h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                              {previewContent.filter(c => c.type === "image").map((img, i) => (
+                                <div key={i} className="rounded-xl overflow-hidden border border-slate-700/50 bg-slate-900/50">
+                                  <img src={img.url} alt={img.name} className="w-full aspect-[3/4] object-cover" />
+                                  <div className="px-2 py-1.5">
+                                    <span className="text-[10px] text-slate-500 truncate block">{img.name}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <Image className="h-12 w-12 text-slate-600 mx-auto mb-3" />
+                        <p className="text-slate-500 text-sm">Nenhum conteúdo no storage para esta modelo</p>
+                        <p className="text-slate-600 text-xs mt-1">Faça upload na aba "Conteúdo" usando a pasta <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-slate-400">{previewSlug}/</code></p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>

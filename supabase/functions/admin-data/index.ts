@@ -207,6 +207,26 @@ Deno.serve(async (req) => {
       });
       data = await res.json();
       error = null;
+    } else if (table === "preview_members") {
+      const { slug } = body;
+      if (!slug) return new Response(JSON.stringify({ error: "slug é obrigatório" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const { data: files, error: listError } = await supabase.storage
+        .from("model-content")
+        .list(slug, { limit: 200, sortBy: { column: "created_at", order: "desc" } });
+      if (listError) throw listError;
+      const filteredFiles = (files || []).filter((f: any) => f.name !== ".emptyFolderPlaceholder");
+      const items = await Promise.all(
+        filteredFiles.map(async (f: any) => {
+          const path = `${slug}/${f.name}`;
+          const { data: signedData, error: signError } = await supabase.storage
+            .from("model-content")
+            .createSignedUrl(path, 3600);
+          const isVideo = /\.(mp4|webm|mov|avi)$/i.test(f.name);
+          return { name: f.name, url: signError ? null : signedData?.signedUrl, type: isVideo ? "video" : "image", created_at: f.created_at };
+        })
+      );
+      data = items.filter((i: any) => i.url);
+      error = null;
     } else {
       return new Response(JSON.stringify({ error: "Tabela inválida" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
