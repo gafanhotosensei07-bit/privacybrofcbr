@@ -51,7 +51,6 @@ const ModelProfile = () => {
       modelSlug={model.slug}
       modelName={model.name}
       originalPrice={model.mainPlan.price}
-      promoPrice={(parseFloat(model.mainPlan.price.replace(",", ".")) * 0.5).toFixed(2).replace(".", ",")}
     />
   );
 

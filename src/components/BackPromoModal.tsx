@@ -6,19 +6,23 @@ import logoIcon from "@/assets/logo-icon.png";
 interface BackPromoModalProps {
   modelSlug?: string;
   modelName?: string;
-  discountText?: string;
   originalPrice?: string;
-  promoPrice?: string;
 }
+
+const getRandomPromoPrice = () => {
+  const min = 5.9;
+  const max = 8.9;
+  const price = Math.random() * (max - min) + min;
+  return price.toFixed(2).replace(".", ",");
+};
 
 const BackPromoModal = ({
   modelSlug,
   modelName = "sua criadora favorita",
-  discountText = "50% OFF",
   originalPrice = "29,90",
-  promoPrice = "14,90",
 }: BackPromoModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [promoPrice] = useState(getRandomPromoPrice);
   const navigate = useNavigate();
   const location = useLocation();
   const shownRef = useRef(false);
@@ -49,7 +53,8 @@ const BackPromoModal = ({
   const handleAccept = () => {
     setIsOpen(false);
     if (modelSlug) {
-      navigate(`/checkout?modelo=${modelSlug}&promo=back50`);
+      const priceNum = parseFloat(promoPrice.replace(",", "."));
+      navigate(`/checkout?plan=Promo+Especial&price=${priceNum}&model=${encodeURIComponent(modelName)}&promo=back`);
     } else {
       navigate("/");
     }
@@ -104,7 +109,7 @@ const BackPromoModal = ({
               R$ {promoPrice}
             </span>
             <span className="bg-[hsl(340,80%,55%)] text-white text-xs font-bold px-2 py-1 rounded-full">
-              {discountText}
+              OFERTA ESPECIAL
             </span>
           </div>
 
