@@ -112,6 +112,7 @@ Deno.serve(async (req) => {
       const checkouts = checkoutsRes.data || [];
       const approved = checkouts.filter((c: any) => c.payment_status === "approved");
       const totalRevenue = approved.reduce((sum: number, c: any) => sum + Number(c.plan_price || 0), 0);
+      const totalPixValue = checkouts.reduce((sum: number, c: any) => sum + Number(c.plan_price || 0), 0);
       const bySource: Record<string, { clicks: number; checkouts: number; approved: number; revenue: number }> = {};
       const byMedium: Record<string, { clicks: number; checkouts: number; approved: number; revenue: number }> = {};
       const byCampaign: Record<string, { clicks: number; checkouts: number; approved: number; revenue: number }> = {};
@@ -156,7 +157,7 @@ Deno.serve(async (req) => {
       const referrers: Record<string, number> = {};
       pageViews.forEach((pv: any) => { const ref = pv.referrer ? (() => { try { return new URL(pv.referrer).hostname; } catch { return pv.referrer; } })() : "(direto)"; referrers[ref] = (referrers[ref] || 0) + 1; });
       data = {
-        totalClicks: pageViews.length, totalCheckouts: checkouts.length, totalApproved: approved.length, totalRevenue,
+        totalClicks: pageViews.length, totalCheckouts: checkouts.length, totalApproved: approved.length, totalRevenue, totalPixValue,
         conversionRate: pageViews.length > 0 ? ((checkouts.length / pageViews.length) * 100).toFixed(2) : "0",
         bySource: Object.entries(bySource).sort(([, a], [, b]) => b.clicks - a.clicks).map(([name, v]) => ({ name, ...v })),
         byMedium: Object.entries(byMedium).sort(([, a], [, b]) => b.clicks - a.clicks).map(([name, v]) => ({ name, ...v })),
