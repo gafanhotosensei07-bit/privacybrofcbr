@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.checkout-manager]
 verify_jwt = false
+
+[functions.admin-data]
+verify_jwt = false
+
+[functions.model-content]
+verify_jwt = false
