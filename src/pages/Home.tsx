@@ -5,6 +5,7 @@ import logoIcon from "@/assets/logo-icon.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { models } from "@/data/models";
 import { usePageView } from "@/hooks/usePageView";
+import BackPromoModal from "@/components/BackPromoModal";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -20,6 +21,12 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-[hsl(30,20%,97%)] flex flex-col">
+      <BackPromoModal
+        modelSlug={featured.slug}
+        modelName={featured.name}
+        originalPrice={featured.mainPlan.price}
+        promoPrice={(parseFloat(featured.mainPlan.price.replace(",", ".")) * 0.5).toFixed(2).replace(".", ",")}
+      />
       {/* Top promo bar */}
       <header className="flex items-center justify-between px-4 py-1.5 bg-[hsl(24,95%,53%)]">
         <img src={logoIcon} alt="Privacy" className="h-10 brightness-0 invert" />
