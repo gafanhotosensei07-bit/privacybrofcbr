@@ -2,8 +2,41 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+async function getAdminUserId(req: Request): Promise<string | null> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+
+  const supabaseAuth = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await supabaseAuth.auth.getClaims(token);
+  if (error || !data?.claims) return null;
+
+  const userId = data.claims.sub as string;
+
+  // Check admin role using service role client
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
+  const { data: roleData } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+
+  if (!roleData) return null;
+  return userId;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,28 +44,26 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Authenticate via JWT + admin role
+    const adminUserId = await getAdminUserId(req);
+    if (!adminUserId) {
+      return new Response(JSON.stringify({ error: "Não autorizado" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const contentType = req.headers.get("content-type") || "";
-    let password = "";
     let table = "";
     let body: any = {};
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
-      password = formData.get("password") as string || "";
       table = formData.get("table") as string || "";
-      body = { password, table, formData };
+      body = { table, formData };
     } else {
       body = await req.json();
-      password = body.password;
       table = body.table;
-    }
-
-    const adminPassword = Deno.env.get("ADMIN_PASSWORD");
-    if (!adminPassword || password !== adminPassword) {
-      return new Response(JSON.stringify({ error: "Senha inválida" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
 
     const supabase = createClient(
@@ -72,7 +103,6 @@ Deno.serve(async (req) => {
         .order("created_at", { ascending: false })
         .limit(500));
     } else if (table === "update_checkout_status") {
-      // Manually approve/reject a checkout
       const { checkout_id, new_status } = body;
       if (!checkout_id || !new_status) {
         return new Response(JSON.stringify({ error: "checkout_id e new_status são obrigatórios" }), {
@@ -86,7 +116,6 @@ Deno.serve(async (req) => {
         .eq("id", checkout_id)
         .select());
     } else if (table === "upload_content") {
-      // Upload file to model-content bucket
       const formData = body.formData;
       if (!formData) {
         return new Response(JSON.stringify({ error: "FormData necessário" }), {
@@ -112,13 +141,11 @@ Deno.serve(async (req) => {
       data = { path: uploadData?.path, publicUrl: urlData?.publicUrl };
       error = null;
     } else if (table === "list_content") {
-      // List files in model-content bucket for a given folder
       const folder = body.folder || "";
       const { data: files, error: listError } = await supabase.storage
         .from("model-content")
         .list(folder, { limit: 200, sortBy: { column: "created_at", order: "desc" } });
       if (listError) throw listError;
-      // Get public URLs
       data = (files || []).map((f: any) => {
         const path = folder ? `${folder}/${f.name}` : f.name;
         const { data: urlData } = supabase.storage.from("model-content").getPublicUrl(path);
@@ -270,7 +297,6 @@ Deno.serve(async (req) => {
       };
       error = null;
     } else if (table === "members") {
-      // Get all approved checkout_attempts grouped by model, with user info
       const { data: approvedCheckouts, error: membersError } = await supabase
         .from("checkout_attempts")
         .select("*")
@@ -279,7 +305,6 @@ Deno.serve(async (req) => {
         .limit(1000);
       if (membersError) throw membersError;
 
-      // Get profiles for user display names
       const userIds = [...new Set((approvedCheckouts || []).map((c: any) => c.user_id).filter(Boolean))];
       let profilesMap: Record<string, string> = {};
       if (userIds.length > 0) {
@@ -296,7 +321,6 @@ Deno.serve(async (req) => {
       }));
       error = null;
     } else if (table === "revoke_access") {
-      // Change an approved checkout back to rejected to revoke access
       const { checkout_id } = body;
       if (!checkout_id) {
         return new Response(JSON.stringify({ error: "checkout_id é obrigatório" }), {
