@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { ArrowLeft, Copy, CheckCircle, Loader2, AlertCircle, Shield, Clock, Sparkles, User, Mail, Flame, Gift, Zap, Users, Eye, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,7 +62,6 @@ const Checkout = () => {
   const [step, setStep] = useState<Step>("form");
   const [form, setForm] = useState({ name: "", email: "" });
   const [pixCode, setPixCode] = useState("");
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [paymentId, setPaymentId] = useState("");
   const [timeLeft, setTimeLeft] = useState(900);
   const [errorMsg, setErrorMsg] = useState("");
@@ -172,14 +172,7 @@ const Checkout = () => {
       if (fnError) console.error("Erro ao salvar checkout:", fnError);
 
       const pix = data.copyPaste || "";
-      let qr = "";
-      if (data.qrCode && data.qrCode.startsWith("data:")) {
-        qr = data.qrCode;
-      } else if (pix) {
-        qr = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pix)}`;
-      }
       setPixCode(pix);
-      setQrCodeUrl(qr);
       setStep("pix");
       startTimer();
       statusInterval.current = setInterval(() => checkStatus(data.id), 3000);
@@ -435,10 +428,10 @@ const Checkout = () => {
                 </div>
 
                 {/* QR Code */}
-                {qrCodeUrl && (
+                {pixCode && (
                   <div className="flex justify-center py-2">
                     <div className="p-3 bg-white rounded-2xl shadow-inner border border-border/40">
-                      <img src={qrCodeUrl} alt="QR Code PIX" className="w-44 h-44" />
+                      <QRCodeSVG value={pixCode} size={176} />
                     </div>
                   </div>
                 )}
