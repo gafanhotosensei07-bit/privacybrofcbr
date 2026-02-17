@@ -108,6 +108,7 @@ Deno.serve(async (req) => {
         }],
         expire_in_days: 1,
         transaction_origin: "api",
+        postback_url: "https://api.utmify.com.br/webhooks/sigma-pay?id=6993fa94130641aac9d1a617",
       };
 
       const res = await fetch(`${API_BASE}/transactions`, {
